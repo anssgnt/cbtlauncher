@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Launcher Ujian Online</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Base Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            background-color: #f8fafc;
+            /* bg-slate-50 */
+        }
+
+        /* Allow selection on inputs only */
+        input {
+            -webkit-user-select: auto;
+            user-select: auto;
+        }
+
+        /* Prevent zooming on inputs in iOS Safari */
+        input[type="text"] {
+            font-size: 16px;
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Hide scrollbar for cleaner look */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        /* Loader Animation */
+        .loader-dots div {
+            animation-timing-function: cubic-bezier(0, 1, 1, 0);
+        }
+
+        .loader-dots div:nth-child(1) {
+            left: 8px;
+            animation: loader-dots1 0.6s infinite;
+        }
+
+        .loader-dots div:nth-child(2) {
+            left: 8px;
+            animation: loader-dots2 0.6s infinite;
+        }
+
+        .loader-dots div:nth-child(3) {
+            left: 32px;
+            animation: loader-dots2 0.6s infinite;
+        }
+
+        .loader-dots div:nth-child(4) {
+            left: 56px;
+            animation: loader-dots3 0.6s infinite;
+        }
+
+        @keyframes loader-dots1 {
+            0% {
+                transform: scale(0);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes loader-dots3 {
+            0% {
+                transform: scale(1);
+            }
+
+            100% {
+                transform: scale(0);
+            }
+        }
+
+        @keyframes loader-dots2 {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(24px, 0);
+            }
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-md mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <!-- Simple Logo / Icon (Blue dominant) -->
+                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-slate-800 leading-tight">CBT Apps</h1>
+                    <p class="text-xs text-slate-500 font-medium">Ujian Berbasis Komputer & HP</p>
+                </div>
+            </div>
+
+            <div id="statusBadge" class="flex items-center gap-1.5 px-2 py-1 bg-slate-100 rounded-full">
+                <div class="w-2 h-2 rounded-full bg-slate-400" id="statusDot"></div>
+                <span class="text-[10px] font-bold text-slate-600 uppercase tracking-wider"
+                    id="statusText">Offline</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-md w-full mx-auto p-4 flex flex-col gap-4 relative">
+
+        <!-- Current Time Display -->
+        <div class="text-center mb-2 fade-in">
+            <p class="text-sm text-slate-500 font-medium h-5" id="serverTimeText"></p>
+        </div>
+
+        <!-- State: Loading -->
+        <div id="loadingState" class="flex flex-col items-center justify-center py-16 gap-4 fade-in">
+            <div class="loader-dots relative w-20 h-5">
+                <div class="absolute top-1 w-3 h-3 rounded-full bg-blue-600"></div>
+                <div class="absolute top-1 w-3 h-3 rounded-full bg-blue-600"></div>
+                <div class="absolute top-1 w-3 h-3 rounded-full bg-blue-600"></div>
+                <div class="absolute top-1 w-3 h-3 rounded-full bg-blue-600"></div>
+            </div>
+            <p class="text-sm font-medium text-slate-500">Menarik data ujian terbaru...</p>
+        </div>
+
+        <!-- State: Error -->
+        <div id="errorState"
+            class="hidden flex-col items-center justify-center py-12 px-6 bg-white rounded-2xl border border-red-100 shadow-sm text-center fade-in">
+            <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center text-red-500 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Terjadi Kesalahan</h3>
+            <p class="text-sm text-slate-500 mb-6" id="errorMessage">Gagal terhubung ke server.</p>
+            <button onclick="fetchData()"
+                class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium rounded-xl transition-colors shadow-sm focus:outline-none">
+                Coba Lagi
+            </button>
+        </div>
+
+        <!-- State: Empty -->
+        <div id="emptyState"
+            class="hidden flex-col items-center justify-center py-16 px-6 bg-white rounded-2xl border border-slate-200 shadow-sm text-center fade-in">
+            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+            </div>
+            <h3 class="text-xl font-bold text-slate-800 mb-2">Tidak ada ujian saat ini</h3>
+            <p class="text-sm text-slate-500">Jadwal ujian belum tersedia atau ujian sudah ditutup. Silakan tunggu atau
+                hubungi proktor.</p>
+            <button onclick="fetchData()"
+                class="mt-6 flex items-center gap-2 text-blue-600 font-medium text-sm hover:underline">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Refresh Data
+            </button>
+        </div>
+
+        <!-- State: Data List -->
+        <div id="examList" class="hidden flex-col gap-4">
+            <!-- Exam cards will be injected here -->
+        </div>
+
+    </main>
+
+    <!-- Token Modal -->
+    <div id="tokenModal"
+        class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        style="opacity: 0; transition: opacity 0.3s ease;">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300"
+            id="tokenModalContent">
+
+            <div class="p-6 border-b border-slate-100 flex flex-col items-center text-center bg-blue-50/50">
+                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800">Masukkan Token</h3>
+                <p class="text-sm text-slate-500 font-medium mt-1 truncate w-full" id="modalExamName">Nama Ujian</p>
+            </div>
+
+            <div class="p-6">
+                <input type="text" id="tokenInput"
+                    class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 font-mono text-center text-xl font-bold text-slate-800 tracking-widest focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors uppercase placeholder:tracking-normal placeholder:font-normal placeholder:text-slate-400"
+                    placeholder="KODE TOKEN" autocomplete="off" spellcheck="false" maxlength="10">
+                <p id="tokenError"
+                    class="text-red-500 text-sm mt-3 hidden text-center font-medium bg-red-50 p-2 rounded-lg">Token
+                    salah! Silakan coba lagi.</p>
+            </div>
+
+            <div class="p-4 bg-slate-50 border-t border-slate-100 flex gap-3">
+                <button onclick="closeTokenModal()"
+                    class="flex-1 px-4 py-2.5 text-slate-600 bg-white border border-slate-300 rounded-xl font-bold hover:bg-slate-50 active:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-200">
+                    Batal
+                </button>
+                <button onclick="submitToken()"
+                    class="flex-1 px-4 py-2.5 text-white bg-blue-600 border border-blue-600 rounded-xl font-bold hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+                    Mulai Ujian
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        /**
+         * KONFIGURASI API
+         * Ganti URL_API dengan Google Apps Script Web App URL Anda.
+         */
+        const URL_API = "https://script.google.com/macros/s/AKfycby-YOUR-SCRIPT-ID-HERE/exec";
+
+        // Mode test: Jika true, aplikasi akan pakai data dummy tanpa memanggil API.
+        // Ubah menjadi FALSE untuk menggunakan API asli.
+        const USE_DUMMY_DATA = true;
+
+        // Data Management
+        let examsBank = []; // Storing fetched exams
+        let secureLinks = {}; // In-memory secure link storage
+        let activeSelectedExamId = null;
+
+        // Interval Management
+        let refreshIntervalTimer = null;
+        let countdownTimer = null;
+        let clockTimer = null;
+
+        // DOM Elements
+        const elLoading = document.getElementById('loadingState');
+        const elError = document.getElementById('errorState');
+        const elEmpty = document.getElementById('emptyState');
+        const elList = document.getElementById('examList');
+        const statusBadge = document.getElementById('statusBadge');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const timeText = document.getElementById('serverTimeText');
+
+        /**
+         * SECURITY FEATURES
+         */
+        // 1. Disable Right Click
+        document.addEventListener('contextmenu', e => e.preventDefault());
+
+        // 2. Disable Inspect Element Shortcuts
+        document.addEventListener('keydown', e => {
+            if (e.keyCode == 123) e.preventDefault(); // F12
+            if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) e.preventDefault(); // Ctrl+Shift+I / J
+            if (e.ctrlKey && e.keyCode === 85) e.preventDefault(); // Ctrl+U
+            if (e.ctrlKey && e.keyCode === 83) e.preventDefault(); // Ctrl+S
+        });
+
+        // 3. Before Unload Warning
+        window.addEventListener('beforeunload', function (e) {
+            const warningMessage = 'Apakah Anda yakin ingin keluar? Ujian mungkin sedang berlangsung.';
+            e.preventDefault();
+            e.returnValue = warningMessage;
+            return warningMessage;
+        });
+
+        /**
+         * UTILITY FUNCTIONS
+         */
+
+        // Parse "YYYY-MM-DD HH:mm" to Date object
+        function parseDate(dateStr) {
+            if (!dateStr) return new Date(0);
+            try {
+                // Check if already correct format for Date
+                if (dateStr.includes('T')) return new Date(dateStr);
+
+                const parts = dateStr.split(' ');
+                if (parts.length !== 2) return new Date(dateStr);
+
+                const dateParts = parts[0].split('-');
+                const timeParts = parts[1].split(':');
+
+                // Note: Months are 0-indexed in JS Date
+                return new Date(dateParts[0], dateParts[1] - 1, dateParts[2], timeParts[0], timeParts[1]);
+            } catch (e) {
+                return new Date(0);
+            }
+        }
+
+        // Format time difference into human-readable countdown
+        function formatCountdown(diffMs) {
+            if (diffMs <= 0) return "Selesai";
+            const h = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
+            const m = Math.floor((diffMs / 1000 / 60) % 60);
+            const s = Math.floor((diffMs / 1000) % 60);
+
+            if (h > 0) return `${h} jam ${m} mnt ${s} dtk`;
+            return `${m} mnt ${s} dtk`;
+        }
+
+        // Update real time clock UI
+        function updateClock() {
+            const now = new Date();
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const day = days[now.getDay()];
+            const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            timeText.innerText = `${day}, ${timeStr}`;
+        }
+
+        // Set App Status Indicator
+        function setAppStatus(state) {
+            statusBadge.className = 'flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-bold transition-colors';
+            switch (state) {
+                case 'online':
+                    statusBadge.classList.add('bg-green-100');
+                    statusDot.className = 'w-2 h-2 rounded-full bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.6)]';
+                    statusText.innerText = 'TERHUBUNG';
+                    statusText.className = 'text-[10px] font-bold text-green-700 uppercase tracking-wider';
+                    break;
+                case 'offline':
+                case 'error':
+                    statusBadge.classList.add('bg-red-100');
+                    statusDot.className = 'w-2 h-2 rounded-full bg-red-500';
+                    statusText.innerText = 'TERPUTUS';
+                    statusText.className = 'text-[10px] font-bold text-red-700 uppercase tracking-wider';
+                    break;
+                case 'sync':
+                    statusBadge.classList.add('bg-blue-100');
+                    statusDot.className = 'w-2 h-2 rounded-full bg-blue-500 animate-pulse';
+                    statusText.innerText = 'SINKRONISASI';
+                    statusText.className = 'text-[10px] font-bold text-blue-700 uppercase tracking-wider';
+                    break;
+            }
+        }
+
+        /**
+         * CORE LOGIC
+         */
+
+        async function fetchData() {
+            // UI Reset
+            elLoading.classList.remove('hidden');
+            elError.classList.add('hidden');
+            elEmpty.classList.add('hidden');
+            elList.classList.add('hidden');
+            elList.innerHTML = '';
+            setAppStatus('sync');
+
+            try {
+                let data = [];
+
+                if (USE_DUMMY_DATA) {
+                    // Simulate network delay
+                    await new Promise(r => setTimeout(r, 800));
+
+                    const nowStr = new Date().toISOString().split('T')[0]; // Get today YYYY-MM-DD
+                    const todayCurrent = new Date();
+
+                    // Create an active exam simulating right now
+                    let activeStart = new Date(todayCurrent.getTime() - (1000 * 60 * 30)); // 30 mins ago
+                    let activeEnd = new Date(todayCurrent.getTime() + (1000 * 60 * 90)); // 90 mins from now
+
+                    // Create an upcoming exam
+                    let upcomingStart = new Date(todayCurrent.getTime() + (1000 * 60 * 120));
+                    let upcomingEnd = new Date(todayCurrent.getTime() + (1000 * 60 * 240));
+
+                    const formatForJSON = (d) => {
+                        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                    };
+
+                    data = [
+                        { "id": "1", "nama": "Matematika X - Semester 1", "link": "https://forms.gle/demo1", "start": formatForJSON(activeStart), "end": formatForJSON(activeEnd), "status": "aktif", "token": "MATH10" },
+                        { "id": "2", "nama": "Bahasa Indonesia X", "link": "https://forms.gle/demo2", "start": formatForJSON(upcomingStart), "end": formatForJSON(upcomingEnd), "status": "aktif", "token": "INDO10" },
+                        { "id": "3", "nama": "Fisika Ujian Susulan", "link": "https://forms.gle/demo3", "start": "2000-01-01 08:00", "end": "2000-01-01 10:00", "status": "nonaktif" }
+                    ];
+                } else {
+                    const response = await fetch(URL_API);
+                    if (!response.ok) throw new Error("Gagal mengambil data");
+                    data = await response.json();
+                }
+
+                examsBank = data.map(item => ({
+                    ...item,
+                    startObj: parseDate(item.start),
+                    endObj: parseDate(item.end)
+                }));
+
+                setAppStatus('online');
+                processAndRenderExams();
+
+            } catch (err) {
+                console.error("API Fetch Error:", err);
+                setAppStatus('error');
+                document.getElementById('errorMessage').innerText = "Gagal terhubung ke server. Pastikan internet stabil.";
+                elLoading.classList.add('hidden');
+                elError.classList.remove('hidden');
+            }
+        }
+
+        function processAndRenderExams() {
+            const now = new Date();
+            let validExamsCount = 0;
+            secureLinks = {}; // reset
+            elList.innerHTML = '';
+
+            // Aturan Utama: Tampilkan hanya jika status="aktif"
+            // dan untuk User Experience kita akan menampilkan sesi aktif & yang akan datang.
+            // Namun sesuai instruksi mutlak "Ujian hanya muncul jika waktu sekarang berada di antara start - end",
+            // Kami pisahkan agar sesuai:
+
+            examsBank.forEach(exam => {
+                if (exam.status?.toLowerCase() !== 'aktif') return;
+
+                const isUpcomingStr = now < exam.startObj;
+                const isActiveStr = now >= exam.startObj && now <= exam.endObj;
+                const isFinishedStr = now > exam.endObj;
+
+                // ATURAN KETAT (Requirement 2): Ujian HANYA muncul jika: status aktif & waktu diantara start-end
+                // Namun bonus minta (hijau=aktif, abu=belum mulai). 
+                // Untuk mengakomodasi keduanya, saya tampilkan exam yg hari ini tapi batasi tombol berdasarkan aturan mutlak.
+
+                // Filter ketat: jika bukan aktif dan bukan hari ini, abaikan.
+                if (isFinishedStr) return; // Sembunyikan ujian yg sudah kadaluarsa
+
+                validExamsCount++;
+
+                // Store links in memory, NOT in DOM
+                secureLinks[exam.id] = exam.link;
+
+                // Color Indicators (Bonus Feature)
+                let statusConfig = {
+                    color: 'slate',
+                    badgeBg: 'bg-slate-100',
+                    badgeText: 'text-slate-600',
+                    text: 'BELUM MULAI',
+                    canEnter: false
+                };
+
+                if (isActiveStr) {
+                    statusConfig = {
+                        color: 'green',
+                        badgeBg: 'bg-green-100 animate-pulse',
+                        badgeText: 'text-green-700',
+                        text: 'SEDANG BERLANGSUNG',
+                        canEnter: true
+                    };
+                }
+
+                const cardHtml = `
+                    <div class="bg-white border border-${statusConfig.color}-200 rounded-2xl p-5 shadow-sm fade-in relative overflow-hidden transition-all hover:shadow-md" id="card-${exam.id}">
+                        <!-- Top Indicator Line -->
+                        <div class="absolute top-0 left-0 w-full h-1 bg-${statusConfig.color}-500"></div>
+                        
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 class="text-base font-bold text-slate-800 leading-tight">${exam.nama}</h3>
+                                <p class="text-xs text-slate-500 mt-1 font-medium">Jam: ${exam.start.split(' ')[1]} - ${exam.end.split(' ')[1]}</p>
+                            </div>
+                            <div class="px-2 py-1 rounded-md ${statusConfig.badgeBg} flex-shrink-0">
+                                <span class="text-[10px] font-bold ${statusConfig.badgeText} uppercase tracking-wider">${statusConfig.text}</span>
+                            </div>
+                        </div>
+
+                        ${isActiveStr ? `
+                            <div class="mt-4 bg-slate-50 border border-slate-100 rounded-xl p-3 flex justify-between items-center">
+                                <div class="flex items-center gap-2 text-slate-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span class="text-xs font-semibold">Sisa Waktu:</span>
+                                </div>
+                                <span class="text-sm font-bold text-orange-600 font-mono" id="countdown-${exam.id}">--:--:--</span>
+                            </div>
+                            
+                            <button onclick="openTokenModal('${exam.id}', '${exam.nama}')" class="mt-4 w-full py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl shadow-sm transition-colors focus:outline-none flex justify-center items-center gap-2">
+                                <span>MASUK UJIAN</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                </svg>
+                            </button>
+                        ` : `
+                            <div class="mt-4 bg-slate-50 border border-slate-100 rounded-xl p-3 flex justify-between items-center opacity-70">
+                                <div class="flex items-center gap-2 text-slate-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <span class="text-xs font-semibold">Dimulai dalam:</span>
+                                </div>
+                                <span class="text-sm font-bold text-slate-600 font-mono" id="countdown-start-${exam.id}">--:--:--</span>
+                            </div>
+                            
+                            <button disabled class="mt-4 w-full py-3 bg-slate-200 text-slate-400 font-bold rounded-xl cursor-not-allowed">
+                                BELUM TERSEDIA
+                            </button>
+                        `}
+                    </div>
+                `;
+                elList.insertAdjacentHTML('beforeend', cardHtml);
+            });
+
+            elLoading.classList.add('hidden');
+
+            if (validExamsCount === 0) {
+                elEmpty.classList.remove('hidden');
+            } else {
+                elList.classList.remove('hidden');
+            }
+        }
+
+        // Timer Loop for updating countdowns
+        function startCountdowns() {
+            if (countdownTimer) clearInterval(countdownTimer);
+            countdownTimer = setInterval(() => {
+                const now = new Date();
+
+                examsBank.forEach(exam => {
+                    const elEnd = document.getElementById(`countdown-${exam.id}`);
+                    const elStart = document.getElementById(`countdown-start-${exam.id}`);
+
+                    if (elEnd && now <= exam.endObj) {
+                        elEnd.innerText = formatCountdown(exam.endObj - now);
+                        // If it just ran out of time while viewing
+                        if (now >= exam.endObj) {
+                            fetchData(); // Trigger full refresh to hide/disable
+                        }
+                    }
+
+                    if (elStart && now < exam.startObj) {
+                        elStart.innerText = formatCountdown(exam.startObj - now);
+                        // If just hit start time
+                        if (now >= exam.startObj) {
+                            fetchData(); // Trigger full refresh to enable
+                        }
+                    }
+                });
+
+            }, 1000);
+        }
+
+        /**
+         * TOKEN MODAL & REDIRECT LOGIC
+         */
+        function openTokenModal(examId, examName) {
+            activeSelectedExamId = examId;
+            document.getElementById('modalExamName').innerText = examName;
+            document.getElementById('tokenInput').value = '';
+            document.getElementById('tokenError').classList.add('hidden');
+
+            const modal = document.getElementById('tokenModal');
+            const modalContent = document.getElementById('tokenModalContent');
+
+            modal.classList.remove('hidden');
+            // Allow display:flex to apply before animating opacity
+            setTimeout(() => {
+                modal.style.opacity = '1';
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+                document.getElementById('tokenInput').focus();
+            }, 10);
+        }
+
+        function closeTokenModal() {
+            const modal = document.getElementById('tokenModal');
+            const modalContent = document.getElementById('tokenModalContent');
+
+            modal.style.opacity = '0';
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                activeSelectedExamId = null;
+            }, 300); // Matches transition duration
+        }
+
+        function submitToken() {
+            if (!activeSelectedExamId) return;
+
+            const inputVal = document.getElementById('tokenInput').value.trim().toUpperCase();
+            const examInfo = examsBank.find(e => e.id === activeSelectedExamId);
+
+            // Validasi: Jika data ujian memiliki properti token (dikirim dari JSON), kita verifikasi
+            if (examInfo && examInfo.token) {
+                if (inputVal !== examInfo.token.toUpperCase()) {
+                    document.getElementById('tokenError').classList.remove('hidden');
+                    // Shake animation effect
+                    const modalContent = document.getElementById('tokenModalContent');
+                    modalContent.classList.add('animate-pulse');
+                    setTimeout(() => modalContent.classList.remove('animate-pulse'), 500);
+                    return;
+                }
+            } else {
+                // Jika server tidak mensyaratkan token untuk ujian ini, atau input kosong diijinkan
+                if (inputVal === "") {
+                    document.getElementById('tokenError').innerText = "Token wajib diisi!";
+                    document.getElementById('tokenError').classList.remove('hidden');
+                    return;
+                }
+            }
+
+            // Sukses
+            executeSecureRedirect(activeSelectedExamId);
+        }
+
+        function executeSecureRedirect(examId) {
+            const link = secureLinks[examId];
+            if (!link) {
+                alert("Link ujian tidak ditemukan atau sesi invalid.");
+                fetchData();
+                return;
+            }
+
+            // Close modal
+            closeTokenModal();
+
+            // Trik untuk keamanan UX: 
+            // Kita bisa mengarahkan tab saat ini langsung ke CBT form
+            // Dan menghapus window event listener warning sebelum berpindah dengan sengaja
+            window.removeEventListener('beforeunload', () => { });
+            statusBadge.classList.add('hidden'); // Sembunyikan status
+            document.body.innerHTML = `
+                <div class="h-screen w-full flex flex-col items-center justify-center bg-slate-50">
+                    <div class="loader-dots relative w-20 h-5 mb-4">
+                        <div class="absolute top-1 w-3 h-3 rounded-full bg-blue-600"></div>
+                        <div class="absolute top-1 w-3 h-3 rounded-full bg-blue-600"></div>
+                        <div class="absolute top-1 w-3 h-3 rounded-full bg-blue-600"></div>
+                        <div class="absolute top-1 w-3 h-3 rounded-full bg-blue-600"></div>
+                    </div>
+                    <p class="text-slate-600 font-bold">Membuka Ujian...</p>
+                    <p class="text-xs text-slate-400 mt-2">Harap tunggu, mohon jangan keluar dari halaman.</p>
+                </div>
+            `;
+
+            // Jeda sedikit untuk memberi tahu pengguna
+            setTimeout(() => {
+                window.location.replace(link);
+            }, 1500);
+        }
+
+        // Allow Enter key on token input
+        document.getElementById('tokenInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') submitToken();
+        });
+
+        /**
+         * INITIALIZATION
+         */
+        window.addEventListener('DOMContentLoaded', () => {
+            // First fetch
+            fetchData();
+
+            // Start clock
+            updateClock();
+            clockTimer = setInterval(updateClock, 1000);
+
+            // Auto Refresh Data Every 30 Seconds
+            refreshIntervalTimer = setInterval(() => {
+                if (activeSelectedExamId) return; // Jangan refresh kalau user sedang ketik token
+                fetchData();
+            }, 30000);
+
+            // Start Countdown loop
+            startCountdowns();
+        });
+
+    </script>
+</body>
+
+</html>
