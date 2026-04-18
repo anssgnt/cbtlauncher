@@ -268,7 +268,7 @@
          * KONFIGURASI API
          * Ganti URL_API dengan Google Apps Script Web App URL Anda.
          */
-        const URL_API = "https://script.google.com/macros/s/AKfycbyyPyvFjhmgN7UW3M8cEWRNMFSVDr_b7vZH3Exs0-dHCULy7-TOdkTo3s0_H3FWbfJqFw/exec";
+        const URL_API = "https://script.google.com/macros/s/AKfycbwalO-HqOZpSYlOjBXl9stx3PzZUWrTadTJeojZ_AuMWFNrJk44vlozgXXEUiNO5Fugog/exec";
 
         // Mode test: Jika true, aplikasi akan pakai data dummy tanpa memanggil API.
         // Ubah menjadi FALSE untuk menggunakan API asli.
@@ -278,6 +278,7 @@
         let examsBank = []; // Storing fetched exams
         let secureLinks = {}; // In-memory secure link storage
         let activeSelectedExamId = null;
+        let kioskExamId = null; // Storing active kiosk exam
 
         // Interval Management
         let refreshIntervalTimer = null;
@@ -585,6 +586,19 @@
                             fetchData(); // Trigger full refresh to enable
                         }
                     }
+
+                    // KIOSK Timer Update
+                    if (kioskExamId === exam.id) {
+                        const kTimer = document.getElementById('kioskTimer');
+                        if (kTimer) {
+                            if (now <= exam.endObj) {
+                                kTimer.innerText = formatCountdown(exam.endObj - now);
+                            } else {
+                                kTimer.innerText = "WAKTU HABIS";
+                                kTimer.classList.replace('bg-blue-800', 'bg-red-600');
+                            }
+                        }
+                    }
                 });
 
             }, 1000);
@@ -655,39 +669,83 @@
             executeSecureRedirect(activeSelectedExamId);
         }
 
+        function requestFullscreenLock() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(err => console.log(err));
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen().catch(err => console.log(err));
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen().catch(err => console.log(err));
+            }
+        }
+
+        function exitFullscreenLock() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(err => console.log(err));
+            } else if (document.webkitExitFullscreen) { /* Safari */
+                document.webkitExitFullscreen().catch(err => console.log(err));
+            } else if (document.msExitFullscreen) { /* IE11 */
+                document.msExitFullscreen().catch(err => console.log(err));
+            }
+        }
+
+        function exitKioskMode() {
+            if(confirm("YAKIN INGIN KELUAR DARI UJIAN? Jika belum menekan tombol Submit/Kirim, jawaban Anda mungkin hilang!")) {
+                exitFullscreenLock();
+                const kiosk = document.getElementById('kioskContainer');
+                if(kiosk) kiosk.remove();
+                kioskExamId = null;
+                document.body.style.overflow = "auto";
+                
+                // Refresh list Ujian
+                fetchData();
+            }
+        }
+
         function executeSecureRedirect(examId) {
             const link = secureLinks[examId];
-            if (!link) {
+            const examInfo = examsBank.find(e => e.id === examId);
+            
+            if (!link || !examInfo) {
                 alert("Link ujian tidak ditemukan atau sesi invalid.");
                 fetchData();
                 return;
             }
 
-            // Close modal
             closeTokenModal();
 
-            // Trik untuk keamanan UX: 
-            // Kita bisa mengarahkan tab saat ini langsung ke CBT form
-            // Dan menghapus window event listener warning sebelum berpindah dengan sengaja
-            window.removeEventListener('beforeunload', () => { });
-            statusBadge.classList.add('hidden'); // Sembunyikan status
-            document.body.innerHTML = `
-                <div class="h-screen w-full flex flex-col items-center justify-center bg-slate-50">
-                    <div class="loader-dots relative w-20 h-5 mb-4">
-                        <div class="absolute top-1 w-3 h-3 rounded-full bg-blue-600"></div>
-                        <div class="absolute top-1 w-3 h-3 rounded-full bg-blue-600"></div>
-                        <div class="absolute top-1 w-3 h-3 rounded-full bg-blue-600"></div>
-                        <div class="absolute top-1 w-3 h-3 rounded-full bg-blue-600"></div>
+            // Set state Kiosk Mode
+            kioskExamId = examId;
+            document.body.style.overflow = "hidden"; // Prevent background scrolling
+
+            // Membangun Kiosk UI
+            const kioskHtml = `
+                <div id="kioskContainer" class="fixed inset-0 z-[9999] bg-white flex flex-col h-[100dvh] w-[100dvw]">
+                    <div class="bg-blue-600 text-white px-3 py-2 flex justify-between items-center shadow-md">
+                        <div class="flex items-center gap-2 overflow-hidden flex-1">
+                            <span class="font-bold text-xs sm:text-sm truncate mr-1">${examInfo.nama}</span>
+                            <span class="bg-blue-800 px-2 py-0.5 rounded text-xs font-mono font-bold whitespace-nowrap" id="kioskTimer">--:--:--</span>
+                        </div>
+                        <button onclick="exitKioskMode()" class="bg-red-500 hover:bg-red-600 active:bg-red-700 text-white text-[11px] sm:text-xs font-bold px-3 py-1.5 rounded shadow whitespace-nowrap flex-shrink-0 ml-2">
+                            KELUAR UJIAN
+                        </button>
                     </div>
-                    <p class="text-slate-600 font-bold">Membuka Ujian...</p>
-                    <p class="text-xs text-slate-400 mt-2">Harap tunggu, mohon jangan keluar dari halaman.</p>
+                    <div class="flex-1 w-full bg-slate-50 relative">
+                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                             <div class="loader-dots relative w-20 h-5 mb-2"><div class="absolute top-1 w-3 h-3 rounded-full bg-slate-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-slate-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-slate-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-slate-300"></div></div>
+                             <p class="text-xs text-slate-500 font-medium">Memuat Layar Ujian...</p>
+                        </div>
+                        <iframe src="${link}" class="w-full h-full border-none z-10 relative bg-transparent" allow="fullscreen" sandbox="allow-scripts allow-top-navigation allow-forms allow-same-origin allow-popups"></iframe>
+                    </div>
                 </div>
             `;
-
-            // Jeda sedikit untuk memberi tahu pengguna
-            setTimeout(() => {
-                window.location.replace(link);
-            }, 1500);
+            
+            // Suntikkan Layar Kiosk ke DOM
+            document.body.insertAdjacentHTML('beforeend', kioskHtml);
+            
+            // Eksekusi API Fullscreen Native
+            requestFullscreenLock();
         }
 
         // Allow Enter key on token input
