@@ -356,57 +356,52 @@
                 validExamsCount++;
                 secureLinks[exam.id] = exam.link;
 
-                // DESIGN TERBARU KARTU UJIAN
+                // DESIGN TERBARU KARTU UJIAN (SPLIT CARD)
                 const cardHtml = `
-                    <div class="bg-white rounded-[1.5rem] p-5 shadow-[0_4px_25px_rgb(0,0,0,0.04)] relative overflow-hidden transition-all duration-300 transform hover:-translate-y-1 border border-slate-100 ${isActiveStr ? 'ring-[3px] ring-emerald-500/20' : ''}" id="card-${exam.id}">
+                    <div class="bg-white rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.06)] relative flex flex-col mb-6 border border-slate-100/50 overflow-hidden transform transition-transform hover:-translate-y-1" id="card-${exam.id}">
                         
-                        <!-- Top Indicator Line -->
-                        <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r ${isActiveStr ? 'from-emerald-400 to-teal-500' : 'from-slate-200 to-slate-300'}"></div>
+                        <!-- Top status line -->
+                        <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r ${isActiveStr ? 'from-indigo-500 to-blue-500' : 'from-slate-200 to-slate-200'} z-10"></div>
                         
-                        <div class="flex justify-between items-start mb-5 mt-1">
-                            <div class="flex-1 pr-4">
-                                <h3 class="text-[17px] font-extrabold text-slate-800 leading-snug mb-1.5">${exam.nama}</h3>
-                                <div class="flex items-center gap-1.5 text-slate-500 bg-slate-50 inline-flex px-2 py-1 rounded-md border border-slate-100">
-                                    <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                    <p class="text-[11px] font-bold tracking-wide">Jadwal: ${exam.start.split(' ')[1]} - ${exam.end.split(' ')[1]}</p>
+                        <!-- Card Body (Info Area) -->
+                        <div class="p-6 pb-4 relative">
+                            ${isActiveStr ? '<div class="absolute -top-10 -right-10 w-32 h-32 bg-indigo-50 rounded-full blur-2xl z-0 pointer-events-none"></div>' : ''}
+                            
+                            <div class="flex justify-between items-start mb-3 relative z-10">
+                                <div class="flex flex-col">
+                                    <div class="flex items-center gap-1.5 px-2.5 py-1.5 ${isActiveStr ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-100 text-slate-500'} rounded-lg inline-flex w-max mb-3">
+                                        ${isActiveStr ? '<div class="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse shadow-[0_0_4px_rgba(79,70,229,0.8)]"></div>' : '<div class="w-1.5 h-1.5 rounded-full bg-slate-400"></div>'}
+                                        <span class="text-[9px] font-extrabold uppercase tracking-[0.15em]">${isActiveStr ? 'ZONA AKTIF' : 'ZONA TERJADWAL'}</span>
+                                    </div>
+                                    <h3 class="text-[18px] font-extrabold text-slate-800 leading-snug tracking-tight pr-4">${exam.nama}</h3>
                                 </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-2 text-slate-500 relative z-10 mb-1 mt-3">
+                                <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <p class="text-[12px] font-semibold tracking-wide">Tersedia: ${exam.start.split(' ')[1]} s/d ${exam.end.split(' ')[1]}</p>
                             </div>
                         </div>
 
-                        ${isActiveStr ? `
-                            <div class="flex flex-col gap-4">
-                                <div class="flex items-center justify-between bg-emerald-50/50 p-3.5 rounded-xl border border-emerald-100">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_5px_rgba(16,185,129,0.5)]"></div>
-                                        <span class="text-[11px] font-extrabold text-emerald-600 tracking-wider uppercase">Berlangsung</span>
-                                    </div>
-                                    <div class="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg shadow-sm border border-emerald-50">
-                                        <span class="text-[13px] font-black text-rose-500 font-mono" id="countdown-${exam.id}">--:--:--</span>
-                                    </div>
-                                </div>
-                                
-                                <button onclick="openTokenModal('${exam.id}', '${exam.nama}')" class="w-full py-[14px] bg-gradient-to-r from-blue-600 to-indigo-600 active:scale-[0.98] text-white font-bold text-[14px] rounded-xl shadow-[0_8px_15px_rgba(79,70,229,0.25)] transition-all flex justify-center items-center gap-2">
-                                    <span>MASUK UJIAN</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                                </button>
+                        <!-- Card Footer (Action Area) -->
+                        <div class="${isActiveStr ? 'bg-indigo-50/30' : 'bg-slate-50/50'} p-6 pt-5 border-t border-slate-100 mt-auto flex flex-col gap-4 relative z-10">
+                            
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">${isActiveStr ? 'WAKTU TERSISA:' : 'DIBUKA DALAM:'}</span>
+                                <span class="text-sm font-black ${isActiveStr ? 'text-rose-500' : 'text-slate-500'} font-mono bg-white px-3 py-1.5 rounded-lg shadow-sm border border-slate-100/80 tracking-wider" id="${isActiveStr ? 'countdown-'+exam.id : 'countdown-start-'+exam.id}">--:--:--</span>
                             </div>
-                        ` : `
-                            <div class="flex flex-col gap-4 opacity-80">
-                                <div class="flex items-center justify-between bg-slate-50 p-3.5 rounded-xl border border-slate-100 text-slate-500">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-2 h-2 rounded-full bg-slate-400"></div>
-                                        <span class="text-[11px] font-extrabold tracking-wider uppercase">BELUM MULAI</span>
-                                    </div>
-                                    <div class="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg shadow-sm border border-slate-100">
-                                        <span class="text-[13px] font-black text-slate-500 font-mono" id="countdown-start-${exam.id}">--:--:--</span>
-                                    </div>
-                                </div>
-                                
-                                <button disabled class="w-full py-[14px] bg-slate-100 text-slate-400 font-bold text-[14px] rounded-xl cursor-not-allowed border border-slate-200">
-                                    BELUM TERSEDIA
+                            
+                            ${isActiveStr ? `
+                                <button onclick="openTokenModal('${exam.id}', '${exam.nama}')" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold text-[14px] rounded-xl shadow-[0_6px_20px_rgba(79,70,229,0.25)] transition-all flex justify-center items-center gap-2">
+                                    <span>KERJAKAN SEKARANG</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
                                 </button>
-                            </div>
-                        `}
+                            ` : `
+                                <button disabled class="w-full py-4 bg-slate-200/80 text-slate-400 font-bold text-[14px] rounded-xl cursor-not-allowed border border-slate-200/50 shadow-inner">
+                                    BELUM DIBUKA
+                                </button>
+                            `}
+                        </div>
                     </div>
                 `;
                 elList.insertAdjacentHTML('beforeend', cardHtml);
@@ -414,8 +409,13 @@
 
             elLoading.classList.add('hidden');
 
-            if (validExamsCount === 0) elEmpty.classList.remove('hidden');
-            else elList.classList.remove('hidden');
+            if (validExamsCount === 0) {
+                elEmpty.classList.remove('hidden');
+                elEmpty.classList.add('flex');
+            } else {
+                elList.classList.remove('hidden');
+                elList.classList.add('flex');
+            }
         }
 
         function startCountdowns() {
