@@ -706,11 +706,17 @@
             updateClock();
             clockTimer = setInterval(updateClock, 1000);
 
-            // Auto Refresh Data Every 30 Seconds
-            refreshIntervalTimer = setInterval(() => {
-                if (activeSelectedExamId) return; // Jangan refresh kalau user sedang ketik token
-                fetchData();
-            }, 30000);
+            // Auto Refresh Data (Jittered)
+            // Menghindari "Thundering Herd" saat 900+ siswa membuka bersamaan
+            function scheduleNextRefresh() {
+                // Jeda utama 30 detik + Acak (0 sampai 15 detik) untuk menyebar beban server
+                const delayMs = 30000 + Math.floor(Math.random() * 15000);
+                refreshIntervalTimer = setTimeout(() => {
+                    if (!activeSelectedExamId) fetchData();
+                    scheduleNextRefresh();
+                }, delayMs);
+            }
+            scheduleNextRefresh();
 
             // Start Countdown loop
             startCountdowns();
