@@ -3,263 +3,190 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Launcher Ujian Online</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Spensada Exam</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Google Fonts -->
+    <!-- Google Fonts: Plus Jakarta Sans for premium feel -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <style>
-        /* Base Styles */
+        /* Base Styles & Typography */
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             -webkit-user-select: none;
             user-select: none;
             -webkit-touch-callout: none;
-            background-color: #f8fafc;
-            /* bg-slate-50 */
+            background-color: #f1f5f9; /* Soft slate background */
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* Allow selection on inputs only */
+        /* Input rules */
         input {
             -webkit-user-select: auto;
             user-select: auto;
         }
-
-        /* Prevent zooming on inputs in iOS Safari */
         input[type="text"] {
-            font-size: 16px;
+            font-size: 16px; /* Prevent iOS zoom */
         }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 0px; } /* Clean, no scrollbar like mobile apps */
 
         /* Animations */
-        .fade-in {
-            animation: fadeIn 0.4s ease-out forwards;
-        }
-
+        .fade-in { animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Hide scrollbar for cleaner look */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Loader Animation */
-        .loader-dots div {
-            animation-timing-function: cubic-bezier(0, 1, 1, 0);
-        }
-
-        .loader-dots div:nth-child(1) {
-            left: 8px;
-            animation: loader-dots1 0.6s infinite;
-        }
-
-        .loader-dots div:nth-child(2) {
-            left: 8px;
-            animation: loader-dots2 0.6s infinite;
-        }
-
-        .loader-dots div:nth-child(3) {
-            left: 32px;
-            animation: loader-dots2 0.6s infinite;
-        }
-
-        .loader-dots div:nth-child(4) {
-            left: 56px;
-            animation: loader-dots3 0.6s infinite;
-        }
-
-        @keyframes loader-dots1 {
-            0% {
-                transform: scale(0);
-            }
-
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        @keyframes loader-dots3 {
-            0% {
-                transform: scale(1);
-            }
-
-            100% {
-                transform: scale(0);
-            }
-        }
-
-        @keyframes loader-dots2 {
-            0% {
-                transform: translate(0, 0);
-            }
-
-            100% {
-                transform: translate(24px, 0);
-            }
-        }
+        .loader-dots div { animation-timing-function: cubic-bezier(0, 1, 1, 0); }
+        .loader-dots div:nth-child(1) { left: 8px; animation: loader-dots1 0.6s infinite; }
+        .loader-dots div:nth-child(2) { left: 8px; animation: loader-dots2 0.6s infinite; }
+        .loader-dots div:nth-child(3) { left: 32px; animation: loader-dots2 0.6s infinite; }
+        .loader-dots div:nth-child(4) { left: 56px; animation: loader-dots3 0.6s infinite; }
+        @keyframes loader-dots1 { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        @keyframes loader-dots3 { 0% { transform: scale(1); } 100% { transform: scale(0); } }
+        @keyframes loader-dots2 { 0% { transform: translate(0, 0); } 100% { transform: translate(24px, 0); } }
     </style>
 </head>
 
-<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="text-slate-800 min-h-screen relative overflow-x-hidden">
 
-    <!-- Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
-        <div class="max-w-md mx-auto px-4 py-4 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <!-- Simple Logo / Icon (Blue dominant) -->
-                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-md">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold text-slate-800 leading-tight">Spensada Exam</h1>
-                    <p class="text-xs text-slate-500 font-medium">Ujian Berbasis Komputer & HP</p>
-                </div>
-            </div>
+    <!-- Top App Background (Curved Header Background) -->
+    <div class="fixed top-0 left-0 w-full h-[280px] bg-gradient-to-br from-[#1E40AF] via-[#3730A3] to-[#312E81] rounded-b-[2.5rem] shadow-xl z-[-1] overflow-hidden">
+        <!-- Abstract Decorations behind header -->
+        <div class="absolute -top-10 -right-10 w-48 h-48 bg-white opacity-[0.07] rounded-full blur-2xl"></div>
+        <div class="absolute top-20 -left-10 w-32 h-32 bg-white opacity-[0.05] rounded-full blur-xl"></div>
+        <div class="absolute bottom-10 right-20 w-40 h-40 bg-indigo-400 opacity-20 rounded-full blur-3xl"></div>
+    </div>
 
-            <div id="statusBadge" class="flex items-center gap-1.5 px-2 py-1 bg-slate-100 rounded-full">
-                <div class="w-2 h-2 rounded-full bg-slate-400" id="statusDot"></div>
-                <span class="text-[10px] font-bold text-slate-600 uppercase tracking-wider"
-                    id="statusText">Offline</span>
+    <!-- Header Navigation -->
+    <header class="w-full max-w-md mx-auto pt-8 px-6 pb-2 flex items-center justify-between">
+        <div class="flex flex-col">
+            <h1 class="text-[22px] font-extrabold text-white tracking-tight leading-tight">Spensada Exam</h1>
+            <p class="text-[11px] text-indigo-100 font-medium opacity-90 mt-0.5">Sistem Ujian Mobile</p>
+        </div>
+        
+        <div id="statusBadge" class="flex flex-col items-end opacity-90 transition-all duration-300">
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-sm" id="statusContainer">
+                <div class="w-2 h-2 rounded-full bg-slate-300" id="statusDot"></div>
+                <span class="text-[9px] font-bold text-white uppercase tracking-wider" id="statusText">Offline</span>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="flex-1 max-w-md w-full mx-auto p-4 flex flex-col gap-4 relative">
+    <main class="max-w-md w-full mx-auto px-5 pt-6 pb-12 flex flex-col relative z-10">
 
-        <!-- Current Time Display -->
-        <div class="text-center mb-2 fade-in">
-            <p class="text-xs text-slate-500 font-medium">ASAS/ASAT Tahun Ajaran 2025/2026</p>
-            <p class="text-sm text-slate-500 font-medium h-5" id="serverTimeText"></p>
+        <!-- Info Card (Overlapping header) -->
+        <div class="bg-white rounded-[1.25rem] p-4 shadow-[0_8px_30px_rgb(0,0,0,0.06)] mb-8 flex flex-col items-center justify-center border border-slate-100 transform transition-transform hover:scale-[1.01]">
+            <p class="text-[10px] font-extrabold text-indigo-600 uppercase tracking-[0.15em] mb-1.5">ASAS/ASAT T.A 2025/2026</p>
+            <div class="flex items-center gap-2 mt-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p class="text-[15px] font-bold text-slate-700" id="serverTimeText">--:--:--</p>
+            </div>
         </div>
 
         <!-- State: Loading -->
-        <div id="loadingState" class="flex flex-col items-center justify-center py-16 gap-4 fade-in">
+        <div id="loadingState" class="flex flex-col items-center justify-center py-20 gap-5 fade-in bg-white/60 backdrop-blur-sm rounded-[2rem] border border-white">
             <div class="loader-dots relative w-20 h-5">
-                <div class="absolute top-1 w-3 h-3 rounded-full bg-blue-600"></div>
-                <div class="absolute top-1 w-3 h-3 rounded-full bg-blue-600"></div>
-                <div class="absolute top-1 w-3 h-3 rounded-full bg-blue-600"></div>
-                <div class="absolute top-1 w-3 h-3 rounded-full bg-blue-600"></div>
+                <div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-600"></div>
+                <div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-600"></div>
+                <div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-600"></div>
+                <div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-600"></div>
             </div>
-            <p class="text-sm font-medium text-slate-500">Menarik data ujian terbaru...</p>
+            <p class="text-sm font-semibold text-slate-500">Mempersiapkan Ujian...</p>
         </div>
 
         <!-- State: Error -->
-        <div id="errorState"
-            class="hidden flex-col items-center justify-center py-12 px-6 bg-white rounded-2xl border border-red-100 shadow-sm text-center fade-in">
-            <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center text-red-500 mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        <div id="errorState" class="hidden flex-col items-center justify-center py-12 px-6 bg-white rounded-[2rem] text-center fade-in border border-rose-100 shadow-[0_8px_30px_rgba(225,29,72,0.06)]">
+            <div class="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 mb-4 shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
             </div>
-            <h3 class="text-lg font-bold text-slate-800 mb-2">Terjadi Kesalahan</h3>
-            <p class="text-sm text-slate-500 mb-6" id="errorMessage">Gagal terhubung ke server.</p>
-            <button onclick="fetchData()"
-                class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium rounded-xl transition-colors shadow-sm focus:outline-none">
-                Coba Lagi
+            <h3 class="text-xl font-extrabold text-slate-800 mb-1">Jaringan Terputus</h3>
+            <p class="text-sm text-slate-500 mb-6 px-2" id="errorMessage">Gagal menghubungi peladen sekolah.</p>
+            <button onclick="fetchData()" class="w-full py-3.5 bg-slate-800 hover:bg-slate-900 active:scale-[0.98] text-white font-bold rounded-[1rem] transition-all shadow-md focus:outline-none">
+                Coba Sinkronisasi Ulang
             </button>
         </div>
 
         <!-- State: Empty -->
-        <div id="emptyState"
-            class="hidden flex-col items-center justify-center py-16 px-6 bg-white rounded-2xl border border-slate-200 shadow-sm text-center fade-in">
-            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-5">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        <div id="emptyState" class="hidden flex-col items-center justify-center py-16 px-6 bg-white rounded-[2rem] text-center fade-in shadow-sm border border-slate-100">
+            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-5 shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
             </div>
-            <h3 class="text-xl font-bold text-slate-800 mb-2">Tidak ada ujian saat ini</h3>
-            <p class="text-sm text-slate-500">Jadwal ujian belum tersedia atau ujian sudah ditutup. Silakan tunggu atau
-                hubungi proktor.</p>
-            <button onclick="fetchData()"
-                class="mt-6 flex items-center gap-2 text-blue-600 font-medium text-sm hover:underline">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            <h3 class="text-[18px] font-extrabold text-slate-800 mb-1">Belum Tersedia</h3>
+            <p class="text-sm text-slate-500 mb-5 px-1 leading-relaxed">Tidak ada jadwal aktif saat ini. Menunggu intruksi proktor.</p>
+            <button onclick="fetchData()" class="flex items-center justify-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-600 font-bold text-xs rounded-full hover:bg-indigo-100 transition-colors shadow-sm active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                Refresh Data
+                Perbarui Data
             </button>
         </div>
 
         <!-- State: Data List -->
-        <div id="examList" class="hidden flex-col gap-4">
+        <!-- Penggunaan gap-6 dan flex-col untuk memberi jarak absolut antar kotak -->
+        <div id="examList" class="hidden flex-col gap-6 pb-10">
             <!-- Exam cards will be injected here -->
         </div>
 
     </main>
 
-    <!-- Token Modal -->
-    <div id="tokenModal"
-        class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-        style="opacity: 0; transition: opacity 0.3s ease;">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300"
-            id="tokenModalContent">
+    <!-- Token Modal (Bottom Sheet style) -->
+    <div id="tokenModal" class="hidden fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all duration-300" style="opacity: 0;">
+        <!-- Backdrop Blur -->
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeTokenModal()"></div>
+        
+        <!-- Modal Content -->
+        <div class="bg-white relative rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden transform translate-y-full sm:translate-y-0 sm:scale-95 transition-transform duration-300" id="tokenModalContent">
 
-            <div class="p-6 border-b border-slate-100 flex flex-col items-center text-center bg-blue-50/50">
-                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            <!-- Drag Handle (Mobile) -->
+            <div class="w-full flex justify-center pt-4 pb-2 sm:hidden absolute top-0 z-10 pointer-events-none">
+                <div class="w-10 h-1.5 bg-slate-200 rounded-full"></div>
+            </div>
+
+            <div class="p-8 pt-10 sm:pt-8 pb-5 flex flex-col items-center text-center">
+                <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-4 border border-indigo-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                 </div>
-                <h3 class="text-lg font-bold text-slate-800">Masukkan Token</h3>
-                <p class="text-sm text-slate-500 font-medium mt-1 truncate w-full" id="modalExamName">Nama Ujian</p>
+                <h3 class="text-xl font-extrabold text-slate-800 tracking-tight">KODE UJIAN</h3>
+                <p class="text-sm text-slate-500 font-semibold mt-1 truncate w-full px-4" id="modalExamName">Nama Ujian</p>
             </div>
 
-            <div class="p-6">
-                <input type="text" id="tokenInput"
-                    class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 font-mono text-center text-xl font-bold text-slate-800 tracking-widest focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors uppercase placeholder:tracking-normal placeholder:font-normal placeholder:text-slate-400"
-                    placeholder="KODE TOKEN" autocomplete="off" spellcheck="false" maxlength="10">
-                <p id="tokenError"
-                    class="text-red-500 text-sm mt-3 hidden text-center font-medium bg-red-50 p-2 rounded-lg">Token
-                    salah! Silakan coba lagi.</p>
+            <div class="px-8 pb-6">
+                <div class="relative">
+                    <input type="text" id="tokenInput" class="w-full bg-slate-50 border-2 border-slate-200/80 rounded-2xl px-4 py-4 font-mono text-center text-2xl font-black text-indigo-700 tracking-[0.2em] focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 transition-all uppercase placeholder:tracking-normal placeholder:font-bold placeholder:text-slate-300 placeholder:text-[15px]" placeholder="MASUKKAN KODE" autocomplete="off" spellcheck="false" maxlength="10">
+                </div>
+                <div id="tokenError" class="mt-3 hidden animate-pulse">
+                    <div class="flex items-center justify-center gap-1.5 bg-rose-50 text-rose-600 px-3 py-2 rounded-xl border border-rose-100 shadow-sm">
+                        <p class="text-xs font-bold">Kode salah, silakan cek ulang.</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="p-4 bg-slate-50 border-t border-slate-100 flex gap-3">
-                <button onclick="closeTokenModal()"
-                    class="flex-1 px-4 py-2.5 text-slate-600 bg-white border border-slate-300 rounded-xl font-bold hover:bg-slate-50 active:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-200">
-                    Batal
+            <div class="p-6 bg-slate-50 border-t border-slate-100 flex gap-3 pb-8 sm:pb-6">
+                <button onclick="closeTokenModal()" class="flex-[0.8] px-4 py-3.5 text-slate-500 bg-white border border-slate-300 rounded-[1rem] font-bold hover:bg-slate-50 active:scale-[0.98] transition-all focus:outline-none shadow-sm">
+                    Kembali
                 </button>
-                <button onclick="submitToken()"
-                    class="flex-1 px-4 py-2.5 text-white bg-blue-600 border border-blue-600 rounded-xl font-bold hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
-                    Mulai Ujian
+                <button onclick="submitToken()" class="flex-[1.2] px-4 py-3.5 text-white bg-indigo-600 border border-transparent rounded-[1rem] font-bold hover:bg-indigo-700 shadow-[0_4px_10px_rgba(79,70,229,0.2)] active:scale-[0.98] transition-all focus:outline-none">
+                    Mulai
                 </button>
             </div>
-
         </div>
     </div>
 
@@ -267,19 +194,15 @@
     <script>
         /**
          * KONFIGURASI API
-         * Ganti URL_API dengan Google Apps Script Web App URL Anda.
          */
-        const URL_API = "https://script.google.com/macros/s/AKfycbyyPyvFjhmgN7UW3M8cEWRNMFSVDr_b7vZH3Exs0-dHCULy7-TOdkTo3s0_H3FWbfJqFw/exec";
-
-        // Mode test: Jika true, aplikasi akan pakai data dummy tanpa memanggil API.
-        // Ubah menjadi FALSE untuk menggunakan API asli.
+        const URL_API = "https://script.google.com/macros/s/AKfycbwalO-HqOZpSYlOjBXl9stx3PzZUWrTadTJeojZ_AuMWFNrJk44vlozgXXEUiNO5Fugog/exec";
         const USE_DUMMY_DATA = false;
 
         // Data Management
-        let examsBank = []; // Storing fetched exams
-        let secureLinks = {}; // In-memory secure link storage
+        let examsBank = [];
+        let secureLinks = {};
         let activeSelectedExamId = null;
-        let kioskExamId = null; // Storing active kiosk exam
+        let kioskExamId = null;
 
         // Interval Management
         let refreshIntervalTimer = null;
@@ -291,7 +214,7 @@
         const elError = document.getElementById('errorState');
         const elEmpty = document.getElementById('emptyState');
         const elList = document.getElementById('examList');
-        const statusBadge = document.getElementById('statusBadge');
+        const statusContainer = document.getElementById('statusContainer');
         const statusDot = document.getElementById('statusDot');
         const statusText = document.getElementById('statusText');
         const timeText = document.getElementById('serverTimeText');
@@ -299,61 +222,43 @@
         /**
          * SECURITY FEATURES
          */
-        // 1. Disable Right Click
         document.addEventListener('contextmenu', e => e.preventDefault());
-
-        // 2. Disable Inspect Element Shortcuts
         document.addEventListener('keydown', e => {
             if (e.keyCode == 123) e.preventDefault(); // F12
-            if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) e.preventDefault(); // Ctrl+Shift+I / J
-            if (e.ctrlKey && e.keyCode === 85) e.preventDefault(); // Ctrl+U
-            if (e.ctrlKey && e.keyCode === 83) e.preventDefault(); // Ctrl+S
+            if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) e.preventDefault();
+            if (e.ctrlKey && e.keyCode === 85) e.preventDefault();
+            if (e.ctrlKey && e.keyCode === 83) e.preventDefault();
         });
-
-        // 3. Before Unload Warning
         window.addEventListener('beforeunload', function (e) {
-            const warningMessage = 'Apakah Anda yakin ingin keluar? Ujian mungkin sedang berlangsung.';
+            const msg = 'Apakah Anda yakin ingin keluar? Ujian mungkin sedang berlangsung.';
             e.preventDefault();
-            e.returnValue = warningMessage;
-            return warningMessage;
+            e.returnValue = msg;
+            return msg;
         });
 
-        /**
-         * UTILITY FUNCTIONS
-         */
-
-        // Parse "YYYY-MM-DD HH:mm" to Date object
         function parseDate(dateStr) {
             if (!dateStr) return new Date(0);
             try {
-                // Check if already correct format for Date
                 if (dateStr.includes('T')) return new Date(dateStr);
-
                 const parts = dateStr.split(' ');
                 if (parts.length !== 2) return new Date(dateStr);
-
                 const dateParts = parts[0].split('-');
                 const timeParts = parts[1].split(':');
-
-                // Note: Months are 0-indexed in JS Date
                 return new Date(dateParts[0], dateParts[1] - 1, dateParts[2], timeParts[0], timeParts[1]);
             } catch (e) {
                 return new Date(0);
             }
         }
 
-        // Format time difference into human-readable countdown
         function formatCountdown(diffMs) {
             if (diffMs <= 0) return "Selesai";
             const h = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
             const m = Math.floor((diffMs / 1000 / 60) % 60);
             const s = Math.floor((diffMs / 1000) % 60);
-
-            if (h > 0) return `${h} jam ${m} mnt ${s} dtk`;
-            return `${m} mnt ${s} dtk`;
+            if (h > 0) return `${h}j ${m}m ${s}d`;
+            return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
         }
 
-        // Update real time clock UI
         function updateClock() {
             const now = new Date();
             const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
@@ -362,38 +267,32 @@
             timeText.innerText = `${day}, ${timeStr}`;
         }
 
-        // Set App Status Indicator
         function setAppStatus(state) {
-            statusBadge.className = 'flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-bold transition-colors';
+            statusContainer.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-sm transition-all duration-300';
             switch (state) {
                 case 'online':
-                    statusBadge.classList.add('bg-green-100');
-                    statusDot.className = 'w-2 h-2 rounded-full bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.6)]';
-                    statusText.innerText = 'TERHUBUNG';
-                    statusText.className = 'text-[10px] font-bold text-green-700 uppercase tracking-wider';
+                    statusContainer.classList.add('bg-white/20', 'backdrop-blur-md', 'border-white/20');
+                    statusDot.className = 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)] animate-pulse';
+                    statusText.innerText = 'ONLINE';
+                    statusText.className = 'text-[9px] font-bold text-white uppercase tracking-widest';
                     break;
                 case 'offline':
                 case 'error':
-                    statusBadge.classList.add('bg-red-100');
-                    statusDot.className = 'w-2 h-2 rounded-full bg-red-500';
+                    statusContainer.classList.add('bg-rose-500/80', 'backdrop-blur-md', 'border-rose-400/50');
+                    statusDot.className = 'w-2 h-2 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.6)]';
                     statusText.innerText = 'TERPUTUS';
-                    statusText.className = 'text-[10px] font-bold text-red-700 uppercase tracking-wider';
+                    statusText.className = 'text-[9px] font-bold text-white uppercase tracking-widest';
                     break;
                 case 'sync':
-                    statusBadge.classList.add('bg-blue-100');
-                    statusDot.className = 'w-2 h-2 rounded-full bg-blue-500 animate-pulse';
-                    statusText.innerText = 'SINKRONISASI';
-                    statusText.className = 'text-[10px] font-bold text-blue-700 uppercase tracking-wider';
+                    statusContainer.classList.add('bg-white/10', 'backdrop-blur-md', 'border-white/10');
+                    statusDot.className = 'w-2 h-2 rounded-full bg-blue-300 animate-ping';
+                    statusText.innerText = 'SYNC';
+                    statusText.className = 'text-[9px] font-bold text-white/80 uppercase tracking-widest';
                     break;
             }
         }
 
-        /**
-         * CORE LOGIC
-         */
-
         async function fetchData() {
-            // UI Reset
             elLoading.classList.remove('hidden');
             elError.classList.add('hidden');
             elEmpty.classList.add('hidden');
@@ -403,34 +302,23 @@
 
             try {
                 let data = [];
-
                 if (USE_DUMMY_DATA) {
-                    // Simulate network delay
                     await new Promise(r => setTimeout(r, 800));
-
-                    const nowStr = new Date().toISOString().split('T')[0]; // Get today YYYY-MM-DD
                     const todayCurrent = new Date();
-
-                    // Create an active exam simulating right now
-                    let activeStart = new Date(todayCurrent.getTime() - (1000 * 60 * 30)); // 30 mins ago
-                    let activeEnd = new Date(todayCurrent.getTime() + (1000 * 60 * 90)); // 90 mins from now
-
-                    // Create an upcoming exam
+                    let activeStart = new Date(todayCurrent.getTime() - (1000 * 60 * 30));
+                    let activeEnd = new Date(todayCurrent.getTime() + (1000 * 60 * 90));
                     let upcomingStart = new Date(todayCurrent.getTime() + (1000 * 60 * 120));
                     let upcomingEnd = new Date(todayCurrent.getTime() + (1000 * 60 * 240));
 
-                    const formatForJSON = (d) => {
-                        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-                    };
+                    const formatForJSON = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 
                     data = [
                         { "id": "1", "nama": "Matematika X - Semester 1", "link": "https://forms.gle/demo1", "start": formatForJSON(activeStart), "end": formatForJSON(activeEnd), "status": "aktif", "token": "MATH10" },
-                        { "id": "2", "nama": "Bahasa Indonesia X", "link": "https://forms.gle/demo2", "start": formatForJSON(upcomingStart), "end": formatForJSON(upcomingEnd), "status": "aktif", "token": "INDO10" },
-                        { "id": "3", "nama": "Fisika Ujian Susulan", "link": "https://forms.gle/demo3", "start": "2000-01-01 08:00", "end": "2000-01-01 10:00", "status": "nonaktif" }
+                        { "id": "2", "nama": "Bahasa Indonesia X", "link": "https://forms.gle/demo2", "start": formatForJSON(upcomingStart), "end": formatForJSON(upcomingEnd), "status": "aktif", "token": "INDO10" }
                     ];
                 } else {
                     const response = await fetch(URL_API);
-                    if (!response.ok) throw new Error("Gagal mengambil data");
+                    if (!response.ok) throw new Error("Gagal");
                     data = await response.json();
                 }
 
@@ -444,9 +332,7 @@
                 processAndRenderExams();
 
             } catch (err) {
-                console.error("API Fetch Error:", err);
                 setAppStatus('error');
-                document.getElementById('errorMessage').innerText = "Gagal terhubung ke server. Pastikan internet stabil.";
                 elLoading.classList.add('hidden');
                 elError.classList.remove('hidden');
             }
@@ -455,13 +341,8 @@
         function processAndRenderExams() {
             const now = new Date();
             let validExamsCount = 0;
-            secureLinks = {}; // reset
+            secureLinks = {}; 
             elList.innerHTML = '';
-
-            // Aturan Utama: Tampilkan hanya jika status="aktif"
-            // dan untuk User Experience kita akan menampilkan sesi aktif & yang akan datang.
-            // Namun sesuai instruksi mutlak "Ujian hanya muncul jika waktu sekarang berada di antara start - end",
-            // Kami pisahkan agar sesuai:
 
             examsBank.forEach(exam => {
                 if (exam.status?.toLowerCase() !== 'aktif') return;
@@ -470,83 +351,61 @@
                 const isActiveStr = now >= exam.startObj && now <= exam.endObj;
                 const isFinishedStr = now > exam.endObj;
 
-                // ATURAN KETAT (Requirement 2): Ujian HANYA muncul jika: status aktif & waktu diantara start-end
-                // Namun bonus minta (hijau=aktif, abu=belum mulai). 
-                // Untuk mengakomodasi keduanya, saya tampilkan exam yg hari ini tapi batasi tombol berdasarkan aturan mutlak.
-
-                // Filter ketat: jika bukan aktif dan bukan hari ini, abaikan.
-                if (isFinishedStr) return; // Sembunyikan ujian yg sudah kadaluarsa
+                if (isFinishedStr) return; 
 
                 validExamsCount++;
-
-                // Store links in memory, NOT in DOM
                 secureLinks[exam.id] = exam.link;
 
-                // Color Indicators (Bonus Feature)
-                let statusConfig = {
-                    color: 'slate',
-                    badgeBg: 'bg-slate-100',
-                    badgeText: 'text-slate-600',
-                    text: 'BELUM MULAI',
-                    canEnter: false
-                };
-
-                if (isActiveStr) {
-                    statusConfig = {
-                        color: 'green',
-                        badgeBg: 'bg-green-100 animate-pulse',
-                        badgeText: 'text-green-700',
-                        text: 'SEDANG BERLANGSUNG',
-                        canEnter: true
-                    };
-                }
-
+                // DESIGN TERBARU KARTU UJIAN
                 const cardHtml = `
-                    <div class="bg-white border border-${statusConfig.color}-200 rounded-2xl p-5 shadow-sm fade-in relative overflow-hidden transition-all hover:shadow-md" id="card-${exam.id}">
-                        <!-- Top Indicator Line -->
-                        <div class="absolute top-0 left-0 w-full h-1 bg-${statusConfig.color}-500"></div>
+                    <div class="bg-white rounded-[1.5rem] p-5 shadow-[0_4px_25px_rgb(0,0,0,0.04)] relative overflow-hidden transition-all duration-300 transform hover:-translate-y-1 border border-slate-100 ${isActiveStr ? 'ring-[3px] ring-emerald-500/20' : ''}" id="card-${exam.id}">
                         
-                        <div class="flex justify-between items-start mb-3">
-                            <div>
-                                <h3 class="text-base font-bold text-slate-800 leading-tight">${exam.nama}</h3>
-                                <p class="text-xs text-slate-500 mt-1 font-medium">Jam: ${exam.start.split(' ')[1]} - ${exam.end.split(' ')[1]}</p>
-                            </div>
-                            <div class="px-2 py-1 rounded-md ${statusConfig.badgeBg} flex-shrink-0">
-                                <span class="text-[10px] font-bold ${statusConfig.badgeText} uppercase tracking-wider">${statusConfig.text}</span>
+                        <!-- Top Indicator Line -->
+                        <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r ${isActiveStr ? 'from-emerald-400 to-teal-500' : 'from-slate-200 to-slate-300'}"></div>
+                        
+                        <div class="flex justify-between items-start mb-5 mt-1">
+                            <div class="flex-1 pr-4">
+                                <h3 class="text-[17px] font-extrabold text-slate-800 leading-snug mb-1.5">${exam.nama}</h3>
+                                <div class="flex items-center gap-1.5 text-slate-500 bg-slate-50 inline-flex px-2 py-1 rounded-md border border-slate-100">
+                                    <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    <p class="text-[11px] font-bold tracking-wide">Jadwal: ${exam.start.split(' ')[1]} - ${exam.end.split(' ')[1]}</p>
+                                </div>
                             </div>
                         </div>
 
                         ${isActiveStr ? `
-                            <div class="mt-4 bg-slate-50 border border-slate-100 rounded-xl p-3 flex justify-between items-center">
-                                <div class="flex items-center gap-2 text-slate-600">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <span class="text-xs font-semibold">Sisa Waktu:</span>
+                            <div class="flex flex-col gap-4">
+                                <div class="flex items-center justify-between bg-emerald-50/50 p-3.5 rounded-xl border border-emerald-100">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_5px_rgba(16,185,129,0.5)]"></div>
+                                        <span class="text-[11px] font-extrabold text-emerald-600 tracking-wider uppercase">Berlangsung</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg shadow-sm border border-emerald-50">
+                                        <span class="text-[13px] font-black text-rose-500 font-mono" id="countdown-${exam.id}">--:--:--</span>
+                                    </div>
                                 </div>
-                                <span class="text-sm font-bold text-orange-600 font-mono" id="countdown-${exam.id}">--:--:--</span>
+                                
+                                <button onclick="openTokenModal('${exam.id}', '${exam.nama}')" class="w-full py-[14px] bg-gradient-to-r from-blue-600 to-indigo-600 active:scale-[0.98] text-white font-bold text-[14px] rounded-xl shadow-[0_8px_15px_rgba(79,70,229,0.25)] transition-all flex justify-center items-center gap-2">
+                                    <span>MASUK UJIAN</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                                </button>
                             </div>
-                            
-                            <button onclick="openTokenModal('${exam.id}', '${exam.nama}')" class="mt-4 w-full py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl shadow-sm transition-colors focus:outline-none flex justify-center items-center gap-2">
-                                <span>MASUK UJIAN</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                </svg>
-                            </button>
                         ` : `
-                            <div class="mt-4 bg-slate-50 border border-slate-100 rounded-xl p-3 flex justify-between items-center opacity-70">
-                                <div class="flex items-center gap-2 text-slate-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    <span class="text-xs font-semibold">Dimulai dalam:</span>
+                            <div class="flex flex-col gap-4 opacity-80">
+                                <div class="flex items-center justify-between bg-slate-50 p-3.5 rounded-xl border border-slate-100 text-slate-500">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-2 h-2 rounded-full bg-slate-400"></div>
+                                        <span class="text-[11px] font-extrabold tracking-wider uppercase">BELUM MULAI</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg shadow-sm border border-slate-100">
+                                        <span class="text-[13px] font-black text-slate-500 font-mono" id="countdown-start-${exam.id}">--:--:--</span>
+                                    </div>
                                 </div>
-                                <span class="text-sm font-bold text-slate-600 font-mono" id="countdown-start-${exam.id}">--:--:--</span>
+                                
+                                <button disabled class="w-full py-[14px] bg-slate-100 text-slate-400 font-bold text-[14px] rounded-xl cursor-not-allowed border border-slate-200">
+                                    BELUM TERSEDIA
+                                </button>
                             </div>
-                            
-                            <button disabled class="mt-4 w-full py-3 bg-slate-200 text-slate-400 font-bold rounded-xl cursor-not-allowed">
-                                BELUM TERSEDIA
-                            </button>
                         `}
                     </div>
                 `;
@@ -555,14 +414,10 @@
 
             elLoading.classList.add('hidden');
 
-            if (validExamsCount === 0) {
-                elEmpty.classList.remove('hidden');
-            } else {
-                elList.classList.remove('hidden');
-            }
+            if (validExamsCount === 0) elEmpty.classList.remove('hidden');
+            else elList.classList.remove('hidden');
         }
 
-        // Timer Loop for updating countdowns
         function startCountdowns() {
             if (countdownTimer) clearInterval(countdownTimer);
             countdownTimer = setInterval(() => {
@@ -574,21 +429,14 @@
 
                     if (elEnd && now <= exam.endObj) {
                         elEnd.innerText = formatCountdown(exam.endObj - now);
-                        // If it just ran out of time while viewing
-                        if (now >= exam.endObj) {
-                            fetchData(); // Trigger full refresh to hide/disable
-                        }
+                        if (now >= exam.endObj) fetchData();
                     }
 
                     if (elStart && now < exam.startObj) {
                         elStart.innerText = formatCountdown(exam.startObj - now);
-                        // If just hit start time
-                        if (now >= exam.startObj) {
-                            fetchData(); // Trigger full refresh to enable
-                        }
+                        if (now >= exam.startObj) fetchData();
                     }
 
-                    // KIOSK Timer Update
                     if (kioskExamId === exam.id) {
                         const kTimer = document.getElementById('kioskTimer');
                         if (kTimer) {
@@ -596,7 +444,9 @@
                                 kTimer.innerText = formatCountdown(exam.endObj - now);
                             } else {
                                 kTimer.innerText = "WAKTU HABIS";
-                                kTimer.classList.replace('bg-blue-800', 'bg-red-600');
+                                kTimer.classList.replace('text-emerald-400', 'text-rose-400');
+                                kTimer.classList.replace('border-white/10', 'border-rose-400/30');
+                                kTimer.classList.add('bg-rose-900/40');
                             }
                         }
                     }
@@ -605,9 +455,6 @@
             }, 1000);
         }
 
-        /**
-         * TOKEN MODAL & REDIRECT LOGIC
-         */
         function openTokenModal(examId, examName) {
             activeSelectedExamId = examId;
             document.getElementById('modalExamName').innerText = examName;
@@ -618,11 +465,10 @@
             const modalContent = document.getElementById('tokenModalContent');
 
             modal.classList.remove('hidden');
-            // Allow display:flex to apply before animating opacity
             setTimeout(() => {
                 modal.style.opacity = '1';
-                modalContent.classList.remove('scale-95');
-                modalContent.classList.add('scale-100');
+                modalContent.classList.remove('translate-y-full', 'sm:scale-95');
+                modalContent.classList.add('translate-y-0', 'sm:scale-100');
                 document.getElementById('tokenInput').focus();
             }, 10);
         }
@@ -632,13 +478,13 @@
             const modalContent = document.getElementById('tokenModalContent');
 
             modal.style.opacity = '0';
-            modalContent.classList.remove('scale-100');
-            modalContent.classList.add('scale-95');
+            modalContent.classList.remove('translate-y-0', 'sm:scale-100');
+            modalContent.classList.add('translate-y-full', 'sm:scale-95');
 
             setTimeout(() => {
                 modal.classList.add('hidden');
                 activeSelectedExamId = null;
-            }, 300); // Matches transition duration
+            }, 300);
         }
 
         function submitToken() {
@@ -647,47 +493,47 @@
             const inputVal = document.getElementById('tokenInput').value.trim().toUpperCase();
             const examInfo = examsBank.find(e => e.id === activeSelectedExamId);
 
-            // Validasi: Jika data ujian memiliki properti token (dikirim dari JSON), kita verifikasi
             if (examInfo && examInfo.token) {
                 if (inputVal !== examInfo.token.toUpperCase()) {
                     document.getElementById('tokenError').classList.remove('hidden');
-                    // Shake animation effect
                     const modalContent = document.getElementById('tokenModalContent');
-                    modalContent.classList.add('animate-pulse');
-                    setTimeout(() => modalContent.classList.remove('animate-pulse'), 500);
+                    modalContent.classList.add('animate-shake');
+                    modalContent.animate([
+                        { transform: 'translateX(0px)' },
+                        { transform: 'translateX(-6px)' },
+                        { transform: 'translateX(6px)' },
+                        { transform: 'translateX(0px)' }
+                    ], { duration: 300 });
                     return;
                 }
             } else {
-                // Jika server tidak mensyaratkan token untuk ujian ini, atau input kosong diijinkan
                 if (inputVal === "") {
-                    document.getElementById('tokenError').innerText = "Token wajib diisi!";
                     document.getElementById('tokenError').classList.remove('hidden');
                     return;
                 }
             }
 
-            // Sukses
             executeSecureRedirect(activeSelectedExamId);
         }
 
         function requestFullscreenLock() {
             const elem = document.documentElement;
             if (elem.requestFullscreen) {
-                elem.requestFullscreen().catch(err => console.log(err));
-            } else if (elem.webkitRequestFullscreen) { /* Safari */
-                elem.webkitRequestFullscreen().catch(err => console.log(err));
-            } else if (elem.msRequestFullscreen) { /* IE11 */
-                elem.msRequestFullscreen().catch(err => console.log(err));
+                elem.requestFullscreen().catch(e => console.log(e));
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen().catch(e => console.log(e));
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen().catch(e => console.log(e));
             }
         }
 
         function exitFullscreenLock() {
             if (document.exitFullscreen) {
-                document.exitFullscreen().catch(err => console.log(err));
-            } else if (document.webkitExitFullscreen) { /* Safari */
-                document.webkitExitFullscreen().catch(err => console.log(err));
-            } else if (document.msExitFullscreen) { /* IE11 */
-                document.msExitFullscreen().catch(err => console.log(err));
+                document.exitFullscreen().catch(e => console.log(e));
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen().catch(e => console.log(e));
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen().catch(e => console.log(e));
             }
         }
 
@@ -698,8 +544,6 @@
                 if(kiosk) kiosk.remove();
                 kioskExamId = null;
                 document.body.style.overflow = "auto";
-                
-                // Refresh list Ujian
                 fetchData();
             }
         }
@@ -715,73 +559,51 @@
             }
 
             closeTokenModal();
-
-            // Set state Kiosk Mode
             kioskExamId = examId;
-            document.body.style.overflow = "hidden"; // Prevent background scrolling
+            document.body.style.overflow = "hidden";
 
-            // Membangun Kiosk UI
             const kioskHtml = `
-                <div id="kioskContainer" class="fixed inset-0 z-[9999] bg-white flex flex-col h-[100dvh] w-[100dvw]">
-                    <div class="bg-blue-600 text-white px-3 py-2 flex justify-between items-center shadow-md">
-                        <div class="flex items-center gap-2 overflow-hidden flex-1">
-                            <span class="font-bold text-xs sm:text-sm truncate mr-1">${examInfo.nama}</span>
-                            <span class="bg-blue-800 px-2 py-0.5 rounded text-xs font-mono font-bold whitespace-nowrap" id="kioskTimer">--:--:--</span>
+                <div id="kioskContainer" class="fixed inset-0 z-[9999] bg-slate-50 flex flex-col h-[100dvh] w-[100dvw]">
+                    <div class="bg-slate-900 border-b border-white/10 text-white px-4 py-3 flex justify-between items-center shadow-xl">
+                        <div class="flex items-center gap-3 overflow-hidden flex-1">
+                            <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse hidden sm:block flex-shrink-0"></div>
+                            <span class="font-bold text-xs sm:text-[14px] text-slate-200 truncate mr-1 tracking-wide opacity-90">${examInfo.nama}</span>
+                            <span class="bg-black/50 border border-white/10 px-2.5 py-1 rounded-xl text-xs font-mono font-black tracking-widest text-emerald-400 whitespace-nowrap shadow-inner" id="kioskTimer">--:--</span>
                         </div>
-                        <button onclick="exitKioskMode()" class="bg-red-500 hover:bg-red-600 active:bg-red-700 text-white text-[11px] sm:text-xs font-bold px-3 py-1.5 rounded shadow whitespace-nowrap flex-shrink-0 ml-2">
-                            KELUAR UJIAN
+                        <button onclick="exitKioskMode()" class="bg-rose-600 hover:bg-rose-500 active:scale-95 transition-transform duration-200 text-white text-[11px] sm:text-xs font-extrabold px-4 py-2 rounded-xl shadow-md whitespace-nowrap flex-shrink-0 ml-3">
+                            KELUAR
                         </button>
                     </div>
                     <div class="flex-1 w-full bg-slate-50 relative">
-                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                             <div class="loader-dots relative w-20 h-5 mb-2"><div class="absolute top-1 w-3 h-3 rounded-full bg-slate-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-slate-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-slate-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-slate-300"></div></div>
-                             <p class="text-xs text-slate-500 font-medium">Memuat Layar Ujian...</p>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
+                             <div class="loader-dots relative w-20 h-5 mb-3"><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div></div>
+                             <p class="text-xs text-slate-500 font-semibold tracking-wide">Menghubungkan Halaman Ujian...</p>
                         </div>
                         <iframe src="${link}" class="w-full h-full border-none z-10 relative bg-transparent" allow="fullscreen" sandbox="allow-scripts allow-top-navigation allow-forms allow-same-origin allow-popups"></iframe>
                     </div>
                 </div>
             `;
             
-            // Suntikkan Layar Kiosk ke DOM
             document.body.insertAdjacentHTML('beforeend', kioskHtml);
-            
-            // Eksekusi API Fullscreen Native
             requestFullscreenLock();
         }
 
-        // Allow Enter key on token input
-        document.getElementById('tokenInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') submitToken();
-        });
-
-        /**
-         * INITIALIZATION
-         */
         window.addEventListener('DOMContentLoaded', () => {
-            // First fetch
             fetchData();
-
-            // Start clock
             updateClock();
             clockTimer = setInterval(updateClock, 1000);
 
-            // Auto Refresh Data (Jittered)
-            // Menghindari "Thundering Herd" saat 900+ siswa membuka bersamaan
             function scheduleNextRefresh() {
-                // Jeda utama 30 detik + Acak (0 sampai 15 detik) untuk menyebar beban server
                 const delayMs = 30000 + Math.floor(Math.random() * 15000);
                 refreshIntervalTimer = setTimeout(() => {
-                    if (!activeSelectedExamId) fetchData();
+                    if (!activeSelectedExamId && !kioskExamId) fetchData();
                     scheduleNextRefresh();
                 }, delayMs);
             }
             scheduleNextRefresh();
-
-            // Start Countdown loop
             startCountdowns();
         });
 
     </script>
 </body>
-
 </html>
