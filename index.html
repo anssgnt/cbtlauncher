@@ -31,6 +31,7 @@
             -webkit-touch-callout: none;
             background-color: #f1f5f9; /* Soft slate background */
             -webkit-font-smoothing: antialiased;
+            overscroll-behavior-y: none; /* Mencegah pull-to-refresh di Chrome Mobile */
         }
 
         /* Input rules */
@@ -40,6 +41,25 @@
         }
         input[type="text"] {
             font-size: 16px; /* Prevent iOS zoom */
+        }
+
+        /* Skeleton Loading Animation */
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
+        }
+        .skeleton {
+            position: relative;
+            overflow: hidden;
+            background-color: #e2e8f0;
+            border-radius: 0.5rem;
+        }
+        .skeleton::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            transform: translateX(-100%);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 1.5s infinite;
         }
 
         /* Custom Scrollbar */
@@ -143,15 +163,35 @@
             </div>
         </div>
 
-        <!-- State: Loading -->
-        <div id="loadingState" class="flex flex-col items-center justify-center py-20 gap-5 fade-in bg-white/60 backdrop-blur-sm rounded-[2rem] border border-white">
-            <div class="loader-dots relative w-20 h-5">
-                <div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-600"></div>
-                <div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-600"></div>
-                <div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-600"></div>
-                <div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-600"></div>
+        <!-- State: Loading (Skeleton) -->
+        <div id="loadingState" class="flex flex-col gap-6 fade-in">
+            <!-- Skeleton Card 1 -->
+            <div class="bg-white rounded-[1.5rem] shadow-sm border border-slate-100 overflow-hidden">
+                <div class="h-1.5 w-full bg-slate-100"></div>
+                <div class="p-6">
+                    <div class="w-24 h-5 skeleton mb-4"></div>
+                    <div class="w-full h-7 skeleton mb-3"></div>
+                    <div class="w-3/4 h-4 skeleton"></div>
+                </div>
+                <div class="p-6 pt-0 border-t border-slate-50 mt-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="w-20 h-3 skeleton"></div>
+                        <div class="w-24 h-8 skeleton"></div>
+                    </div>
+                    <div class="w-full h-12 skeleton rounded-xl"></div>
+                </div>
             </div>
-            <p class="text-sm font-semibold text-slate-500">Mempersiapkan Ujian...</p>
+            <!-- Skeleton Card 2 -->
+            <div class="bg-white rounded-[1.5rem] shadow-sm border border-slate-100 overflow-hidden opacity-60">
+                <div class="h-1.5 w-full bg-slate-100"></div>
+                <div class="p-6">
+                    <div class="w-24 h-5 skeleton mb-4"></div>
+                    <div class="w-full h-7 skeleton mb-3"></div>
+                </div>
+                <div class="p-6 pt-0 border-t border-slate-50 mt-4">
+                    <div class="w-full h-12 skeleton rounded-xl"></div>
+                </div>
+            </div>
         </div>
 
         <!-- State: Error -->
@@ -344,6 +384,7 @@
         }
 
         async function fetchData() {
+            // Tampilkan Skeleton Loading (loadingState)
             elLoading.classList.remove('hidden');
             elError.classList.add('hidden');
             elEmpty.classList.add('hidden');
@@ -354,7 +395,7 @@
             try {
                 let data = [];
                 if (USE_DUMMY_DATA) {
-                    await new Promise(r => setTimeout(r, 800));
+                    await new Promise(r => setTimeout(r, 1200)); // Simulasi load sedikit lebih lama untuk pamer skeleton
                     const todayCurrent = new Date();
                     let activeStart = new Date(todayCurrent.getTime() - (1000 * 60 * 30));
                     let activeEnd = new Date(todayCurrent.getTime() + (1000 * 60 * 90));
@@ -371,7 +412,17 @@
                     const response = await fetch(URL_API);
                     if (!response.ok) throw new Error("Gagal");
                     data = await response.json();
+
+                    // PROTEKSI SIBUK: Jika server mengembalikan flag retry (karena lock antrean penuh)
+                    if (data.retryAlert) {
+                        setAppStatus('sync');
+                        console.warn("Server sibuk, mencoba sinkronisasi otomatis dalam 3 detik...");
+                        setTimeout(fetchData, 3000);
+                        return;
+                    }
                 }
+
+                if (data.error) throw new Error(data.message);
 
                 examsBank = data.map(item => ({
                     ...item,
@@ -386,6 +437,7 @@
                 setAppStatus('error');
                 elLoading.classList.add('hidden');
                 elError.classList.remove('hidden');
+                document.getElementById('errorMessage').innerText = err.message || "Gagal menghubungi peladen sekolah.";
             }
         }
 
@@ -446,7 +498,7 @@
                             </div>
                             
                             ${isActiveStr ? `
-                                <button onclick="openTokenModal('${exam.id}', '${exam.nama}')" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold text-[14px] rounded-xl shadow-[0_6px_20px_rgba(79,70,229,0.25)] transition-all flex justify-center items-center gap-2">
+                                <button onclick="openTokenModal('${exam.id}', '${exam.nama}')" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold text-[14px] rounded-xl shadow-[0_6px_20_rgba(79,70,229,0.25)] transition-all flex justify-center items-center gap-2">
                                     <span>KERJAKAN SEKARANG</span>
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
                                 </button>
@@ -461,19 +513,19 @@
                 elList.insertAdjacentHTML('beforeend', cardHtml);
             });
 
+            // Sembunyikan Skeleton & Tampilkan Konten Asli
             elLoading.classList.add('hidden');
-
             if (validExamsCount === 0) {
                 elEmpty.classList.remove('hidden');
-                elEmpty.classList.add('flex');
+                elList.classList.add('hidden');
             } else {
+                elEmpty.classList.add('hidden');
                 elList.classList.remove('hidden');
                 elList.classList.add('flex');
             }
         }
 
         function startCountdowns() {
-            if (countdownTimer) clearInterval(countdownTimer);
             countdownTimer = setInterval(() => {
                 const now = new Date();
 
