@@ -3,15 +3,13 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Spensada Exam</title>
 
     <!-- PWA Setup -->
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#1E40AF">
-    <link rel="apple-touch-icon"
-        href="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png">
+    <link rel="apple-touch-icon" href="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
@@ -22,8 +20,7 @@
     <!-- Google Fonts: Plus Jakarta Sans for premium feel -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <style>
         /* Base Styles & Typography */
@@ -32,8 +29,7 @@
             -webkit-user-select: none;
             user-select: none;
             -webkit-touch-callout: none;
-            background-color: #f1f5f9;
-            /* Soft slate background */
+            background-color: #f1f5f9; /* Soft slate background */
             -webkit-font-smoothing: antialiased;
         }
 
@@ -42,150 +38,67 @@
             -webkit-user-select: auto;
             user-select: auto;
         }
-
         input[type="text"] {
-            font-size: 16px;
-            /* Prevent iOS zoom */
+            font-size: 16px; /* Prevent iOS zoom */
         }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 0px;
-        }
-
-        /* Clean, no scrollbar like mobile apps */
+        ::-webkit-scrollbar { width: 0px; } /* Clean, no scrollbar like mobile apps */
 
         /* Animations */
-        .fade-in {
-            animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
+        .fade-in { animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Loader Animation */
-        .loader-dots div {
-            animation-timing-function: cubic-bezier(0, 1, 1, 0);
-        }
-
-        .loader-dots div:nth-child(1) {
-            left: 8px;
-            animation: loader-dots1 0.6s infinite;
-        }
-
-        .loader-dots div:nth-child(2) {
-            left: 8px;
-            animation: loader-dots2 0.6s infinite;
-        }
-
-        .loader-dots div:nth-child(3) {
-            left: 32px;
-            animation: loader-dots2 0.6s infinite;
-        }
-
-        .loader-dots div:nth-child(4) {
-            left: 56px;
-            animation: loader-dots3 0.6s infinite;
-        }
-
-        @keyframes loader-dots1 {
-            0% {
-                transform: scale(0);
-            }
-
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        @keyframes loader-dots3 {
-            0% {
-                transform: scale(1);
-            }
-
-            100% {
-                transform: scale(0);
-            }
-        }
-
-        @keyframes loader-dots2 {
-            0% {
-                transform: translate(0, 0);
-            }
-
-            100% {
-                transform: translate(24px, 0);
-            }
-        }
+        .loader-dots div { animation-timing-function: cubic-bezier(0, 1, 1, 0); }
+        .loader-dots div:nth-child(1) { left: 8px; animation: loader-dots1 0.6s infinite; }
+        .loader-dots div:nth-child(2) { left: 8px; animation: loader-dots2 0.6s infinite; }
+        .loader-dots div:nth-child(3) { left: 32px; animation: loader-dots2 0.6s infinite; }
+        .loader-dots div:nth-child(4) { left: 56px; animation: loader-dots3 0.6s infinite; }
+        @keyframes loader-dots1 { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        @keyframes loader-dots3 { 0% { transform: scale(1); } 100% { transform: scale(0); } }
+        @keyframes loader-dots2 { 0% { transform: translate(0, 0); } 100% { transform: translate(24px, 0); } }
     </style>
 </head>
 
 <body class="text-slate-800 min-h-screen relative overflow-x-hidden">
 
     <!-- PWA Install Gatecade -->
-    <div id="pwaInstallGate"
-        class="fixed inset-0 z-[99999] bg-slate-50 flex flex-col items-center justify-center p-6 text-center transform transition-all duration-300">
-        <div
-            class="w-24 h-24 bg-white border border-slate-200 rounded-[2rem] shadow-xl flex items-center justify-center mb-8 relative overflow-hidden transform hover:scale-105 transition-all">
+    <div id="pwaInstallGate" class="fixed inset-0 z-[99999] bg-slate-50 flex flex-col items-center justify-center p-6 text-center transform transition-all duration-300">
+        <div class="w-24 h-24 bg-white border border-slate-200 rounded-[2rem] shadow-xl flex items-center justify-center mb-8 relative overflow-hidden transform hover:scale-105 transition-all">
             <div class="absolute inset-0 bg-blue-100/30 blur-xl"></div>
-            <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" alt="Logo"
-                class="w-16 h-16 object-contain relative z-10 drop-shadow-sm">
+            <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" alt="Logo" class="w-16 h-16 object-contain relative z-10 drop-shadow-sm">
         </div>
         <h2 class="text-[22px] font-extrabold text-slate-800 mb-2 tracking-tight">Pasang Aplikasi Ujian</h2>
-        <p class="text-[13px] text-slate-500 font-medium mb-8 max-w-xs leading-relaxed px-4">Sistem ujian dilindungi.
-            Akses dari browser langsung telah diblokir. Wajib menginstall Aplikasi CBT Spensada di Perangkat Anda.</p>
-
+        <p class="text-[13px] text-slate-500 font-medium mb-8 max-w-xs leading-relaxed px-4">Sistem ujian dilindungi. Akses dari browser langsung telah diblokir. Wajib menginstall Aplikasi CBT Spensada di Perangkat Anda.</p>
+        
         <div id="pwaAndroidWrapper" class="w-full max-w-xs flex flex-col gap-3">
-            <button id="pwaInstallBtn"
-                class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[15px] font-bold rounded-[1.25rem] shadow-[0_8px_20px_rgba(79,70,229,0.25)] active:scale-95 transition-transform flex items-center justify-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
+            <button id="pwaInstallBtn" class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[15px] font-bold rounded-[1.25rem] shadow-[0_8px_20px_rgba(79,70,229,0.25)] active:scale-95 transition-transform flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                 Install Aplikasi Sekarang
             </button>
             <p class="text-[11px] text-slate-400 mt-2 font-semibold">Instalasi Otomatis (Android/Windows)</p>
         </div>
 
-        <div id="pwaManualWrapper"
-            class="hidden w-full max-w-sm flex-col items-center bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mt-4 fade-in">
-            <p id="pwaManualTitle"
-                class="text-[12px] font-extrabold text-indigo-500 mb-5 uppercase tracking-[0.1em] text-center w-full">
-                Panduan Instalasi Manual</p>
+        <div id="pwaManualWrapper" class="hidden w-full max-w-sm flex-col items-center bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mt-4 fade-in">
+            <p id="pwaManualTitle" class="text-[12px] font-extrabold text-indigo-500 mb-5 uppercase tracking-[0.1em] text-center w-full">Panduan Instalasi Manual</p>
             <div class="flex items-start gap-4 mb-4 text-left w-full">
-                <div
-                    class="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0 mt-0.5">
-                    1</div>
-                <p id="pwaManualStep1" class="text-[13px] text-slate-600 font-medium leading-normal">Tekan Ikon navigasi
-                    browser Anda (Misal: <strong class="text-slate-800">Tiga Titik ⋮</strong> di pojok kanan atas).</p>
+                <div class="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0 mt-0.5">1</div>
+                <p id="pwaManualStep1" class="text-[13px] text-slate-600 font-medium leading-normal">Tekan Ikon navigasi browser Anda (Misal: <strong class="text-slate-800">Tiga Titik ⋮</strong> di pojok kanan atas).</p>
             </div>
             <div class="flex items-start gap-4 text-left w-full">
-                <div
-                    class="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0 mt-0.5">
-                    2</div>
-                <p id="pwaManualStep2" class="text-[13px] text-slate-600 font-medium leading-normal">Pilih menu <span
-                        class="text-slate-800 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold whitespace-nowrap mt-2 inline-block">Tambahkan
-                        ke Layar Utama</span> atau <span
-                        class="text-slate-800 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold whitespace-nowrap mt-2 inline-block">Install
-                        Aplikasi</span>.</p>
+                <div class="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0 mt-0.5">2</div>
+                <p id="pwaManualStep2" class="text-[13px] text-slate-600 font-medium leading-normal">Pilih menu <span class="text-slate-800 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold whitespace-nowrap mt-2 inline-block">Tambahkan ke Layar Utama</span> atau <span class="text-slate-800 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold whitespace-nowrap mt-2 inline-block">Install Aplikasi</span>.</p>
             </div>
         </div>
 
     </div>
 
     <!-- Top App Background (Curved Header Background) -->
-    <div
-        class="fixed top-0 left-0 w-full h-[280px] bg-gradient-to-br from-[#1E40AF] via-[#3730A3] to-[#312E81] rounded-b-[2.5rem] shadow-xl z-[-1] overflow-hidden">
+    <div class="fixed top-0 left-0 w-full h-[280px] bg-gradient-to-br from-[#1E40AF] via-[#3730A3] to-[#312E81] rounded-b-[2.5rem] shadow-xl z-[-1] overflow-hidden">
         <!-- Abstract Decorations behind header -->
         <div class="absolute -top-10 -right-10 w-48 h-48 bg-white opacity-[0.07] rounded-full blur-2xl"></div>
         <div class="absolute top-20 -left-10 w-32 h-32 bg-white opacity-[0.05] rounded-full blur-xl"></div>
@@ -195,24 +108,18 @@
     <!-- Header Navigation -->
     <header class="w-full max-w-md mx-auto pt-8 px-6 pb-2 flex items-center justify-between">
         <div class="flex items-center gap-3.5">
-            <div
-                class="bg-white/10 p-1.5 rounded-[0.9rem] backdrop-blur-md border border-white/20 shadow-[0_4px_15px_rgba(0,0,0,0.1)] flex-shrink-0 relative overflow-hidden">
+            <div class="bg-white/10 p-1.5 rounded-[0.9rem] backdrop-blur-md border border-white/20 shadow-[0_4px_15px_rgba(0,0,0,0.1)] flex-shrink-0 relative overflow-hidden">
                 <div class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent"></div>
-                <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png"
-                    alt="Logo"
-                    class="w-10 h-10 object-contain drop-shadow-md relative z-10 transition-transform duration-300 hover:scale-105"
-                    onerror="this.style.display='none'">
+                <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" alt="Logo" class="w-10 h-10 object-contain drop-shadow-md relative z-10 transition-transform duration-300 hover:scale-105" onerror="this.style.display='none'">
             </div>
             <div class="flex flex-col">
                 <h1 class="text-[22px] font-extrabold text-white tracking-tight leading-tight">Spensada Exam</h1>
-                <p class="text-[11px] text-indigo-100 font-medium opacity-90 mt-0.5 tracking-wide">Sistem Ujian Mobile
-                </p>
+                <p class="text-[11px] text-indigo-100 font-medium opacity-90 mt-0.5 tracking-wide">Sistem Ujian Mobile</p>
             </div>
         </div>
-
+        
         <div id="statusBadge" class="flex flex-col items-end opacity-90 transition-all duration-300">
-            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-sm"
-                id="statusContainer">
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-sm" id="statusContainer">
                 <div class="w-2 h-2 rounded-full bg-slate-300" id="statusDot"></div>
                 <span class="text-[9px] font-bold text-white uppercase tracking-wider" id="statusText">Offline</span>
             </div>
@@ -223,30 +130,21 @@
     <main class="max-w-md w-full mx-auto px-5 pt-6 pb-12 flex flex-col relative z-10">
 
         <!-- Info Card (Overlapping header) -->
-        <div
-            class="bg-white rounded-[1.25rem] p-4 shadow-[0_8px_30px_rgb(0,0,0,0.06)] mb-8 flex flex-col items-center justify-center border border-slate-100 transform transition-transform hover:scale-[1.01]">
+        <div class="bg-white rounded-[1.25rem] p-4 shadow-[0_8px_30px_rgb(0,0,0,0.06)] mb-8 flex flex-col items-center justify-center border border-slate-100 transform transition-transform hover:scale-[1.01]">
             <div class="flex items-center gap-1.5 mb-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-indigo-500" fill="none"
-                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <p class="text-[10px] font-extrabold text-indigo-600 uppercase tracking-[0.15em]">ASAS/ASAT T.A
-                    2025/2026</p>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                <p class="text-[10px] font-extrabold text-indigo-600 uppercase tracking-[0.15em]">ASAS/ASAT T.A 2025/2026</p>
             </div>
             <div class="flex items-center gap-2 mt-0.5">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <p class="text-[15px] font-bold text-slate-700" id="serverTimeText">--:--:--</p>
             </div>
         </div>
 
         <!-- State: Loading -->
-        <div id="loadingState"
-            class="flex flex-col items-center justify-center py-20 gap-5 fade-in bg-white/60 backdrop-blur-sm rounded-[2rem] border border-white">
+        <div id="loadingState" class="flex flex-col items-center justify-center py-20 gap-5 fade-in bg-white/60 backdrop-blur-sm rounded-[2rem] border border-white">
             <div class="loader-dots relative w-20 h-5">
                 <div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-600"></div>
                 <div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-600"></div>
@@ -257,44 +155,31 @@
         </div>
 
         <!-- State: Error -->
-        <div id="errorState"
-            class="hidden flex-col items-center justify-center py-12 px-6 bg-white rounded-[2rem] text-center fade-in border border-rose-100 shadow-[0_8px_30px_rgba(225,29,72,0.06)]">
-            <div
-                class="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 mb-4 shadow-inner">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        <div id="errorState" class="hidden flex-col items-center justify-center py-12 px-6 bg-white rounded-[2rem] text-center fade-in border border-rose-100 shadow-[0_8px_30px_rgba(225,29,72,0.06)]">
+            <div class="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 mb-4 shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
             </div>
             <h3 class="text-xl font-extrabold text-slate-800 mb-1">Jaringan Terputus</h3>
             <p class="text-sm text-slate-500 mb-6 px-2" id="errorMessage">Gagal menghubungi peladen sekolah.</p>
-            <button onclick="fetchData()"
-                class="w-full py-3.5 bg-slate-800 hover:bg-slate-900 active:scale-[0.98] text-white font-bold rounded-[1rem] transition-all shadow-md focus:outline-none">
+            <button onclick="fetchData()" class="w-full py-3.5 bg-slate-800 hover:bg-slate-900 active:scale-[0.98] text-white font-bold rounded-[1rem] transition-all shadow-md focus:outline-none">
                 Coba Sinkronisasi Ulang
             </button>
         </div>
 
         <!-- State: Empty -->
-        <div id="emptyState"
-            class="hidden flex-col items-center justify-center py-16 px-6 bg-white rounded-[2rem] text-center fade-in shadow-sm border border-slate-100">
-            <div
-                class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-5 shadow-inner">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-200" fill="none"
-                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        <div id="emptyState" class="hidden flex-col items-center justify-center py-16 px-6 bg-white rounded-[2rem] text-center fade-in shadow-sm border border-slate-100">
+            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-5 shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
             </div>
             <h3 class="text-[18px] font-extrabold text-slate-800 mb-1">Belum Tersedia</h3>
-            <p class="text-sm text-slate-500 mb-5 px-1 leading-relaxed">Tidak ada jadwal aktif saat ini. Menunggu
-                intruksi proktor.</p>
-            <button onclick="fetchData()"
-                class="flex items-center justify-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-600 font-bold text-xs rounded-full hover:bg-indigo-100 transition-colors shadow-sm active:scale-95">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            <p class="text-sm text-slate-500 mb-5 px-1 leading-relaxed">Tidak ada jadwal aktif saat ini. Menunggu intruksi proktor.</p>
+            <button onclick="fetchData()" class="flex items-center justify-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-600 font-bold text-xs rounded-full hover:bg-indigo-100 transition-colors shadow-sm active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
                 Perbarui Data
             </button>
@@ -309,15 +194,12 @@
     </main>
 
     <!-- Token Modal (Bottom Sheet style) -->
-    <div id="tokenModal"
-        class="hidden fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all duration-300"
-        style="opacity: 0;">
+    <div id="tokenModal" class="hidden fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all duration-300" style="opacity: 0;">
         <!-- Backdrop Blur -->
         <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeTokenModal()"></div>
-
+        
         <!-- Modal Content -->
-        <div class="bg-white relative rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden transform translate-y-full sm:translate-y-0 sm:scale-95 transition-transform duration-300"
-            id="tokenModalContent">
+        <div class="bg-white relative rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden transform translate-y-full sm:translate-y-0 sm:scale-95 transition-transform duration-300" id="tokenModalContent">
 
             <!-- Drag Handle (Mobile) -->
             <div class="w-full flex justify-center pt-4 pb-2 sm:hidden absolute top-0 z-10 pointer-events-none">
@@ -325,47 +207,34 @@
             </div>
 
             <div class="p-8 pt-10 sm:pt-8 pb-5 flex flex-col items-center text-center">
-                <div
-                    class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-4 border border-indigo-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor" stroke-width="2.2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-4 border border-indigo-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                 </div>
                 <h3 class="text-xl font-extrabold text-slate-800 tracking-tight">KODE UJIAN</h3>
-                <p class="text-sm text-slate-500 font-semibold mt-1 truncate w-full px-4" id="modalExamName">Nama Ujian
-                </p>
+                <p class="text-sm text-slate-500 font-semibold mt-1 truncate w-full px-4" id="modalExamName">Nama Ujian</p>
             </div>
 
             <div class="px-8 pb-6">
                 <div class="relative group">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <svg class="h-6 w-6 text-indigo-300 group-focus-within:text-indigo-500 transition-colors"
-                            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
+                        <svg class="h-6 w-6 text-indigo-300 group-focus-within:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                     </div>
-                    <input type="text" id="tokenInput"
-                        class="w-full bg-slate-50 border-2 border-slate-200/80 rounded-2xl pl-12 pr-4 py-4 font-mono text-center text-2xl font-black text-indigo-700 tracking-[0.2em] focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 transition-all uppercase placeholder:tracking-normal placeholder:font-bold placeholder:text-slate-300 placeholder:text-[15px]"
-                        placeholder="KODE AKSES" autocomplete="off" spellcheck="false" maxlength="10">
+                    <input type="text" id="tokenInput" class="w-full bg-slate-50 border-2 border-slate-200/80 rounded-2xl pl-12 pr-4 py-4 font-mono text-center text-2xl font-black text-indigo-700 tracking-[0.2em] focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 transition-all uppercase placeholder:tracking-normal placeholder:font-bold placeholder:text-slate-300 placeholder:text-[15px]" placeholder="KODE AKSES" autocomplete="off" spellcheck="false" maxlength="10">
                 </div>
                 <div id="tokenError" class="mt-3 hidden animate-pulse">
-                    <div
-                        class="flex items-center justify-center gap-1.5 bg-rose-50 text-rose-600 px-3 py-2 rounded-xl border border-rose-100 shadow-sm">
+                    <div class="flex items-center justify-center gap-1.5 bg-rose-50 text-rose-600 px-3 py-2 rounded-xl border border-rose-100 shadow-sm">
                         <p class="text-xs font-bold">Kode salah, silakan cek ulang.</p>
                     </div>
                 </div>
             </div>
 
             <div class="p-6 bg-slate-50 border-t border-slate-100 flex gap-3 pb-8 sm:pb-6">
-                <button onclick="closeTokenModal()"
-                    class="flex-[0.8] px-4 py-3.5 text-slate-500 bg-white border border-slate-300 rounded-[1rem] font-bold hover:bg-slate-50 active:scale-[0.98] transition-all focus:outline-none shadow-sm">
+                <button onclick="closeTokenModal()" class="flex-[0.8] px-4 py-3.5 text-slate-500 bg-white border border-slate-300 rounded-[1rem] font-bold hover:bg-slate-50 active:scale-[0.98] transition-all focus:outline-none shadow-sm">
                     Kembali
                 </button>
-                <button onclick="submitToken()"
-                    class="flex-[1.2] px-4 py-3.5 text-white bg-indigo-600 border border-transparent rounded-[1rem] font-bold hover:bg-indigo-700 shadow-[0_4px_10px_rgba(79,70,229,0.2)] active:scale-[0.98] transition-all focus:outline-none">
+                <button onclick="submitToken()" class="flex-[1.2] px-4 py-3.5 text-white bg-indigo-600 border border-transparent rounded-[1rem] font-bold hover:bg-indigo-700 shadow-[0_4px_10px_rgba(79,70,229,0.2)] active:scale-[0.98] transition-all focus:outline-none">
                     Mulai
                 </button>
             </div>
@@ -438,7 +307,7 @@
             const m = Math.floor((diffMs / 1000 / 60) % 60);
             const s = Math.floor((diffMs / 1000) % 60);
             if (h > 0) return `${h}j ${m}m ${s}d`;
-            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
         }
 
         function updateClock() {
@@ -523,7 +392,7 @@
         function processAndRenderExams() {
             const now = new Date();
             let validExamsCount = 0;
-            secureLinks = {};
+            secureLinks = {}; 
             elList.innerHTML = '';
 
             examsBank.forEach(exam => {
@@ -533,7 +402,7 @@
                 const isActiveStr = now >= exam.startObj && now <= exam.endObj;
                 const isFinishedStr = now > exam.endObj;
 
-                if (isFinishedStr) return;
+                if (isFinishedStr) return; 
 
                 validExamsCount++;
                 secureLinks[exam.id] = exam.link;
@@ -573,7 +442,7 @@
                                     ${isActiveStr ? '<svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' : '<svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>'}
                                     <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">${isActiveStr ? 'WAKTU TERSISA:' : 'DIBUKA DALAM:'}</span>
                                 </div>
-                                <span class="text-sm font-black ${isActiveStr ? 'text-rose-500' : 'text-slate-500'} font-mono bg-white px-3 py-1.5 rounded-lg shadow-sm border border-slate-100/80 tracking-wider" id="${isActiveStr ? 'countdown-' + exam.id : 'countdown-start-' + exam.id}">--:--:--</span>
+                                <span class="text-sm font-black ${isActiveStr ? 'text-rose-500' : 'text-slate-500'} font-mono bg-white px-3 py-1.5 rounded-lg shadow-sm border border-slate-100/80 tracking-wider" id="${isActiveStr ? 'countdown-'+exam.id : 'countdown-start-'+exam.id}">--:--:--</span>
                             </div>
                             
                             ${isActiveStr ? `
@@ -723,10 +592,10 @@
         }
 
         function exitKioskMode() {
-            if (confirm("YAKIN INGIN KELUAR DARI UJIAN? Jika belum menekan tombol Submit/Kirim, jawaban Anda mungkin hilang!")) {
+            if(confirm("YAKIN INGIN KELUAR DARI UJIAN? Jika belum menekan tombol Submit/Kirim, jawaban Anda mungkin hilang!")) {
                 exitFullscreenLock();
                 const kiosk = document.getElementById('kioskContainer');
-                if (kiosk) kiosk.remove();
+                if(kiosk) kiosk.remove();
                 kioskExamId = null;
                 document.body.style.overflow = "auto";
                 fetchData();
@@ -736,7 +605,7 @@
         function executeSecureRedirect(examId) {
             const link = secureLinks[examId];
             const examInfo = examsBank.find(e => e.id === examId);
-
+            
             if (!link || !examInfo) {
                 alert("Link ujian tidak ditemukan atau sesi invalid.");
                 fetchData();
@@ -768,7 +637,7 @@
                     </div>
                 </div>
             `;
-
+            
             document.body.insertAdjacentHTML('beforeend', kioskHtml);
             requestFullscreenLock();
         }
@@ -796,7 +665,7 @@
             const iosStandalone = window.navigator.standalone === true;
             const urlStandalone = new URLSearchParams(window.location.search).get('mode') === 'standalone';
             const sessionBypass = sessionStorage.getItem('pwa_bypass') === '1';
-
+            
             const isStandalone = mediaStandalone || iosStandalone || urlStandalone || sessionBypass;
 
             const gate = document.getElementById('pwaInstallGate');
@@ -809,17 +678,17 @@
                     if (bypassBtn) bypassBtn.style.display = 'block';
                 }, 3000);
             }
-
+            
             if (isStandalone) {
                 if (gate) gate.remove();
                 initApp();
             } else {
                 // Lock screen on Install UI
                 document.body.style.overflow = "hidden";
-
+                
                 const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
                 const isMacSafari = /Macintosh/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
-
+                
                 const showManualIos = () => {
                     document.getElementById('pwaAndroidWrapper').classList.add('hidden');
                     document.getElementById('pwaAndroidWrapper').classList.remove('flex');
@@ -838,7 +707,7 @@
                     document.getElementById('pwaAndroidWrapper').classList.remove('flex');
                     document.getElementById('pwaManualWrapper').classList.remove('hidden');
                     document.getElementById('pwaManualWrapper').classList.add('flex');
-
+                    
                     if (isPC) {
                         document.getElementById('pwaManualTitle').innerText = "Panduan Windows / PC";
                         document.getElementById('pwaManualStep1').innerHTML = 'Periksa kolom ketik alamat web (URL Bar) di paling atas layar.';
@@ -855,7 +724,7 @@
                     }
                 };
 
-                if (isIos || isMacSafari) {
+                if(isIos || isMacSafari) {
                     showManualIos();
                 }
 
@@ -901,5 +770,4 @@
 
     </script>
 </body>
-
 </html>
