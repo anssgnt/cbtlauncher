@@ -696,6 +696,7 @@
                 };
 
                 const isPC = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                const isWebView = /(wv|WhatsApp|Instagram|Line|FBAN|FBAV|BytedanceWebview)/i.test(navigator.userAgent);
 
                 const showManualFallback = () => {
                     document.getElementById('pwaAndroidWrapper').classList.add('hidden');
@@ -707,8 +708,15 @@
                         document.getElementById('pwaManualTitle').innerText = "Panduan Windows / PC";
                         document.getElementById('pwaManualStep1').innerHTML = 'Periksa kolom ketik alamat web (URL Bar) di paling atas layar.';
                         document.getElementById('pwaManualStep2').innerHTML = 'Klik Ikon <strong class="text-slate-800">Layar 🖥️⬇️</strong> yang muncul, lalu pilih <span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold whitespace-nowrap mt-2 inline-block">Install</span>.<br><br><span class="text-[10px] text-slate-400 font-normal">*Jika sudah pernah install, tutup browser ini & cari Spensada via Start Menu / Ikon Desktop.</span>';
+                    } else if (isWebView) {
+                        document.getElementById('pwaManualTitle').innerText = "Buka di Browser Asli";
+                        document.getElementById('pwaManualTitle').classList.replace('text-indigo-500', 'text-rose-500');
+                        document.getElementById('pwaManualStep1').innerHTML = 'Anda sedang membuka Ujian di dalam WhatsApp/Sosmed yang memblokir proses sistem.';
+                        document.getElementById('pwaManualStep2').innerHTML = 'Silakan tekan <strong class="text-slate-800">Tiga Titik ⋮</strong> di pojok kanan atas, lalu pilih <span class="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold whitespace-nowrap mt-2 inline-block">Buka di Chrome</span> / Browser Asli.';
                     } else {
                         document.getElementById('pwaManualTitle').innerText = "Mohon Gunakan Install Manual";
+                        document.getElementById('pwaManualStep1').innerHTML = 'Tekan Ikon navigasi browser Anda (Misal: <strong class="text-slate-800">Tiga Titik ⋮</strong> di pojok kanan atas).';
+                        document.getElementById('pwaManualStep2').innerHTML = 'Pilih menu <span class="text-slate-800 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold whitespace-nowrap mt-2 inline-block">Tambahkan ke Layar Utama</span>.<br><br><span class="text-[10px] text-rose-500 font-semibold block mt-1 leading-tight tracking-tight">*Jika opsi tidak terlihat, Cache Browser error. Hapus history Anda & Segarkan ulang halaman ini.</span>';
                     }
                 };
 
