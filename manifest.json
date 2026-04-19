@@ -1,0 +1,18 @@
+{
+  "name": "Spensada Exam",
+  "short_name": "Spensada CBT",
+  "description": "Sistem Ujian Mobile Sekolah Spensada",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#1E40AF",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
