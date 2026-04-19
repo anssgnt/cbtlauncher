@@ -83,15 +83,15 @@
             <p class="text-[11px] text-slate-400 mt-2 font-semibold">Instalasi Otomatis (Android/Windows)</p>
         </div>
 
-        <div id="pwaIosWrapper" class="hidden w-full max-w-sm flex-col items-center bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mt-4">
-            <p class="text-[12px] font-extrabold text-indigo-500 mb-5 uppercase tracking-[0.1em] text-center w-full">Panduan Pengguna Apple (iPhone/iPad)</p>
-            <div class="flex items-start gap-4 mb-5 text-left w-full">
+        <div id="pwaManualWrapper" class="hidden w-full max-w-sm flex-col items-center bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mt-4 fade-in">
+            <p id="pwaManualTitle" class="text-[12px] font-extrabold text-indigo-500 mb-5 uppercase tracking-[0.1em] text-center w-full">Panduan Instalasi Manual</p>
+            <div class="flex items-start gap-4 mb-4 text-left w-full">
                 <div class="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0 mt-0.5">1</div>
-                <p class="text-[13px] text-slate-600 font-medium leading-normal">Tekan Ikon <strong class="text-blue-600">Share</strong> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg> di menu navigasi bawah Safari Anda.</p>
+                <p id="pwaManualStep1" class="text-[13px] text-slate-600 font-medium leading-normal">Tekan Ikon navigasi browser Anda (Misal: <strong class="text-slate-800">Tiga Titik ⋮</strong> di pojok kanan atas).</p>
             </div>
             <div class="flex items-start gap-4 text-left w-full">
                 <div class="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0 mt-0.5">2</div>
-                <p class="text-[13px] text-slate-600 font-medium leading-normal">Gulir ke bawah dan pilih <span class="text-slate-800 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold whitespace-nowrap mt-2 inline-block">Add to Home Screen</span></p>
+                <p id="pwaManualStep2" class="text-[13px] text-slate-600 font-medium leading-normal">Pilih menu <span class="text-slate-800 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold whitespace-nowrap mt-2 inline-block">Tambahkan ke Layar Utama</span> atau <span class="text-slate-800 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold whitespace-nowrap mt-2 inline-block">Install Aplikasi</span>.</p>
             </div>
         </div>
     </div>
@@ -683,11 +683,26 @@
                 const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
                 const isMacSafari = /Macintosh/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
                 
-                if(isIos || isMacSafari) {
+                const showManualIos = () => {
                     document.getElementById('pwaAndroidWrapper').classList.add('hidden');
                     document.getElementById('pwaAndroidWrapper').classList.remove('flex');
-                    document.getElementById('pwaIosWrapper').classList.remove('hidden');
-                    document.getElementById('pwaIosWrapper').classList.add('flex');
+                    document.getElementById('pwaManualWrapper').classList.remove('hidden');
+                    document.getElementById('pwaManualWrapper').classList.add('flex');
+                    document.getElementById('pwaManualTitle').innerText = "Panduan Khusus Apple (iOS)";
+                    document.getElementById('pwaManualStep1').innerHTML = 'Tekan Ikon <strong class="text-blue-600">Share</strong> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg> di menu terbawah Browser Safari Anda.';
+                    document.getElementById('pwaManualStep2').innerHTML = 'Gulir ke bawah dan pilih <span class="text-slate-800 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold whitespace-nowrap mt-2 inline-block">Add to Home Screen</span>';
+                };
+
+                const showManualAndroid = () => {
+                    document.getElementById('pwaAndroidWrapper').classList.add('hidden');
+                    document.getElementById('pwaAndroidWrapper').classList.remove('flex');
+                    document.getElementById('pwaManualWrapper').classList.remove('hidden');
+                    document.getElementById('pwaManualWrapper').classList.add('flex');
+                    document.getElementById('pwaManualTitle').innerText = "Mohon Gunakan Install Manual";
+                };
+
+                if(isIos || isMacSafari) {
+                    showManualIos();
                 }
 
                 document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
@@ -696,7 +711,7 @@
                         const { outcome } = await deferredPrompt.userChoice;
                         deferredPrompt = null;
                     } else {
-                        alert("Browser Anda memerlukan Instalasi Manual: Silakan buka opsi/menu browser (Tiga Titik) lalu pilih 'Install Aplikasi' atau 'Tambahkan ke Layar Utama'.");
+                        showManualAndroid();
                     }
                 });
             }
