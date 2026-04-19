@@ -90,16 +90,16 @@
 <body class="text-slate-800 min-h-screen relative overflow-x-hidden">
 
     <!-- PWA Install Gatecade -->
-   <div id="pwaInstallGate" class="hidden fixed inset-0 z-[99999] bg-slate-50 flex flex-col items-center justify-center">
-        <div class="w-24 h-24 bg-white border border-slate-200 rounded-[2rem] shadow-xl flex items-center justify-center mb-8 relative overflow-hidden transform hover:scale-105 transition-all">
+    <div id="pwaInstallGate" class="fixed inset-0 z-[99999] bg-slate-50 flex flex-col items-center justify-center p-6 text-center transform transition-all duration-300">
+        <div class="w-20 h-20 sm:w-24 sm:h-24 bg-white border border-slate-200 rounded-[1.5rem] sm:rounded-[2rem] shadow-xl flex items-center justify-center mb-6 sm:mb-8 relative overflow-hidden transform hover:scale-105 transition-all">
             <div class="absolute inset-0 bg-blue-100/30 blur-xl"></div>
-            <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" alt="Logo" class="w-16 h-16 object-contain relative z-10 drop-shadow-sm">
+            <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" alt="Logo" class="w-12 h-12 sm:w-16 sm:h-16 object-contain relative z-10 drop-shadow-sm">
         </div>
-        <h2 class="text-[22px] font-extrabold text-slate-800 mb-2 tracking-tight">Pasang Aplikasi Ujian</h2>
-        <p class="text-[13px] text-slate-500 font-medium mb-8 max-w-xs leading-relaxed px-4">Sistem ujian dilindungi. Akses dari browser langsung telah diblokir. Wajib menginstall Aplikasi CBT Spensada di Perangkat Anda.</p>
+        <h2 class="text-[20px] sm:text-[22px] font-extrabold text-slate-800 mb-1.5 tracking-tight">Pasang Aplikasi Ujian</h2>
+        <p class="text-[12px] sm:text-[13px] text-slate-500 font-medium mb-6 sm:mb-8 max-w-xs leading-relaxed px-2 sm:px-4">Sistem ujian dilindungi. Akses dari browser langsung telah diblokir. Wajib menginstall Aplikasi CBT Spensada di Perangkat Anda.</p>
         
         <div id="pwaAndroidWrapper" class="w-full max-w-xs flex flex-col gap-3">
-            <button id="pwaInstallBtn" class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[15px] font-bold rounded-[1.25rem] shadow-[0_8px_20px_rgba(79,70,229,0.25)] active:scale-95 transition-transform flex items-center justify-center gap-2">
+            <button id="pwaInstallBtn" class="w-full py-3.5 sm:py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[14px] sm:text-[15px] font-bold rounded-[1.25rem] shadow-[0_8px_20px_rgba(79,70,229,0.25)] active:scale-95 transition-transform flex items-center justify-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                 Install Aplikasi Sekarang
             </button>
@@ -121,7 +121,7 @@
     </div>
 
     <!-- Top App Background (Curved Header Background) -->
-    <div class="fixed top-0 left-0 w-full h-[280px] bg-gradient-to-br from-[#1E40AF] via-[#3730A3] to-[#312E81] rounded-b-[2.5rem] shadow-xl z-[-1] overflow-hidden">
+    <div class="fixed top-0 left-0 w-full h-[240px] sm:h-[280px] bg-gradient-to-br from-[#1E40AF] via-[#3730A3] to-[#312E81] rounded-b-[2.5rem] shadow-xl z-[-1] overflow-hidden">
         <!-- Abstract Decorations behind header -->
         <div class="absolute -top-10 -right-10 w-48 h-48 bg-white opacity-[0.07] rounded-full blur-2xl"></div>
         <div class="absolute top-20 -left-10 w-32 h-32 bg-white opacity-[0.05] rounded-full blur-xl"></div>
@@ -129,15 +129,15 @@
     </div>
 
     <!-- Header Navigation -->
-    <header class="w-full max-w-md mx-auto pt-8 px-6 pb-2 flex items-center justify-between">
-        <div class="flex items-center gap-3.5">
+    <header class="w-full max-w-md mx-auto pt-6 sm:pt-8 px-5 sm:px-6 pb-2 flex items-center justify-between">
+        <div class="flex items-center gap-3 sm:gap-3.5">
             <div class="bg-white/10 p-1.5 rounded-[0.9rem] backdrop-blur-md border border-white/20 shadow-[0_4px_15px_rgba(0,0,0,0.1)] flex-shrink-0 relative overflow-hidden">
                 <div class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent"></div>
-                <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" alt="Logo" class="w-10 h-10 object-contain drop-shadow-md relative z-10 transition-transform duration-300 hover:scale-105" onerror="this.style.display='none'">
+                <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" alt="Logo" class="w-9 h-9 sm:w-10 sm:h-10 object-contain drop-shadow-md relative z-10 transition-transform duration-300 hover:scale-105" onerror="this.style.display='none'">
             </div>
             <div class="flex flex-col">
-                <h1 class="text-[22px] font-extrabold text-white tracking-tight leading-tight">Spensada Exam</h1>
-                <p class="text-[11px] text-indigo-100 font-medium opacity-90 mt-0.5 tracking-wide">Sistem Ujian Mobile</p>
+                <h1 class="text-[20px] sm:text-[22px] font-extrabold text-white tracking-tight leading-tight">Spensada Exam</h1>
+                <p class="text-[10px] sm:text-[11px] text-indigo-100 font-medium opacity-90 mt-0.5 tracking-wide">Sistem Ujian Mobile</p>
             </div>
         </div>
         
@@ -150,11 +150,11 @@
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-md w-full mx-auto px-5 pt-6 pb-12 flex flex-col relative z-10">
+    <main class="max-w-md w-full mx-auto px-4 sm:px-5 pt-5 sm:pt-6 pb-12 flex flex-col relative z-10">
 
         <!-- Info Card (Overlapping header) -->
-        <div class="bg-white rounded-[1.25rem] p-4 shadow-[0_8px_30px_rgb(0,0,0,0.06)] mb-8 flex flex-col items-center justify-center border border-slate-100 transform transition-transform hover:scale-[1.01]">
-            <div class="flex items-center gap-1.5 mb-1.5">
+        <div class="bg-white rounded-[1.25rem] p-3.5 sm:p-4 shadow-[0_8px_30px_rgb(0,0,0,0.06)] mb-6 sm:mb-8 flex flex-col items-center justify-center border border-slate-100 transform transition-transform hover:scale-[1.01]">
+            <div class="flex items-center gap-1.5 mb-1 sm:mb-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                 <p class="text-[10px] font-extrabold text-indigo-600 uppercase tracking-[0.15em]">ASAS/ASAT T.A 2025/2026</p>
             </div>
@@ -314,84 +314,6 @@
 
     <!-- Application Script -->
     <script>
-
-        // =======================
-// PWA INSTALL SYSTEM FIX
-// =======================
-
-let deferredPrompt = null;
-
-// REGISTER SW
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(() => console.log("SW registered"))
-      .catch(err => console.log("SW failed", err));
-  });
-}
-
-// DETECT INSTALL PROMPT
-window.addEventListener('beforeinstallprompt', (e) => {
-  console.log("Install prompt ready");
-  e.preventDefault();
-  deferredPrompt = e;
-
-  // tampilkan tombol install
-  document.getElementById("pwaInstallBtn").style.display = "flex";
-});
-
-// INSTALL BUTTON CLICK
-document.getElementById("pwaInstallBtn").addEventListener("click", async () => {
-
-  if (!deferredPrompt) {
-    alert("Jika tombol tidak muncul:\nKlik ⋮ → Install App / Tambahkan ke layar utama");
-    return;
-  }
-
-  deferredPrompt.prompt();
-
-  const choice = await deferredPrompt.userChoice;
-
-  if (choice.outcome === 'accepted') {
-    console.log("User accepted install");
-  } else {
-    console.log("User dismissed install");
-  }
-
-  deferredPrompt = null;
-});
-
-// =======================
-// DELAY INSTALL GATE (PENTING)
-// =======================
-
-setTimeout(() => {
-  const isStandalone =
-    window.matchMedia('(display-mode: standalone)').matches ||
-    window.navigator.standalone === true;
-
-  if (!isStandalone) {
-    document.getElementById('pwaInstallGate').classList.remove('hidden');
-  }
-}, 4000);
-
-// =======================
-// USER ENGAGEMENT TRIGGER
-// =======================
-
-document.body.addEventListener('click', () => {
-  console.log("User engaged");
-}, { once: true });
-
-// =======================
-// DETEKSI WEBVIEW (WA/IG)
-// =======================
-
-const isWebView = /(wv|WhatsApp|Instagram|FBAN|FBAV|Line)/i.test(navigator.userAgent);
-
-if (isWebView) {
-  alert("⚠️ Buka di Chrome agar bisa install aplikasi");
-}
         /**
          * CUSTOM MODAL SYSTEM (Bypassing GAS Sandbox)
          */
@@ -740,22 +662,22 @@ if (isWebView) {
                         <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r ${isActiveStr ? 'from-indigo-500 to-blue-500' : 'from-slate-200 to-slate-200'} z-10"></div>
                         
                         <!-- Card Body (Info Area) -->
-                        <div class="p-6 pb-4 relative">
+                        <div class="p-5 sm:p-6 pb-3 sm:pb-4 relative">
                             ${isActiveStr ? '<div class="absolute -top-10 -right-10 w-32 h-32 bg-indigo-50 rounded-full blur-2xl z-0 pointer-events-none"></div>' : ''}
                             
-                            <div class="flex justify-between items-start mb-3 relative z-10">
+                            <div class="flex justify-between items-start mb-2 sm:mb-3 relative z-10">
                                 <div class="flex flex-col">
-                                    <div class="flex items-center gap-1.5 px-2.5 py-1.5 ${isActiveStr ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-100 text-slate-500'} rounded-lg inline-flex w-max mb-3">
+                                    <div class="flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 ${isActiveStr ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-100 text-slate-500'} rounded-lg inline-flex w-max mb-2.5 sm:mb-3">
                                         ${isActiveStr ? '<svg class="w-3.5 h-3.5 text-indigo-600 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>' : '<svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'}
-                                        <span class="text-[9px] font-extrabold uppercase tracking-[0.15em]">${isActiveStr ? 'ZONA AKTIF' : 'ZONA TERJADWAL'}</span>
+                                        <span class="text-[8px] sm:text-[9px] font-extrabold uppercase tracking-[0.15em]">${isActiveStr ? 'ZONA AKTIF' : 'ZONA TERJADWAL'}</span>
                                     </div>
-                                    <h3 class="text-[18px] font-extrabold text-slate-800 leading-snug tracking-tight pr-4">${exam.nama}</h3>
+                                    <h3 class="text-[16px] sm:text-[18px] font-extrabold text-slate-800 leading-snug tracking-tight pr-2 sm:pr-4">${exam.nama}</h3>
                                 </div>
                             </div>
                             
-                            <div class="flex items-center gap-2 text-slate-500 relative z-10 mb-1 mt-3">
-                                <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                <p class="text-[12px] font-semibold tracking-wide">
+                            <div class="flex items-center gap-2 text-slate-500 relative z-10 mb-1 mt-2 sm:mt-3">
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <p class="text-[11px] sm:text-[12px] font-semibold tracking-wide">
                                     <span class="text-indigo-600/80 font-bold">${formatDateIndo(exam.startObj)}</span>
                                     <span class="mx-1 opacity-30">|</span>
                                     ${exam.start.split(' ')[1]} — ${exam.end.split(' ')[1]}
@@ -764,23 +686,23 @@ if (isWebView) {
                         </div>
 
                         <!-- Card Footer (Action Area) -->
-                        <div class="${isActiveStr ? 'bg-indigo-50/30' : 'bg-slate-50/50'} p-6 pt-5 border-t border-slate-100 mt-auto flex flex-col gap-4 relative z-10">
+                        <div class="${isActiveStr ? 'bg-indigo-50/30' : 'bg-slate-50/50'} p-5 sm:p-6 pt-4 sm:pt-5 border-t border-slate-100 mt-auto flex flex-col gap-3 sm:gap-4 relative z-10">
                             
                             <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-1.5">
-                                    ${isActiveStr ? '<svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' : '<svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>'}
-                                    <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">${isActiveStr ? 'WAKTU TERSISA:' : 'DIBUKA DALAM:'}</span>
+                                <div class="flex items-center gap-1 sm:gap-1.5">
+                                    ${isActiveStr ? '<svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' : '<svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>'}
+                                    <span class="text-[9px] sm:text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">${isActiveStr ? 'WAKTU TERSISA:' : 'DIBUKA DALAM:'}</span>
                                 </div>
-                                <span class="text-sm font-black ${isActiveStr ? 'text-rose-500' : 'text-slate-500'} font-mono bg-white px-3 py-1.5 rounded-lg shadow-sm border border-slate-100/80 tracking-wider" id="${isActiveStr ? 'countdown-'+exam.id : 'countdown-start-'+exam.id}">--:--:--</span>
+                                <span class="text-[13px] sm:text-sm font-black ${isActiveStr ? 'text-rose-500' : 'text-slate-500'} font-mono bg-white px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg shadow-sm border border-slate-100/80 tracking-wider" id="${isActiveStr ? 'countdown-'+exam.id : 'countdown-start-'+exam.id}">--:--:--</span>
                             </div>
                             
                             ${isActiveStr ? `
-                                <button onclick="openTokenModal('${exam.id}', '${exam.nama}')" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold text-[14px] rounded-xl shadow-[0_6px_20_rgba(79,70,229,0.25)] transition-all flex justify-center items-center gap-2">
+                                <button onclick="openTokenModal('${exam.id}', '${exam.nama}')" class="w-full py-3.5 sm:py-4 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold text-[13px] sm:text-[14px] rounded-[0.85rem] sm:rounded-xl shadow-[0_6px_20_rgba(79,70,229,0.25)] transition-all flex justify-center items-center gap-2">
                                     <span>KERJAKAN SEKARANG</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
                                 </button>
                             ` : `
-                                <button disabled class="w-full py-4 bg-slate-200/80 text-slate-400 font-bold text-[14px] rounded-xl cursor-not-allowed border border-slate-200/50 shadow-inner">
+                                <button disabled class="w-full py-3.5 sm:py-4 bg-slate-200/80 text-slate-400 font-bold text-[13px] sm:text-[14px] rounded-[0.85rem] sm:rounded-xl cursor-not-allowed border border-slate-200/50 shadow-inner">
                                     BELUM DIBUKA
                                 </button>
                             `}
