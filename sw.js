@@ -1,9 +1,7 @@
 const CACHE_NAME = 'spensada-cbt-v1';
 const urlsToCache = [
   './index.html',
-  './manifest.json',
-  'https://cdn.tailwindcss.com',
-  'https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png'
+  './manifest.json'
 ];
 
 self.addEventListener('install', event => {
