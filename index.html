@@ -14,8 +14,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS (Pinned version for production) -->
+    <script src="https://cdn.tailwindcss.com/3.4.1"></script>
+    
+    <!-- Favicon Fix 404 -->
+    <link rel="icon" type="image/x-icon" href="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png">
 
     <!-- Google Fonts: Plus Jakarta Sans for premium feel -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -86,7 +89,38 @@
 
 <body class="text-slate-800 min-h-screen relative overflow-x-hidden">
 
-    <!-- App Background -->
+    <!-- PWA Install Gatecade -->
+    <div id="pwaInstallGate" class="fixed inset-0 z-[99999] bg-slate-50 flex flex-col items-center justify-center p-6 text-center transform transition-all duration-300">
+        <div class="w-24 h-24 bg-white border border-slate-200 rounded-[2rem] shadow-xl flex items-center justify-center mb-8 relative overflow-hidden transform hover:scale-105 transition-all">
+            <div class="absolute inset-0 bg-blue-100/30 blur-xl"></div>
+            <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" alt="Logo" class="w-16 h-16 object-contain relative z-10 drop-shadow-sm">
+        </div>
+        <h2 class="text-[22px] font-extrabold text-slate-800 mb-2 tracking-tight">Pasang Aplikasi Ujian</h2>
+        <p class="text-[13px] text-slate-500 font-medium mb-8 max-w-xs leading-relaxed px-4">Sistem ujian dilindungi. Akses dari browser langsung telah diblokir. Wajib menginstall Aplikasi CBT Spensada di Perangkat Anda.</p>
+        
+        <div id="pwaAndroidWrapper" class="w-full max-w-xs flex flex-col gap-3">
+            <button id="pwaInstallBtn" class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[15px] font-bold rounded-[1.25rem] shadow-[0_8px_20px_rgba(79,70,229,0.25)] active:scale-95 transition-transform flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                Install Aplikasi Sekarang
+            </button>
+            <p class="text-[11px] text-slate-400 mt-2 font-semibold">Instalasi Otomatis (Android/Windows)</p>
+        </div>
+
+        <div id="pwaManualWrapper" class="hidden w-full max-w-sm flex-col items-center bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mt-4 fade-in">
+            <p id="pwaManualTitle" class="text-[12px] font-extrabold text-indigo-500 mb-5 uppercase tracking-[0.1em] text-center w-full">Panduan Instalasi Manual</p>
+            <div class="flex items-start gap-4 mb-4 text-left w-full">
+                <div class="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0 mt-0.5">1</div>
+                <p id="pwaManualStep1" class="text-[13px] text-slate-600 font-medium leading-normal">Tekan Ikon navigasi browser Anda (Misal: <strong class="text-slate-800">Tiga Titik ⋮</strong> di pojok kanan atas).</p>
+            </div>
+            <div class="flex items-start gap-4 text-left w-full">
+                <div class="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0 mt-0.5">2</div>
+                <p id="pwaManualStep2" class="text-[13px] text-slate-600 font-medium leading-normal">Pilih menu <span class="text-slate-800 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold whitespace-nowrap mt-2 inline-block">Tambahkan ke Layar Utama</span> atau <span class="text-slate-800 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold whitespace-nowrap mt-2 inline-block">Install Aplikasi</span>.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Top App Background (Curved Header Background) -->
     <div class="fixed top-0 left-0 w-full h-[280px] bg-gradient-to-br from-[#1E40AF] via-[#3730A3] to-[#312E81] rounded-b-[2.5rem] shadow-xl z-[-1] overflow-hidden">
         <!-- Abstract Decorations behind header -->
         <div class="absolute -top-10 -right-10 w-48 h-48 bg-white opacity-[0.07] rounded-full blur-2xl"></div>
@@ -257,6 +291,7 @@
          */
         const URL_API = "https://script.google.com/macros/s/AKfycbwalO-HqOZpSYlOjBXl9stx3PzZUWrTadTJeojZ_AuMWFNrJk44vlozgXXEUiNO5Fugog/exec";
         const USE_DUMMY_DATA = false;
+        let PROCTOR_KEY = localStorage.getItem('last_proctor_key') || "2025"; // Sinkron via Spreadsheet
 
         // Data Management
         let examsBank = [];
@@ -393,7 +428,16 @@
 
                 if (data.error) throw new Error(data.message);
 
-                examsBank = data.map(item => ({
+                // Handle Object vs Array response (Backward Compatibility)
+                let examsArray = Array.isArray(data) ? data : (data.exams || []);
+                
+                // Sync Proctor Key from Config
+                if (data.config && data.config.proctorKey) {
+                    PROCTOR_KEY = data.config.proctorKey;
+                    localStorage.setItem('last_proctor_key', PROCTOR_KEY);
+                }
+
+                examsBank = examsArray.map(item => ({
                     ...item,
                     startObj: parseDate(item.start),
                     endObj: parseDate(item.end)
@@ -654,13 +698,153 @@
                              <div class="loader-dots relative w-20 h-5 mb-3"><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div></div>
                              <p class="text-xs text-slate-500 font-semibold tracking-wide">Menghubungkan Halaman Ujian...</p>
                         </div>
-                        <iframe src="${link}" class="w-full h-full border-none z-10 relative bg-transparent" allow="fullscreen" sandbox="allow-scripts allow-top-navigation allow-forms allow-same-origin allow-popups"></iframe>
+                        <iframe src="${link}" class="w-full h-full border-none z-10 relative bg-transparent" allow="fullscreen" sandbox="allow-scripts allow-top-navigation allow-forms allow-same-origin allow-popups allow-modals"></iframe>
                     </div>
                 </div>
             `;
             
             document.body.insertAdjacentHTML('beforeend', kioskHtml);
             requestFullscreenLock();
+        }
+
+        function setupPWAEnforcement() {
+            let deferredPrompt;
+
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('./sw.js').catch(err => console.error('SW Registration Failed:', err));
+                });
+            }
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+            });
+
+            // Multi-layer standalone detection:
+            // 1. CSS media query (most reliable)
+            // 2. iOS Safari native property  
+            // 3. URL param from manifest start_url
+            // 4. Window size heuristic (PWA app windows have no browser chrome overhead)
+            const mediaStandalone = window.matchMedia('(display-mode: standalone)').matches;
+            const iosStandalone = window.navigator.standalone === true;
+            const urlStandalone = new URLSearchParams(window.location.search).get('mode') === 'standalone';
+            const sessionBypass = sessionStorage.getItem('pwa_bypass') === '1';
+            const proctorBypass = localStorage.getItem('pwa_proctor_bypass') === 'true';
+            
+            const isStandalone = mediaStandalone || iosStandalone || urlStandalone || sessionBypass || proctorBypass;
+
+            const gate = document.getElementById('pwaInstallGate');
+            const isPC = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isMacSafari = /Macintosh/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+            const isWebView = /(wv|WhatsApp|Instagram|Line|FBAN|FBAV|BytedanceWebview)/i.test(navigator.userAgent);
+
+            // Helper: show manual install guide panel
+            function showManualPanel(title, step1, step2, titleColor) {
+                document.getElementById('pwaAndroidWrapper').classList.add('hidden');
+                document.getElementById('pwaAndroidWrapper').classList.remove('flex');
+                document.getElementById('pwaManualWrapper').classList.remove('hidden');
+                document.getElementById('pwaManualWrapper').classList.add('flex');
+                const titleEl = document.getElementById('pwaManualTitle');
+                titleEl.innerText = title;
+                if (titleColor) titleEl.style.color = titleColor;
+                document.getElementById('pwaManualStep1').innerHTML = step1;
+                document.getElementById('pwaManualStep2').innerHTML = step2;
+            }
+
+            function showManualFallback() {
+                if (isIos || isMacSafari) {
+                    showManualPanel(
+                        "Panduan Khusus Apple (iOS)",
+                        'Tekan Ikon <strong class="text-blue-600">Share</strong> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg> di menu terbawah Browser Safari.',
+                        'Gulir ke bawah dan pilih <span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold">Add to Home Screen</span>'
+                    );
+                } else if (isWebView) {
+                    showManualPanel(
+                        "Buka di Browser Asli",
+                        'Anda membuka Ujian dari dalam WhatsApp/Sosmed yang memblokir instalasi.',
+                        'Tekan <strong>Tiga Titik ⋮</strong> pojok kanan atas, lalu pilih <span class="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold">Buka di Chrome</span>.',
+                        '#e11d48'
+                    );
+                } else {
+                    showManualPanel(
+                        "Mohon Install Manual",
+                        'Tekan Ikon <strong>Tiga Titik ⋮</strong> di pojok kanan atas browser Anda.',
+                        'Pilih <span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold">Tambahkan ke Layar Utama</span> atau <span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold">Install Aplikasi</span>.'
+                    );
+                }
+            }
+
+            // Chrome Windows bug: display-mode:standalone sometimes returns false even in PWA window
+            const noBrowserChrome = isPC && (window.outerHeight > 0) && (Math.abs(window.outerHeight - window.innerHeight) < 80);
+            const isStandaloneApp = isStandalone || noBrowserChrome;
+
+            if (isStandaloneApp) {
+                // ✅ Running as standalone / PWA - enter app
+                if (gate) gate.remove();
+                initApp();
+            } else {
+                // Not standalone - show install gate
+                document.body.style.overflow = "hidden";
+                
+                // Show bypass button universally after 3 seconds as safety net for all bugged Chrome apps
+                setTimeout(() => {
+                    const bypassBtn = document.getElementById('pwaBypassBtn');
+                    if (bypassBtn) bypassBtn.style.display = 'block';
+                }, 3000);
+
+                if (isPC) {
+                    showManualFallback();
+                } else if (isIos || isMacSafari) {
+                    showManualFallback();
+                }
+
+                document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        deferredPrompt = null;
+                    } else {
+                        showManualFallback();
+                    }
+                });
+
+                // PROCTOR SECRET BYPASS: Tap logo 5x to enter proctor mode
+                let logoTaps = 0;
+                let tapTimer;
+                const gateLogo = document.querySelector('#pwaInstallGate img');
+                if (gateLogo) {
+                    gateLogo.style.cursor = 'pointer';
+                    gateLogo.addEventListener('click', () => {
+                        logoTaps++;
+                        clearTimeout(tapTimer);
+                        tapTimer = setTimeout(() => { logoTaps = 0; }, 2000); // Reset taps after 2s of inactivity
+
+                        if (logoTaps >= 5) {
+                            logoTaps = 0;
+                            const input = prompt("MASUKKAN KODE OTORISASI PENGAWAS:");
+                            if (input === PROCTOR_KEY) {
+                                localStorage.setItem('pwa_proctor_bypass', 'true');
+                                alert("OTORISASI BERHASIL. Mode Pengawas diaktifkan untuk perangkat ini.");
+                                if (gate) gate.remove();
+                                initApp();
+                            } else if (input !== null) {
+                                alert("KODE SALAH.");
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        function bypassAndEnter() {
+            // User confirms they already installed. Save flag to sessionStorage and bypass gate.
+            sessionStorage.setItem('pwa_bypass', '1');
+            const gate = document.getElementById('pwaInstallGate');
+            if (gate) gate.remove();
+            document.body.style.overflow = '';
+            initApp();
         }
 
         function initApp() {
@@ -678,14 +862,7 @@
             startCountdowns();
         }
 
-        // Service Worker Silent Registration for PWA Support
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(err => console.error('SW Registration Failed:', err));
-            });
-        }
-
-        window.addEventListener('DOMContentLoaded', initApp);
+        window.addEventListener('DOMContentLoaded', setupPWAEnforcement);
 
 
 
