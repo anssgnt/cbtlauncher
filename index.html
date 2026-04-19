@@ -431,6 +431,10 @@
         let refreshIntervalTimer = null;
         let countdownTimer = null;
         let clockTimer = null;
+        let healthTimer = null; // Timer for device stats
+        let wakeLock = null;
+        let violationCount = 0;
+        let isLeavingKiosk = false;
 
         // DOM Elements
         const elLoading = document.getElementById('loadingState');
@@ -847,6 +851,9 @@
                 );
 
                 if(isConfirmed) {
+                    isLeavingKiosk = true; // Flag to prevent violation modal during exit
+                    stopDeviceMonitoring();
+                    releaseWakeLock();
                     exitFullscreenLock();
                     const kiosk = document.getElementById('kioskContainer');
                     if(kiosk) {
@@ -886,7 +893,22 @@
                 <div id="kioskContainer" class="fixed inset-0 z-[10000] bg-slate-50 flex flex-col h-[100dvh] w-[100dvw] transition-opacity duration-300">
                     <div class="bg-slate-900 border-b border-white/10 text-white px-4 py-3 flex justify-between items-center shadow-xl relative z-[10001]">
                         <div class="flex items-center gap-3 overflow-hidden flex-1">
-                            <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse hidden sm:block flex-shrink-0"></div>
+                            <div class="flex items-center gap-1.5 bg-black/40 border border-white/5 py-1 px-2.5 rounded-xl">
+                                <div class="flex items-center gap-1.5 pr-2 border-r border-white/10">
+                                    <div class="w-3.5 h-3.5 flex items-center justify-center text-emerald-400" id="kioskBatteryIcon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M20,10V14H22V10H20M18,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H18A1,1 0 0,0 19,17V7A1,1 0 0,0 18,6Z" /></svg>
+                                    </div>
+                                    <span class="text-[10px] font-black font-mono text-white/90" id="kioskBatteryText">--%</span>
+                                </div>
+                                <div class="pl-0.5 flex items-center gap-1">
+                                    <div class="flex items-end gap-0.5 h-2.5" id="kioskSignalIcon">
+                                        <div class="w-0.5 h-1 bg-white/20 rounded-full"></div>
+                                        <div class="w-0.5 h-1.5 bg-white/20 rounded-full"></div>
+                                        <div class="w-0.5 h-2 bg-white/20 rounded-full"></div>
+                                        <div class="w-0.5 h-2.5 bg-white/20 rounded-full"></div>
+                                    </div>
+                                </div>
+                            </div>
                             <span class="font-bold text-xs sm:text-[14px] text-slate-200 truncate mr-1 tracking-wide opacity-90">${examInfo.nama}</span>
                             <span class="bg-black/50 border border-white/10 px-2.5 py-1 rounded-xl text-xs font-mono font-black tracking-widest text-emerald-400 whitespace-nowrap shadow-inner" id="kioskTimer">--:--</span>
                         </div>
@@ -906,6 +928,91 @@
             
             document.body.insertAdjacentHTML('beforeend', kioskHtml);
             requestFullscreenLock();
+            
+            // Activate Security & Health Monitoring
+            violationCount = 0;
+            isLeavingKiosk = false;
+            startDeviceMonitoring();
+            setupAntiCheat();
+            requestWakeLock();
+        }
+
+        /**
+         * ANTI-CHEAT & DEVICE HEALTH LOGIC
+         */
+        async function startDeviceMonitoring() {
+            const updateStats = async () => {
+                if (isLeavingKiosk) return;
+                
+                // Update Battery
+                try {
+                    if (navigator.getBattery) {
+                        const battery = await navigator.getBattery();
+                        const level = Math.round(battery.level * 100);
+                        const elText = document.getElementById('kioskBatteryText');
+                        const elIcon = document.getElementById('kioskBatteryIcon');
+                        if (elText) elText.innerText = level + '%';
+                        if (elIcon) elIcon.style.color = level < 20 ? '#fb7185' : (level < 50 ? '#fbbf24' : '#34d399');
+                    }
+                } catch (e) {}
+
+                // Update Network/Signal
+                const elSignal = document.getElementById('kioskSignalIcon');
+                if (elSignal) {
+                    const bars = elSignal.children;
+                    const isOnline = navigator.onLine;
+                    for (let i = 0; i < bars.length; i++) {
+                        bars[i].className = `w-0.5 rounded-full ${isOnline ? 'bg-emerald-400' : 'bg-white/20'}`;
+                        bars[i].style.height = (1 + i * 0.5) * 4 + 'px';
+                    }
+                }
+            };
+            
+            updateStats();
+            healthTimer = setInterval(updateStats, 10000);
+        }
+
+        function stopDeviceMonitoring() {
+            if (healthTimer) clearInterval(healthTimer);
+        }
+
+        function setupAntiCheat() {
+            const handleViolation = async () => {
+                if (isLeavingKiosk || !kioskExamId) return;
+                
+                violationCount++;
+                await CustomModal.alert(
+                    `Peringatan Pelanggaran #${violationCount}!\n\nAnda dilarang keluar dari aplikasi atau membuka aplikasi lain selama ujian berlangsung. Aktivitas Anda telah dicatat oleh sistem.`,
+                    "DETEKSI KECURANGAN"
+                );
+                
+                // Re-lock if possible
+                requestFullscreenLock();
+            };
+
+            window.addEventListener('blur', handleViolation);
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') handleViolation();
+            });
+        }
+
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Screen Wake Lock active');
+                }
+            } catch (err) {
+                console.warn(`${err.name}, ${err.message}`);
+            }
+        }
+
+        function releaseWakeLock() {
+            if (wakeLock !== null) {
+                wakeLock.release().then(() => {
+                    wakeLock = null;
+                });
+            }
         }
 
         function setupPWAEnforcement() {
