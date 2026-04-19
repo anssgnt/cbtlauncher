@@ -284,12 +284,137 @@
         </div>
     </div>
 
+    <!-- Custom Universal Modal (Alert/Confirm/Prompt) -->
+    <div id="customModal" class="hidden fixed inset-0 z-[1000] flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all duration-300" style="opacity: 0;">
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" id="customModalBackdrop"></div>
+        <div class="bg-white relative rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden transform translate-y-full sm:translate-y-0 sm:scale-95 transition-transform duration-300" id="customModalContent">
+            <div class="w-full flex justify-center pt-4 pb-2 sm:hidden absolute top-0 z-10 pointer-events-none">
+                <div class="w-10 h-1.5 bg-slate-200 rounded-full"></div>
+            </div>
+            <div class="p-8 pt-10 sm:pt-8 pb-5 flex flex-col items-center text-center">
+                <div id="customModalIcon" class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-4 border border-indigo-100">
+                </div>
+                <h3 id="customModalTitle" class="text-xl font-extrabold text-slate-800 tracking-tight">TITLE</h3>
+                <p id="customModalMessage" class="text-sm text-slate-500 font-medium mt-2 px-4 leading-relaxed">Message goes here.</p>
+            </div>
+            <div id="customModalInputWrapper" class="px-8 pb-6 hidden">
+                <input type="text" id="customModalInput" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3.5 font-bold text-slate-700 focus:outline-none focus:border-indigo-500 transition-all text-center uppercase" placeholder="...">
+            </div>
+            <div class="p-6 bg-slate-50 border-t border-slate-100 flex gap-3 pb-8 sm:pb-6">
+                <button id="customModalCancelBtn" class="hidden flex-1 px-4 py-3.5 text-slate-500 bg-white border border-slate-300 rounded-[1rem] font-bold hover:bg-slate-50 active:scale-[0.98] transition-all focus:outline-none shadow-sm">
+                    Batal
+                </button>
+                <button id="customModalConfirmBtn" class="flex-1 px-4 py-3.5 text-white bg-indigo-600 border border-transparent rounded-[1rem] font-bold hover:bg-indigo-700 shadow-[0_4px_10px_rgba(79,70,229,0.25)] active:scale-[0.98] transition-all focus:outline-none">
+                    OKE
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Application Script -->
     <script>
         /**
+         * CUSTOM MODAL SYSTEM (Bypassing GAS Sandbox)
+         */
+        const CustomModal = {
+            get el() { return document.getElementById('customModal'); },
+            get content() { return document.getElementById('customModalContent'); },
+            get title() { return document.getElementById('customModalTitle'); },
+            get message() { return document.getElementById('customModalMessage'); },
+            get inputWrapper() { return document.getElementById('customModalInputWrapper'); },
+            get input() { return document.getElementById('customModalInput'); },
+            get confirmBtn() { return document.getElementById('customModalConfirmBtn'); },
+            get cancelBtn() { return document.getElementById('customModalCancelBtn'); },
+            get icon() { return document.getElementById('customModalIcon'); },
+            
+            show(options) {
+                return new Promise((resolve) => {
+                    this.title.innerText = options.title || 'Informasi';
+                    this.message.innerText = options.message || '';
+                    this.confirmBtn.innerText = options.confirmText || 'OKE';
+                    this.cancelBtn.innerText = options.cancelText || 'Batal';
+                    this.input.value = '';
+                    
+                    if (options.showInput) {
+                        this.inputWrapper.classList.remove('hidden');
+                        if (options.placeholder) this.input.placeholder = options.placeholder;
+                    } else {
+                        this.inputWrapper.classList.add('hidden');
+                    }
+                    
+                    if (options.showCancel) {
+                        this.cancelBtn.classList.remove('hidden');
+                    } else {
+                        this.cancelBtn.classList.add('hidden');
+                    }
+
+                    // Icon setup
+                    let iconHtml = '';
+                    if (options.type === 'confirm') {
+                        iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+                        this.icon.className = "w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mb-4 border border-amber-100";
+                    } else if (options.type === 'prompt') {
+                        iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>';
+                        this.icon.className = "w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-4 border border-indigo-100";
+                    } else {
+                        iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+                        this.icon.className = "w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-4 border border-blue-100";
+                    }
+                    this.icon.innerHTML = iconHtml;
+
+                    this.el.classList.remove('hidden');
+                    setTimeout(() => {
+                        this.el.style.opacity = '1';
+                        this.content.classList.remove('translate-y-full', 'sm:scale-95');
+                        this.content.classList.add('translate-y-0', 'sm:scale-100');
+                        if (options.showInput) this.input.focus();
+                    }, 10);
+
+                    const handleConfirm = () => {
+                        cleanup();
+                        resolve(options.showInput ? this.input.value : true);
+                    };
+                    const handleCancel = () => {
+                        cleanup();
+                        resolve(options.showInput ? null : false);
+                    };
+                    const cleanup = () => {
+                        this.confirmBtn.removeEventListener('click', handleConfirm);
+                        this.cancelBtn.removeEventListener('click', handleCancel);
+                        this.hide();
+                    };
+
+                    this.confirmBtn.addEventListener('click', handleConfirm);
+                    this.cancelBtn.addEventListener('click', handleCancel);
+                });
+            },
+            
+            hide() {
+                this.el.style.opacity = '0';
+                this.content.classList.remove('translate-y-0', 'sm:scale-100');
+                this.content.classList.add('translate-y-full', 'sm:scale-95');
+                setTimeout(() => {
+                    this.el.classList.add('hidden');
+                }, 300);
+            },
+
+            alert(message, title = 'Informasi') {
+                return this.show({ type: 'alert', title, message, showCancel: false, confirmText: 'OKE' });
+            },
+
+            confirm(message, title = 'Konfirmasi') {
+                return this.show({ type: 'confirm', title, message, showCancel: true, confirmText: 'YA', cancelText: 'TIDAK' });
+            },
+
+            prompt(message, placeholder = '', title = 'Input') {
+                return this.show({ type: 'prompt', title, message, showInput: true, showCancel: true, placeholder, confirmText: 'LANJUT', cancelText: 'BATAL' });
+            }
+        };
+
+        /**
          * KONFIGURASI API
          */
-        const URL_API = "https://script.google.com/macros/s/AKfycbw22O-pntupGvPiC7i6q0O4_kATa9nGM_hoWM4jo4WW5nRY2-hSKLBpVAOWGhqLutY2Rw/exec";
+        const URL_API = "https://script.google.com/macros/s/AKfycbwalO-HqOZpSYlOjBXl9stx3PzZUWrTadTJeojZ_AuMWFNrJk44vlozgXXEUiNO5Fugog/exec";
         const USE_DUMMY_DATA = false;
         let PROCTOR_KEY = localStorage.getItem('last_proctor_key') || "2025"; // Sinkron via Spreadsheet
 
@@ -656,8 +781,8 @@
             }
         }
 
-        function exitKioskMode() {
-            if(confirm("YAKIN INGIN KELUAR DARI UJIAN? Jika belum menekan tombol Submit/Kirim, jawaban Anda mungkin hilang!")) {
+        async function exitKioskMode() {
+            if(await CustomModal.confirm("YAKIN INGIN KELUAR DARI UJIAN? Jika belum menekan tombol Submit/Kirim, jawaban Anda mungkin hilang!")) {
                 exitFullscreenLock();
                 const kiosk = document.getElementById('kioskContainer');
                 if(kiosk) kiosk.remove();
@@ -667,12 +792,12 @@
             }
         }
 
-        function executeSecureRedirect(examId) {
+        async function executeSecureRedirect(examId) {
             const link = secureLinks[examId];
             const examInfo = examsBank.find(e => e.id === examId);
             
             if (!link || !examInfo) {
-                alert("Link ujian tidak ditemukan atau sesi invalid.");
+                await CustomModal.alert("Link ujian tidak ditemukan atau sesi invalid.", "Gagal");
                 fetchData();
                 return;
             }
@@ -816,21 +941,21 @@
                 const gateLogo = document.querySelector('#pwaInstallGate img');
                 if (gateLogo) {
                     gateLogo.style.cursor = 'pointer';
-                    gateLogo.addEventListener('click', () => {
+                    gateLogo.addEventListener('click', async () => {
                         logoTaps++;
                         clearTimeout(tapTimer);
                         tapTimer = setTimeout(() => { logoTaps = 0; }, 2000); // Reset taps after 2s of inactivity
 
                         if (logoTaps >= 5) {
                             logoTaps = 0;
-                            const input = prompt("MASUKKAN KODE OTORISASI PENGAWAS:");
+                            const input = await CustomModal.prompt("MASUKKAN KODE OTORISASI PENGAWAS:", "KODE PENGAWAS");
                             if (input === PROCTOR_KEY) {
                                 localStorage.setItem('pwa_proctor_bypass', 'true');
-                                alert("OTORISASI BERHASIL. Mode Pengawas diaktifkan untuk perangkat ini.");
+                                await CustomModal.alert("OTORISASI BERHASIL. Mode Pengawas diaktifkan untuk perangkat ini.", "Sukses");
                                 if (gate) gate.remove();
                                 initApp();
                             } else if (input !== null) {
-                                alert("KODE SALAH.");
+                                await CustomModal.alert("KODE SALAH.", "Otorisasi Gagal");
                             }
                         }
                     });
