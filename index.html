@@ -980,20 +980,22 @@
             const handleViolation = async () => {
                 if (isLeavingKiosk || !kioskExamId) return;
                 
-                violationCount++;
-                await CustomModal.alert(
-                    `Peringatan Pelanggaran #${violationCount}!\n\nAnda dilarang keluar dari aplikasi atau membuka aplikasi lain selama ujian berlangsung. Aktivitas Anda telah dicatat oleh sistem.`,
-                    "DETEKSI KECURANGAN"
-                );
-                
-                // Re-lock if possible
-                requestFullscreenLock();
+                // Hanya picu jika aplikasi benar-benar tidak terlihat (keluar tab/app)
+                if (document.visibilityState === 'hidden') {
+                    violationCount++;
+                    await CustomModal.alert(
+                        `Peringatan Pelanggaran #${violationCount}!\n\nAnda dilarang keluar dari aplikasi atau membuka aplikasi lain selama ujian berlangsung. Aktivitas Anda telah dicatat oleh sistem.`,
+                        "DETEKSI KECURANGAN"
+                    );
+                    
+                    // Re-lock jika memungkinkan
+                    requestFullscreenLock();
+                }
             };
 
-            window.addEventListener('blur', handleViolation);
-            document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'hidden') handleViolation();
-            });
+            // Gunakan visibilitychange sebagai standar deteksi yang paling akurat
+            // 'blur' sengaja dilepas karena memicu alarm palsu saat keyboard muncul atau klik di dalam iframe
+            document.addEventListener('visibilitychange', handleViolation);
         }
 
         async function requestWakeLock() {
