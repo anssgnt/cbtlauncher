@@ -206,7 +206,8 @@
             </div>
             <h3 class="text-xl font-extrabold text-slate-800 mb-1">Jaringan Terputus</h3>
             <p class="text-sm text-slate-500 mb-6 px-2" id="errorMessage">Gagal menghubungi peladen sekolah.</p>
-            <button onclick="fetchData()" class="w-full py-3.5 bg-slate-800 hover:bg-slate-900 active:scale-[0.98] text-white font-bold rounded-[1rem] transition-all shadow-md focus:outline-none">
+            <button onclick="fetchData(true)" class="w-full py-3.5 bg-slate-800 hover:bg-slate-900 active:scale-[0.98] text-white font-bold rounded-[1rem] transition-all shadow-md focus:outline-none flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                 Coba Sinkronisasi Ulang
             </button>
         </div>
@@ -220,11 +221,11 @@
             </div>
             <h3 class="text-[18px] font-extrabold text-slate-800 mb-1">Belum Tersedia</h3>
             <p class="text-sm text-slate-500 mb-5 px-1 leading-relaxed">Tidak ada jadwal aktif saat ini. Menunggu intruksi proktor.</p>
-            <button onclick="fetchData()" class="flex items-center justify-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-600 font-bold text-xs rounded-full hover:bg-indigo-100 transition-colors shadow-sm active:scale-95">
+            <button onclick="fetchData(true)" id="manualRefreshBtn" class="flex items-center justify-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-600 font-bold text-xs rounded-full hover:bg-indigo-100 transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                Perbarui Data
+                <span id="refreshBtnText">Perbarui Data</span>
             </button>
         </div>
 
@@ -524,71 +525,111 @@
             }
         }
 
-        async function fetchData() {
-            // Tampilkan Skeleton Loading (loadingState)
-            elLoading.classList.remove('hidden');
+        async function fetchData(force = false) {
+            const now = Date.now();
+            const lastSync = parseInt(localStorage.getItem('last_sync_timestamp') || 0);
+            const cachedData = localStorage.getItem('cached_exams_data');
+            const COOLDOWN_MS = 10000; // 10 Detik Throttling
+
+            const btn = document.getElementById('manualRefreshBtn');
+            const btnText = document.getElementById('refreshBtnText');
+
+            // Tampilkan Skeleton Loading awal (hanya jika tidak ada cache)
+            if (!cachedData) {
+                elLoading.classList.remove('hidden');
+            }
             elError.classList.add('hidden');
             elEmpty.classList.add('hidden');
-            elList.classList.add('hidden');
-            elList.innerHTML = '';
+            
+            // ANTI-SPAM LOGIC: Jika baru saja sync, jangan tembak server lagi
+            if (!force && cachedData && (now - lastSync < COOLDOWN_MS)) {
+                console.info("Anti-Spam: Menggunakan cache lokal (Data masih segar).");
+                setAppStatus('online');
+                const data = JSON.parse(cachedData);
+                processFetchedData(data);
+                return;
+            }
+
+            if (force && btn) {
+                btn.disabled = true;
+                if (btnText) btnText.innerText = "Memperbarui...";
+            }
+
             setAppStatus('sync');
 
             try {
                 let data = [];
                 if (USE_DUMMY_DATA) {
-                    await new Promise(r => setTimeout(r, 1200)); // Simulasi load sedikit lebih lama untuk pamer skeleton
+                    await new Promise(r => setTimeout(r, 800)); 
                     const todayCurrent = new Date();
-                    let activeStart = new Date(todayCurrent.getTime() - (1000 * 60 * 30));
-                    let activeEnd = new Date(todayCurrent.getTime() + (1000 * 60 * 90));
-                    let upcomingStart = new Date(todayCurrent.getTime() + (1000 * 60 * 120));
-                    let upcomingEnd = new Date(todayCurrent.getTime() + (1000 * 60 * 240));
-
                     const formatForJSON = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-
-                    data = [
-                        { "id": "1", "nama": "Matematika X - Semester 1", "link": "https://forms.gle/demo1", "start": formatForJSON(activeStart), "end": formatForJSON(activeEnd), "status": "aktif", "token": "MATH10" },
-                        { "id": "2", "nama": "Bahasa Indonesia X", "link": "https://forms.gle/demo2", "start": formatForJSON(upcomingStart), "end": formatForJSON(upcomingEnd), "status": "aktif", "token": "INDO10" }
-                    ];
+                    data = {
+                        exams: [
+                            { "id": "1", "nama": "Matematika X - Semester 1", "link": "https://forms.gle/demo1", "start": formatForJSON(new Date(todayCurrent.getTime() - 1800000)), "end": formatForJSON(new Date(todayCurrent.getTime() + 5400000)), "status": "aktif", "token": "MATH10" },
+                            { "id": "2", "nama": "Bahasa Indonesia X", "link": "https://forms.gle/demo2", "start": formatForJSON(new Date(todayCurrent.getTime() + 7200000)), "end": formatForJSON(new Date(todayCurrent.getTime() + 14400000)), "status": "aktif", "token": "INDO10" }
+                        ],
+                        config: { proctorKey: PROCTOR_KEY }
+                    };
                 } else {
                     const response = await fetch(URL_API);
-                    if (!response.ok) throw new Error("Gagal");
+                    if (!response.ok) throw new Error("Gagal terhubung ke server.");
                     data = await response.json();
 
-                    // PROTEKSI SIBUK: Jika server mengembalikan flag retry (karena lock antrean penuh)
                     if (data.retryAlert) {
                         setAppStatus('sync');
-                        console.warn("Server sibuk, mencoba sinkronisasi otomatis dalam 3 detik...");
-                        setTimeout(fetchData, 3000);
+                        setTimeout(() => fetchData(true), 3000);
                         return;
                     }
                 }
 
                 if (data.error) throw new Error(data.message);
 
-                // Handle Object vs Array response (Backward Compatibility)
-                let examsArray = Array.isArray(data) ? data : (data.exams || []);
-                
-                // Sync Proctor Key from Config
-                if (data.config && data.config.proctorKey) {
-                    PROCTOR_KEY = data.config.proctorKey;
-                    localStorage.setItem('last_proctor_key', PROCTOR_KEY);
-                }
+                // Update Cache
+                localStorage.setItem('cached_exams_data', JSON.stringify(data));
+                localStorage.setItem('last_sync_timestamp', now.toString());
 
-                examsBank = examsArray.map(item => ({
-                    ...item,
-                    startObj: parseDate(item.start),
-                    endObj: parseDate(item.end)
-                }));
-
+                processFetchedData(data);
                 setAppStatus('online');
-                processAndRenderExams();
 
             } catch (err) {
+                console.error(err);
                 setAppStatus('error');
-                elLoading.classList.add('hidden');
-                elError.classList.remove('hidden');
-                document.getElementById('errorMessage').innerText = err.message || "Gagal menghubungi peladen sekolah.";
+                
+                // Jika error tapi ada cache, gunakan cache sebagai fallback darurat
+                if (cachedData) {
+                    console.warn("Server Error: Menggunakan data cache sebagai fallback.");
+                    processFetchedData(JSON.parse(cachedData));
+                } else {
+                    elLoading.classList.add('hidden');
+                    elError.classList.remove('hidden');
+                    document.getElementById('errorMessage').innerText = err.message || "Gagal menghubungi peladen sekolah.";
+                }
+            } finally {
+                if (btn) {
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        if (btnText) btnText.innerText = "Perbarui Data";
+                    }, 2000);
+                }
             }
+        }
+
+        // Fungsi Helper untuk memproses data hasil fetch/cache
+        function processFetchedData(data) {
+            let examsArray = Array.isArray(data) ? data : (data.exams || []);
+            
+            if (data.config && data.config.proctorKey) {
+                PROCTOR_KEY = data.config.proctorKey;
+                localStorage.setItem('last_proctor_key', PROCTOR_KEY);
+            }
+
+            examsBank = examsArray.map(item => ({
+                ...item,
+                startObj: parseDate(item.start),
+                endObj: parseDate(item.end)
+            }));
+
+            processAndRenderExams();
         }
 
         function processAndRenderExams() {
