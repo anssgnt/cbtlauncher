@@ -61,7 +61,11 @@ self.addEventListener('fetch', event => {
          // Optionally cache new requests, tp jangan cache sembarangan
          return networkResponse;
       }).catch(() => {
-          // Fallback offline murni
+          // Fallback offline murni agar lulus PWA validation Chrome PC
+          return new Response(
+            "<!DOCTYPE html><html><body><h1>Sistem Ujian Offline</h1><p>Penyimpanan lokal diaktifkan. Silakan periksa koneksi internet Anda.</p></body></html>",
+            { headers: { 'Content-Type': 'text/html' } }
+          );
       });
     })
   );
