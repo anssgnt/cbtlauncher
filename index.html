@@ -693,12 +693,21 @@
                     document.getElementById('pwaManualStep2').innerHTML = 'Gulir ke bawah dan pilih <span class="text-slate-800 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold whitespace-nowrap mt-2 inline-block">Add to Home Screen</span>';
                 };
 
-                const showManualAndroid = () => {
+                const isPC = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+                const showManualFallback = () => {
                     document.getElementById('pwaAndroidWrapper').classList.add('hidden');
                     document.getElementById('pwaAndroidWrapper').classList.remove('flex');
                     document.getElementById('pwaManualWrapper').classList.remove('hidden');
                     document.getElementById('pwaManualWrapper').classList.add('flex');
-                    document.getElementById('pwaManualTitle').innerText = "Mohon Gunakan Install Manual";
+                    
+                    if (isPC) {
+                        document.getElementById('pwaManualTitle').innerText = "Panduan Windows / PC";
+                        document.getElementById('pwaManualStep1').innerHTML = 'Periksa kolom ketik alamat web (URL Bar) di paling atas layar.';
+                        document.getElementById('pwaManualStep2').innerHTML = 'Klik Ikon <strong class="text-slate-800">Layar 🖥️⬇️</strong> yang muncul, lalu pilih <span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold whitespace-nowrap mt-2 inline-block">Install</span>.<br><br><span class="text-[10px] text-slate-400 font-normal">*Jika sudah pernah install, tutup browser ini & cari Spensada via Start Menu / Ikon Desktop.</span>';
+                    } else {
+                        document.getElementById('pwaManualTitle').innerText = "Mohon Gunakan Install Manual";
+                    }
                 };
 
                 if(isIos || isMacSafari) {
@@ -711,7 +720,7 @@
                         const { outcome } = await deferredPrompt.userChoice;
                         deferredPrompt = null;
                     } else {
-                        showManualAndroid();
+                        showManualFallback();
                     }
                 });
             }
