@@ -2,8 +2,7 @@
   "name": "Spensada Exam",
   "short_name": "Spensada CBT",
   "description": "Sistem Ujian Mobile Sekolah Spensada",
-  "start_url": "/?mode=standalone",
-  "scope": "/",
+  "start_url": "./index.html?mode=standalone",
   "display": "standalone",
   "background_color": "#f1f5f9",
   "theme_color": "#1E40AF",
@@ -11,15 +10,15 @@
   "icons": [
     {
       "src": "https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png",
-      "sizes": "192x192",
+      "sizes": "any",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png",
-      "sizes": "512x512",
+      "sizes": "192x192 512x512",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "maskable"
     }
   ]
 }
