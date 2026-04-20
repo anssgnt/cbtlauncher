@@ -14,222 +14,223 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
 
-    <!-- Accelerated Styling: Optimized Static CSS (Replaces Tailwind CDN) -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" as="style">
-    <link rel="preload" href="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" as="image">
-    
-    <link rel="icon" type="image/x-icon" href="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png">
-
-    <!-- Google Fonts: Plus Jakarta Sans for premium feel -->
+    <!-- [OPT-1] Preconnect hanya ke resource yang benar-benar dibutuhkan saat FCP -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- [OPT-2] Preload logo agar tidak ada FOUC pada gate screen -->
+    <link rel="preload" as="image" href="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png">
 
+    <!-- [OPT-3] Critical CSS di-inline agar tidak ada render-blocking request.
+         Tailwind dimuat SETELAH konten kritis tampil (defer via media trick). -->
     <style>
-        /* CORE DESIGN SYSTEM (Optimized Utility Classes) */
+        /* === CRITICAL PATH CSS (Inline - Langsung di-render tanpa request) === */
         :root {
-            --primary: #4f46e5; --primary-hover: #4338ca;
-            --slate-50: #f8fafc; --slate-100: #f1f5f9; --slate-200: #e2e8f0; --slate-300: #cbd5e1;
-            --slate-400: #94a3b8; --slate-500: #64748b; --slate-600: #475569; --slate-700: #334155; --slate-800: #1e293b; --slate-900: #0f172a;
-            --indigo-50: #eef2ff; --indigo-100: #e0e7ff; --indigo-400: #818cf8; --indigo-500: #6366f1; --indigo-600: #4f46e5; --indigo-700: #4338ca;
-            --emerald-50: #ecfdf5; --emerald-400: #34d399; --emerald-500: #10b981; --emerald-600: #059669;
-            --rose-50: #fff1f2; --rose-100: #ffe4e6; --rose-400: #fb7185; --rose-500: #f43f5e; --rose-600: #e11d48;
-            --amber-50: #fffbeb; --amber-100: #fef3c7; --amber-600: #d97706;
+            --blue-dark: #1E40AF;
+            --indigo-dark: #3730A3;
+            --violet-dark: #312E81;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; }
+
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--slate-100);
-            color: var(--slate-800);
-            -webkit-user-select: none; user-select: none;
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            background-color: #f1f5f9;
             -webkit-font-smoothing: antialiased;
             overscroll-behavior-y: none;
-            min-height: 100vh;
-            line-height: 1.5;
+        }
+        input { -webkit-user-select: auto; user-select: auto; }
+        input[type="text"] { font-size: 16px; } /* Prevent iOS zoom */
+
+        /* PWA Gate: tampil secara instan, kritis */
+        #pwaInstallGate {
+            position: fixed; inset: 0; z-index: 99999;
+            background: #f8fafc;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 24px; text-align: center;
+        }
+        #pwaInstallGate .gate-logo-wrap {
+            width: 80px; height: 80px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 24px;
+            position: relative; overflow: hidden;
+        }
+        #pwaInstallGate .gate-logo-wrap img { width: 52px; height: 52px; object-fit: contain; }
+        #pwaInstallGate h2 {
+            font-size: 20px; font-weight: 800;
+            color: #1e293b; margin: 0 0 8px;
+            letter-spacing: -0.02em;
+        }
+        #pwaInstallGate p.gate-desc {
+            font-size: 13px; color: #64748b; font-weight: 500;
+            max-width: 300px; line-height: 1.6;
+            margin: 0 0 28px;
+        }
+        #pwaInstallBtn {
+            width: 100%; max-width: 300px;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            color: white; font-size: 14px; font-weight: 700;
+            border: none; border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(79,70,229,0.3);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: transform 0.1s; -webkit-tap-highlight-color: transparent;
+        }
+        #pwaInstallBtn:active { transform: scale(0.97); }
+        #pwaInstallBtn svg { width: 18px; height: 18px; flex-shrink: 0; }
+        .gate-hint {
+            font-size: 11px; color: #94a3b8; font-weight: 600;
+            margin-top: 12px;
+        }
+        #pwaManualWrapper {
+            display: none;
+            width: 100%; max-width: 340px;
+            background: white; padding: 20px 24px;
+            border-radius: 24px; border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            margin-top: 16px; text-align: left;
+        }
+        #pwaManualWrapper.show { display: flex; flex-direction: column; }
+        #pwaManualTitle {
+            font-size: 11px; font-weight: 800;
+            color: #6366f1; text-transform: uppercase;
+            letter-spacing: 0.1em; margin: 0 0 16px; text-align: center;
+        }
+        .manual-step {
+            display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px;
+        }
+        .manual-step .step-num {
+            width: 26px; height: 26px; flex-shrink: 0;
+            background: #f1f5f9; border: 1px solid #e2e8f0;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 700; color: #475569;
+        }
+        .manual-step p { font-size: 13px; color: #475569; font-weight: 500; line-height: 1.5; margin: 0; }
+        .step-key {
+            background: #f1f5f9; border: 1px solid #e2e8f0;
+            padding: 2px 6px; border-radius: 6px; font-weight: 700;
+            color: #1e293b; white-space: nowrap; font-size: 12px;
         }
 
-        /* Layout Utilities */
-        .fixed { position: fixed; } .absolute { position: absolute; } .relative { position: relative; }
-        .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
-        .top-0 { top: 0; } .left-0 { left: 0; } .right-0 { right: 0; } .bottom-0 { bottom: 0; }
-        .z-10 { z-index: 10; } .z-20 { z-index: 20; } .z-50 { z-index: 50; } 
-        .z-\[99999\] { z-index: 99999; } .z-\[10000\] { z-index: 10000; } .z-\[2147483646\] { z-index: 2147483646; } .z-\[2147483647\] { z-index: 2147483647; }
-        
-        .flex { display: flex; } .flex-col { flex-direction: column; } .items-center { align-items: center; } 
-        .justify-center { justify-content: center; } .justify-between { justify-content: space-between; }
-        .flex-1 { flex: 1 1 0%; } .flex-shrink-0 { flex-shrink: 0; } .gap-1 { gap: 0.25rem; } .gap-1\.5 { gap: 0.375rem; }
-        .gap-2 { gap: 0.5rem; } .gap-3 { gap: 0.75rem; } .gap-4 { gap: 1rem; } .gap-6 { gap: 1.5rem; } .gap-8 { gap: 2rem; }
+        /* Header Background: tampil langsung */
+        .header-bg {
+            position: fixed; top: 0; left: 0; width: 100%;
+            height: 240px;
+            background: linear-gradient(135deg, #1E40AF, #3730A3, #312E81);
+            border-radius: 0 0 40px 40px;
+            z-index: -1; overflow: hidden;
+        }
 
-        .w-full { width: 100%; } .h-full { height: 100%; } .min-h-screen { min-height: 100vh; }
-        .w-9 { width: 2.25rem; } .h-9 { height: 2.25rem; } .w-10 { width: 2.5rem; } .h-10 { height: 2.5rem; }
-        .w-12 { width: 3rem; } .h-12 { height: 3rem; } .w-14 { width: 3.5rem; } .h-14 { height: 3.5rem; }
-        .w-16 { width: 4rem; } .h-16 { height: 4rem; } .w-20 { width: 5rem; } .h-20 { height: 5rem; }
-        .w-24 { width: 6rem; } .h-24 { height: 6rem; } .max-w-md { max-w: 28rem; } .max-w-xs { max-w: 20rem; } .max-w-sm { max-w: 24rem; }
-        .mx-auto { margin-left: auto; margin-right: auto; }
-
-        /* Sizing & Spacing */
-        .p-0 { padding: 0; } .p-2 { padding: 0.5rem; } .p-3\.5 { padding: 0.875rem; } .p-4 { padding: 1rem; } 
-        .p-5 { padding: 1.25rem; } .p-6 { padding: 1.5rem; } .p-8 { padding: 2rem; }
-        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; } .px-4 { padding-left: 1rem; padding-right: 1rem; }
-        .px-5 { padding-left: 1.25rem; padding-right: 1.25rem; } .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
-        .px-8 { padding-left: 2rem; padding-right: 2rem; }
-        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; } .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
-        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; } .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
-        .py-3\.5 { padding-top: 0.875rem; padding-bottom: 0.875rem; } .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
-        .pt-4 { padding-top: 1rem; } .pt-5 { padding-top: 1.25rem; } .pt-6 { padding-top: 1.5rem; } .pt-8 { padding-top: 2rem; } .pt-10 { padding-top: 2.5rem; }
-        .pb-2 { padding-bottom: 0.5rem; } .pb-3 { padding-bottom: 0.75rem; } .pb-4 { padding-bottom: 1rem; } .pb-5 { padding-bottom: 1.25rem; }
-        .pb-6 { padding-bottom: 1.5rem; } .pb-8 { padding-bottom: 2rem; } .pb-10 { padding-bottom: 2.5rem; } .pb-12 { padding-bottom: 3rem; }
-        .mt-0\.5 { margin-top: 0.125rem; } .mt-1 { margin-top: 0.25rem; } .mt-2 { margin-top: 0.5rem; } .mt-3 { margin-top: 0.75rem; } .mt-4 { margin-top: 1rem; }
-        .mb-1 { margin-bottom: 0.25rem; } .mb-1\.5 { margin-bottom: 0.375rem; } .mb-2 { margin-bottom: 0.5rem; } .mb-3 { margin-bottom: 0.75rem; }
-        .mb-4 { margin-bottom: 1rem; } .mb-5 { margin-bottom: 1.25rem; } .mb-6 { margin-bottom: 1.5rem; } .mb-8 { margin-bottom: 2rem; }
-
-        /* Typography */
-        .text-[8px] { font-size: 8px; } .text-[9px] { font-size: 9px; } .text-[10px] { font-size: 10px; } .text-[11px] { font-size: 11px; }
-        .text-xs { font-size: 12px; } .text-sm { font-size: 14px; } .text-base { font-size: 16px; } .text-lg { font-size: 18px; } .text-xl { font-size: 20px; }
-        .text-[15px] { font-size: 15px; } .text-[20px] { font-size: 20px; } .text-[22px] { font-size: 22px; }
-        .font-normal { font-weight: 400; } .font-medium { font-weight: 500; } .font-semibold { font-weight: 600; }
-        .font-bold { font-weight: 700; } .font-extrabold { font-weight: 800; } .font-black { font-weight: 900; } .font-mono { font-family: monospace; }
-        .uppercase { text-transform: uppercase; } .lowercase { text-transform: lowercase; } .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .tracking-tight { letter-spacing: -0.025em; } .tracking-wide { letter-spacing: 0.025em; } .tracking-widest { letter-spacing: 0.1em; }
-        .leading-none { line-height: 1; } .leading-tight { line-height: 1.25; } .leading-snug { line-height: 1.375; } .leading-relaxed { line-height: 1.625; }
-
-        /* Colors & Bg */
-        .bg-white { background-color: #ffffff; } .bg-slate-50 { background-color: var(--slate-50); } .bg-slate-100 { background-color: var(--slate-100); }
-        .bg-slate-800 { background-color: var(--slate-800); } .bg-slate-900 { background-color: var(--slate-900); }
-        .bg-indigo-50 { background-color: var(--indigo-50); } .bg-indigo-600 { background-color: var(--indigo-600); }
-        .bg-rose-600 { background-color: var(--rose-600); } .bg-emerald-400 { background-color: var(--emerald-400); }
-        .bg-white\/10 { background-color: rgba(255, 255, 255, 0.1); }
-        .bg-white\/20 { background-color: rgba(255, 255, 255, 0.2); }
-        .bg-black\/40 { background-color: rgba(0, 0, 0, 0.4); }
-        .bg-black\/50 { background-color: rgba(0, 0, 0, 0.5); }
-        
-        .backdrop-blur-sm { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
-        .backdrop-blur-md { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-        
-        .border-white\/10 { border-color: rgba(255, 255, 255, 0.1); }
-        .border-white\/20 { border-color: rgba(255, 255, 255, 0.2); }
-        .bg-gradient-to-br { background-image: linear-gradient(to bottom right, var(--tw-gradient-stops)); }
-        .from-\[\#1E40AF\] { --tw-gradient-from: #1E40AF; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(30, 64, 175, 0)); }
-        .via-\[\#3730A3\] { --tw-gradient-stops: var(--tw-gradient-from), #3730A3, var(--tw-gradient-to, rgba(55, 48, 163, 0)); }
-        .to-\[\#312E81\] { --tw-gradient-to: #312E81; }
-
-        .text-white { color: #ffffff; } .text-slate-200 { color: var(--slate-200); } .text-slate-300 { color: var(--slate-300); }
-        .text-slate-400 { color: var(--slate-400); } .text-slate-500 { color: var(--slate-500); } .text-slate-600 { color: var(--slate-600); }
-        .text-slate-700 { color: var(--slate-700); } .text-slate-800 { color: var(--slate-800); }
-        .text-indigo-100 { color: var(--indigo-100); } .text-indigo-500 { color: var(--indigo-500); } .text-indigo-600 { color: var(--indigo-600); } .text-indigo-700 { color: var(--indigo-700); }
-        .text-rose-500 { color: var(--rose-500); } .text-rose-600 { color: var(--rose-600); } .text-emerald-400 { color: var(--emerald-400); }
-
-        /* Borders & Shadows */
-        .border { border: 1px solid var(--slate-200); } .border-2 { border: 2px solid var(--slate-200); } .border-t { border-top: 1px solid var(--slate-200); } .border-b { border-bottom: 1px solid var(--slate-200); }
-        .border-slate-100 { border-color: var(--slate-100); } .border-slate-200 { border-color: var(--slate-200); }
-        .border-indigo-100 { border-color: var(--indigo-100); } .border-rose-100 { border-color: var(--rose-100); }
-        .rounded-lg { border-radius: 0.5rem; } .rounded-xl { border-radius: 0.75rem; } .rounded-2xl { border-radius: 1rem; } .rounded-3xl { border-radius: 1.5rem; } .rounded-full { border-radius: 9999px; }
-        .rounded-t-\[2rem\] { border-top-left-radius: 2rem; border-top-right-radius: 2rem; } .rounded-\[1rem\] { border-radius: 1rem; } .rounded-\[1\.25rem\] { border-radius: 1.25rem; } .rounded-\[1\.5rem\] { border-radius: 1.5rem; } .rounded-\[2rem\] { border-radius: 2rem; }
-        .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); } .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); } .shadow-xl { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); } .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
-
-        /* Interactivity */
-        .overflow-hidden { overflow: hidden; } .overflow-x-hidden { overflow-x: hidden; }
-        .drop-shadow-md { filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.07)) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.06)); }
-        .transition-all { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        .transition-transform { transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        .duration-300 { transition-duration: 300ms; }
-        .hover\:scale-105:hover { transform: scale(1.05); }
-        .active\:scale-95:active { transform: scale(0.95); }
-        .active\:scale-98:active { transform: scale(0.98); }
-        .active\:scale-\[0\.98\]:active { transform: scale(0.98); }
-        .cursor-pointer { cursor: pointer; }
-        .hidden { display: none !important; }
-        .opacity-0 { opacity: 0; } .opacity-30 { opacity: 0.3; } .opacity-60 { opacity: 0.6; } .opacity-90 { opacity: 0.9; } .opacity-100 { opacity: 1; }
-        
-        .shadow-\[0_8px_30px_rgb\(0\,0\,0\,0\.06\)\] { box-shadow: 0 8px 30px rgba(0,0,0,0.06); }
-        .shadow-\[0_8px_20px_rgba\(79\,70\,229\,0\.25\)\] { box-shadow: 0 8px 20px rgba(79,70,229,0.25); }
-        .shadow-\[0_4px_15px_rgba\(0\,0\,0\,0\.1\)\] { box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.06); }
-
-        /* Custom Animations */
+        /* Skeleton */
         @keyframes shimmer { 100% { transform: translateX(100%); } }
-        .skeleton { position: relative; overflow: hidden; background-color: var(--slate-200); border-radius: 0.5rem; }
-        .skeleton::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent); animation: shimmer 1.5s infinite; }
-        .fade-in { animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
-        .animate-ping { animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite; }
-        @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
-
-        /* Violation Flash (Visual Alert) */
-        @keyframes violation-flash {
-            0%, 100% { background-color: var(--slate-100); }
-            50% { background-color: #fecaca; } /* Light Red */
+        .skeleton {
+            position: relative; overflow: hidden;
+            background: #e2e8f0; border-radius: 8px;
         }
-        .animate-violation { animation: violation-flash 0.3s ease-in-out 3; }
+        .skeleton::after {
+            content: ''; position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            transform: translateX(-100%);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 1.5s infinite;
+        }
 
-        /* Input styling */
-        input { -webkit-user-select: auto; user-select: auto; border: none; }
-        input[type="text"] { font-size: 16px; }
+        /* Fade in */
+        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16,1,0.3,1) forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Loader dots */
+        .loader-dots div { animation-timing-function: cubic-bezier(0,1,1,0); }
+        .loader-dots div:nth-child(1) { left:8px; animation: ld1 .6s infinite; }
+        .loader-dots div:nth-child(2) { left:8px; animation: ld2 .6s infinite; }
+        .loader-dots div:nth-child(3) { left:32px; animation: ld2 .6s infinite; }
+        .loader-dots div:nth-child(4) { left:56px; animation: ld3 .6s infinite; }
+        @keyframes ld1 { 0%{transform:scale(0)} 100%{transform:scale(1)} }
+        @keyframes ld3 { 0%{transform:scale(1)} 100%{transform:scale(0)} }
+        @keyframes ld2 { 0%{transform:translate(0,0)} 100%{transform:translate(24px,0)} }
+
+        /* Scrollbar hidden */
         ::-webkit-scrollbar { width: 0px; }
-
-        /* PWA specific classes */
-        .h-\[100dvh\] { height: 100dvh; } .w-\[100dvw\] { width: 100dvw; }
     </style>
+
+    <!-- [OPT-4] Google Font dimuat dengan display=swap dan media=print trick agar non-blocking -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap"></noscript>
+
+    <!-- [OPT-5] Tailwind dimuat async - TIDAK blocking render -->
+    <link rel="preload" href="https://cdn.tailwindcss.com/3.4.1" as="script">
+    <!-- Favicon Fix 404 -->
+    <link rel="icon" type="image/x-icon" href="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png">
 </head>
 
 <body class="text-slate-800 min-h-screen relative overflow-x-hidden">
 
-    <!-- PWA Install Gatecade -->
-    <div id="pwaInstallGate" class="fixed inset-0 z-[99999] bg-slate-50 flex flex-col items-center justify-center p-6 text-center transform transition-all duration-300">
-        <div class="w-20 h-20 sm:w-24 sm:h-24 bg-white border border-slate-200 rounded-[1.5rem] sm:rounded-[2rem] shadow-xl flex items-center justify-center mb-6 sm:mb-8 relative overflow-hidden transform hover:scale-105 transition-all">
-            <div class="absolute inset-0 bg-blue-100/30 blur-xl"></div>
-            <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" alt="Logo" class="w-12 h-12 sm:w-16 sm:h-16 object-contain relative z-10 drop-shadow-sm">
+    <!-- PWA Install Gate -->
+    <div id="pwaInstallGate">
+        <div class="gate-logo-wrap">
+            <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" alt="Logo" width="52" height="52">
         </div>
-        <h2 class="text-[20px] sm:text-[22px] font-extrabold text-slate-800 mb-1.5 tracking-tight">Pasang Aplikasi Ujian</h2>
-        <p class="text-[12px] sm:text-[13px] text-slate-500 font-medium mb-6 sm:mb-8 max-w-xs leading-relaxed px-2 sm:px-4">Sistem ujian dilindungi. Akses dari browser langsung telah diblokir. Wajib menginstall Aplikasi CBT Spensada di Perangkat Anda.</p>
+        <h2>Pasang Aplikasi Ujian</h2>
+        <p class="gate-desc">Sistem ujian dilindungi. Akses dari browser langsung telah diblokir. Wajib menginstall Aplikasi CBT Spensada di Perangkat Anda.</p>
         
-        <div id="pwaAndroidWrapper" class="w-full max-w-xs flex flex-col gap-3">
-            <button id="pwaInstallBtn" class="w-full py-3.5 sm:py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[14px] sm:text-[15px] font-bold rounded-[1.25rem] shadow-[0_8px_20px_rgba(79,70,229,0.25)] active:scale-95 transition-transform flex items-center justify-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+        <div id="pwaAndroidWrapper" style="width:100%;max-width:300px;display:flex;flex-direction:column;gap:12px;">
+            <button id="pwaInstallBtn">
+                <!-- [OPT-6] SVG inline, bukan external icon library -->
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                 Install Aplikasi Sekarang
             </button>
-            <p class="text-[11px] text-slate-400 mt-2 font-semibold">Instalasi Otomatis (Android/Windows)</p>
+            <p class="gate-hint">Instalasi Otomatis (Android/Windows)</p>
         </div>
 
-        <div id="pwaManualWrapper" class="hidden w-full max-w-sm flex-col items-center bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mt-4 fade-in">
-            <p id="pwaManualTitle" class="text-[12px] font-extrabold text-indigo-500 mb-5 uppercase tracking-[0.1em] text-center w-full">Panduan Instalasi Manual</p>
-            <div class="flex items-start gap-4 mb-4 text-left w-full">
-                <div class="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0 mt-0.5">1</div>
-                <p id="pwaManualStep1" class="text-[13px] text-slate-600 font-medium leading-normal">Tekan Ikon navigasi browser Anda (Misal: <strong class="text-slate-800">Tiga Titik ⋮</strong> di pojok kanan atas).</p>
+        <div id="pwaManualWrapper">
+            <p id="pwaManualTitle">Panduan Instalasi Manual</p>
+            <div class="manual-step">
+                <div class="step-num">1</div>
+                <p id="pwaManualStep1">Tekan ikon navigasi browser Anda (Misal: <strong>Tiga Titik ⋮</strong> di pojok kanan atas).</p>
             </div>
-            <div class="flex items-start gap-4 text-left w-full">
-                <div class="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0 mt-0.5">2</div>
-                <p id="pwaManualStep2" class="text-[13px] text-slate-600 font-medium leading-normal">Pilih menu <span class="text-slate-800 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold whitespace-nowrap mt-2 inline-block">Tambahkan ke Layar Utama</span> atau <span class="text-slate-800 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold whitespace-nowrap mt-2 inline-block">Install Aplikasi</span>.</p>
+            <div class="manual-step">
+                <div class="step-num">2</div>
+                <p id="pwaManualStep2">Pilih menu <span class="step-key">Tambahkan ke Layar Utama</span> atau <span class="step-key">Install Aplikasi</span>.</p>
             </div>
         </div>
 
+        <!-- [OPT-7] Bypass button: muncul setelah 3 detik -->
+        <button id="pwaBypassBtn" onclick="bypassAndEnter()" style="display:none;margin-top:16px;font-size:11px;color:#94a3b8;background:none;border:none;cursor:pointer;font-weight:600;padding:8px;">
+            Sudah Install? Ketuk di sini
+        </button>
     </div>
 
-    <!-- Top App Background (Curved Header Background) -->
-    <div class="fixed top-0 left-0 w-full h-[240px] sm:h-[280px] bg-gradient-to-br from-[#1E40AF] via-[#3730A3] to-[#312E81] rounded-b-[2.5rem] shadow-xl z-[-1] overflow-hidden">
-        <!-- Abstract Decorations behind header -->
-        <div class="absolute -top-10 -right-10 w-48 h-48 bg-white opacity-[0.07] rounded-full blur-2xl"></div>
-        <div class="absolute top-20 -left-10 w-32 h-32 bg-white opacity-[0.05] rounded-full blur-xl"></div>
-        <div class="absolute bottom-10 right-20 w-40 h-40 bg-indigo-400 opacity-20 rounded-full blur-3xl"></div>
+    <!-- Header Background -->
+    <div class="header-bg">
+        <div style="position:absolute;top:-40px;right:-40px;width:192px;height:192px;background:rgba(255,255,255,0.07);border-radius:50%;filter:blur(24px)"></div>
+        <div style="position:absolute;top:80px;left:-40px;width:128px;height:128px;background:rgba(255,255,255,0.05);border-radius:50%;filter:blur(16px)"></div>
     </div>
 
     <!-- Header Navigation -->
-    <header class="w-full max-w-md mx-auto pt-6 sm:pt-8 px-5 sm:px-6 pb-2 flex items-center justify-between">
-        <div class="flex items-center gap-3 sm:gap-3.5">
-            <div class="bg-white/10 p-1.5 rounded-[0.9rem] backdrop-blur-md border border-white/20 shadow-[0_4px_15px_rgba(0,0,0,0.1)] flex-shrink-0 relative overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent"></div>
-                <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" alt="Logo" class="w-9 h-9 sm:w-10 sm:h-10 object-contain drop-shadow-md relative z-10 transition-transform duration-300 hover:scale-105" onerror="this.style.display='none'">
+    <header class="w-full max-w-md mx-auto pt-6 px-5 pb-2 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="bg-white/10 p-1.5 rounded-[0.9rem] backdrop-blur-md border border-white/20 shadow flex-shrink-0">
+                <!-- [OPT-8] width/height eksplisit cegah layout shift -->
+                <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" alt="Logo" width="36" height="36" class="object-contain drop-shadow-md" onerror="this.style.display='none'">
             </div>
-            <div class="flex flex-col">
-                <h1 class="text-[20px] sm:text-[22px] font-extrabold text-white tracking-tight leading-tight">Spensada Exam</h1>
-                <p class="text-[10px] sm:text-[11px] text-indigo-100 font-medium opacity-90 mt-0.5 tracking-wide">Sistem Ujian Mobile</p>
+            <div>
+                <h1 class="text-[20px] font-extrabold text-white tracking-tight leading-tight">Spensada Exam</h1>
+                <p class="text-[10px] text-indigo-100 font-medium opacity-90 tracking-wide">Sistem Ujian Mobile</p>
             </div>
         </div>
-        
-        <div id="statusBadge" class="flex flex-col items-end opacity-90 transition-all duration-300">
+        <div id="statusBadge" class="flex flex-col items-end opacity-90">
             <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-sm" id="statusContainer">
                 <div class="w-2 h-2 rounded-full bg-slate-300" id="statusDot"></div>
                 <span class="text-[9px] font-bold text-white uppercase tracking-wider" id="statusText">Offline</span>
@@ -238,25 +239,22 @@
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-md w-full mx-auto px-4 sm:px-5 pt-5 sm:pt-6 pb-12 flex flex-col relative z-10">
+    <main class="max-w-md w-full mx-auto px-4 pt-5 pb-12 flex flex-col relative z-10">
 
-        <!-- Info Card (Overlapping header) -->
-        <div class="bg-white rounded-[1.25rem] p-3.5 sm:p-4 shadow-[0_8px_30px_rgb(0,0,0,0.06)] mb-6 sm:mb-8 flex flex-col items-center justify-center border border-slate-100 transform transition-transform hover:scale-[1.01]">
-            <div class="flex items-center gap-1.5 mb-1 sm:mb-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+        <!-- Info Card: Jam -->
+        <div class="bg-white rounded-[1.25rem] p-3.5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] mb-6 flex flex-col items-center justify-center border border-slate-100">
+            <div class="flex items-center gap-1.5 mb-1">
+                <svg class="h-3.5 w-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 <p class="text-[10px] font-extrabold text-indigo-600 uppercase tracking-[0.15em]">ASAS/ASAT T.A 2025/2026</p>
             </div>
             <div class="flex items-center gap-2 mt-0.5">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 <p class="text-[15px] font-bold text-slate-700" id="serverTimeText">--:--:--</p>
             </div>
         </div>
 
         <!-- State: Loading (Skeleton) -->
         <div id="loadingState" class="flex flex-col gap-6 fade-in">
-            <!-- Skeleton Card 1 -->
             <div class="bg-white rounded-[1.5rem] shadow-sm border border-slate-100 overflow-hidden">
                 <div class="h-1.5 w-full bg-slate-100"></div>
                 <div class="p-6">
@@ -272,7 +270,6 @@
                     <div class="w-full h-12 skeleton rounded-xl"></div>
                 </div>
             </div>
-            <!-- Skeleton Card 2 -->
             <div class="bg-white rounded-[1.5rem] shadow-sm border border-slate-100 overflow-hidden opacity-60">
                 <div class="h-1.5 w-full bg-slate-100"></div>
                 <div class="p-6">
@@ -287,384 +284,337 @@
 
         <!-- State: Error -->
         <div id="errorState" class="hidden flex-col items-center justify-center py-12 px-6 bg-white rounded-[2rem] text-center fade-in border border-rose-100 shadow-[0_8px_30px_rgba(225,29,72,0.06)]">
-            <div class="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 mb-4 shadow-inner">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
+            <div class="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 mb-4">
+                <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
             </div>
             <h3 class="text-xl font-extrabold text-slate-800 mb-1">Jaringan Terputus</h3>
             <p class="text-sm text-slate-500 mb-6 px-2" id="errorMessage">Gagal menghubungi peladen sekolah.</p>
-            <button onclick="fetchData(true)" class="w-full py-3.5 bg-slate-800 hover:bg-slate-900 active:scale-[0.98] text-white font-bold rounded-[1rem] transition-all shadow-md focus:outline-none flex items-center justify-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+            <button onclick="fetchData(true)" class="w-full py-3.5 bg-slate-800 hover:bg-slate-900 active:scale-[0.98] text-white font-bold rounded-[1rem] transition-all shadow-md flex items-center justify-center gap-2">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                 Coba Sinkronisasi Ulang
             </button>
         </div>
 
         <!-- State: Empty -->
         <div id="emptyState" class="hidden flex-col items-center justify-center py-16 px-6 bg-white rounded-[2rem] text-center fade-in shadow-sm border border-slate-100">
-            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-5 shadow-inner">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
+            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-5">
+                <svg class="h-10 w-10 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
             </div>
             <h3 class="text-[18px] font-extrabold text-slate-800 mb-1">Belum Tersedia</h3>
-            <p class="text-sm text-slate-500 mb-5 px-1 leading-relaxed">Tidak ada jadwal aktif saat ini. Menunggu intruksi proktor.</p>
-            <button onclick="fetchData(true)" id="manualRefreshBtn" class="flex items-center justify-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-600 font-bold text-xs rounded-full hover:bg-indigo-100 transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
+            <p class="text-sm text-slate-500 mb-5 px-1 leading-relaxed">Tidak ada jadwal aktif saat ini. Menunggu instruksi proktor.</p>
+            <button onclick="fetchData(true)" id="manualRefreshBtn" class="flex items-center justify-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-600 font-bold text-xs rounded-full hover:bg-indigo-100 transition-all active:scale-95 disabled:opacity-50">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                 <span id="refreshBtnText">Perbarui Data</span>
             </button>
         </div>
 
         <!-- State: Data List -->
-        <!-- Penggunaan gap-6 dan flex-col untuk memberi jarak absolut antar kotak -->
-        <div id="examList" class="hidden flex-col gap-6 pb-10">
-            <!-- Exam cards will be injected here -->
-        </div>
+        <div id="examList" class="hidden flex-col gap-6 pb-10"></div>
 
     </main>
 
-    <!-- Token Modal (Bottom Sheet style) -->
-    <div id="tokenModal" class="hidden fixed inset-0 z-[2147483646] flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all duration-300" style="opacity: 0;">
-        <!-- Backdrop Blur -->
+    <!-- Token Modal (Bottom Sheet) -->
+    <div id="tokenModal" class="hidden fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all duration-300" style="opacity:0;">
         <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeTokenModal()"></div>
-        
-        <!-- Modal Content -->
         <div class="bg-white relative rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden transform translate-y-full sm:translate-y-0 sm:scale-95 transition-transform duration-300" id="tokenModalContent">
-
-            <!-- Drag Handle (Mobile) -->
             <div class="w-full flex justify-center pt-4 pb-2 sm:hidden absolute top-0 z-10 pointer-events-none">
                 <div class="w-10 h-1.5 bg-slate-200 rounded-full"></div>
             </div>
-
             <div class="p-8 pt-10 sm:pt-8 pb-5 flex flex-col items-center text-center">
                 <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-4 border border-indigo-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
+                    <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                 </div>
                 <h3 class="text-xl font-extrabold text-slate-800 tracking-tight">KODE UJIAN</h3>
                 <p class="text-sm text-slate-500 font-semibold mt-1 truncate w-full px-4" id="modalExamName">Nama Ujian</p>
             </div>
-
             <div class="px-8 pb-6">
-                <div class="relative group">
+                <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <svg class="h-6 w-6 text-indigo-300 group-focus-within:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        <svg class="h-6 w-6 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                     </div>
-                    <input type="text" id="tokenInput" class="w-full bg-slate-50 border-2 border-slate-200/80 rounded-2xl pl-12 pr-4 py-4 font-mono text-center text-2xl font-black text-indigo-700 tracking-[0.2em] focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 transition-all uppercase placeholder:tracking-normal placeholder:font-bold placeholder:text-slate-300 placeholder:text-[15px]" placeholder="KODE AKSES" autocomplete="off" spellcheck="false" maxlength="10">
+                    <input type="text" id="tokenInput" class="w-full bg-slate-50 border-2 border-slate-200/80 rounded-2xl pl-12 pr-4 py-4 font-mono text-center text-2xl font-black text-indigo-700 tracking-[0.2em] focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 transition-all uppercase placeholder:tracking-normal placeholder:font-bold placeholder:text-slate-300 placeholder:text-[15px]" placeholder="KODE AKSES" autocomplete="off" spellcheck="false" maxlength="10" enterkeyhint="go">
                 </div>
-                <div id="tokenError" class="mt-3 hidden animate-pulse">
-                    <div class="flex items-center justify-center gap-1.5 bg-rose-50 text-rose-600 px-3 py-2 rounded-xl border border-rose-100 shadow-sm">
+                <div id="tokenError" class="mt-3 hidden">
+                    <div class="flex items-center justify-center gap-1.5 bg-rose-50 text-rose-600 px-3 py-2 rounded-xl border border-rose-100">
                         <p class="text-xs font-bold">Kode salah, silakan cek ulang.</p>
                     </div>
                 </div>
             </div>
-
             <div class="p-6 bg-slate-50 border-t border-slate-100 flex gap-3 pb-8 sm:pb-6">
-                <button onclick="closeTokenModal()" class="flex-[0.8] px-4 py-3.5 text-slate-500 bg-white border border-slate-300 rounded-[1rem] font-bold hover:bg-slate-50 active:scale-[0.98] transition-all focus:outline-none shadow-sm">
-                    Kembali
-                </button>
-                <button onclick="submitToken()" class="flex-[1.2] px-4 py-3.5 text-white bg-indigo-600 border border-transparent rounded-[1rem] font-bold hover:bg-indigo-700 shadow-[0_4px_10px_rgba(79,70,229,0.2)] active:scale-[0.98] transition-all focus:outline-none">
-                    Mulai
-                </button>
+                <button onclick="closeTokenModal()" class="flex-[0.8] px-4 py-3.5 text-slate-500 bg-white border border-slate-300 rounded-[1rem] font-bold hover:bg-slate-50 active:scale-[0.98] transition-all">Kembali</button>
+                <button onclick="submitToken()" class="flex-[1.2] px-4 py-3.5 text-white bg-indigo-600 rounded-[1rem] font-bold hover:bg-indigo-700 shadow-[0_4px_10px_rgba(79,70,229,0.2)] active:scale-[0.98] transition-all">Mulai</button>
             </div>
         </div>
     </div>
 
-    <!-- Custom Universal Modal (Alert/Confirm/Prompt) -->
-    <div id="customModal" class="hidden fixed inset-0 z-[2147483647] flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all duration-300" style="opacity: 0;">
+    <!-- Custom Universal Modal -->
+    <div id="customModal" class="hidden fixed inset-0 z-[99999] flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all duration-300" style="opacity:0;">
         <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" id="customModalBackdrop"></div>
         <div class="bg-white relative rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden transform translate-y-full sm:translate-y-0 sm:scale-95 transition-transform duration-300" id="customModalContent">
             <div class="w-full flex justify-center pt-4 pb-2 sm:hidden absolute top-0 z-10 pointer-events-none">
                 <div class="w-10 h-1.5 bg-slate-200 rounded-full"></div>
             </div>
             <div class="p-8 pt-10 sm:pt-8 pb-5 flex flex-col items-center text-center">
-                <div id="customModalIcon" class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-4 border border-indigo-100">
-                </div>
+                <div id="customModalIcon" class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-4 border border-indigo-100"></div>
                 <h3 id="customModalTitle" class="text-xl font-extrabold text-slate-800 tracking-tight">TITLE</h3>
-                <p id="customModalMessage" class="text-sm text-slate-500 font-medium mt-2 px-4 leading-relaxed">Message goes here.</p>
+                <p id="customModalMessage" class="text-sm text-slate-500 font-medium mt-2 px-4 leading-relaxed"></p>
             </div>
             <div id="customModalInputWrapper" class="px-8 pb-6 hidden">
                 <input type="text" id="customModalInput" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3.5 font-bold text-slate-700 focus:outline-none focus:border-indigo-500 transition-all text-center uppercase" placeholder="...">
             </div>
             <div class="p-6 bg-slate-50 border-t border-slate-100 flex gap-3 pb-8 sm:pb-6">
-                <button id="customModalCancelBtn" class="hidden flex-1 px-4 py-3.5 text-slate-500 bg-white border border-slate-300 rounded-[1rem] font-bold hover:bg-slate-50 active:scale-[0.98] transition-all focus:outline-none shadow-sm">
-                    Batal
-                </button>
-                <button id="customModalConfirmBtn" class="flex-1 px-4 py-3.5 text-white bg-indigo-600 border border-transparent rounded-[1rem] font-bold hover:bg-indigo-700 shadow-[0_4px_10px_rgba(79,70,229,0.25)] active:scale-[0.98] transition-all focus:outline-none">
-                    OKE
-                </button>
+                <button id="customModalCancelBtn" class="hidden flex-1 px-4 py-3.5 text-slate-500 bg-white border border-slate-300 rounded-[1rem] font-bold hover:bg-slate-50 active:scale-[0.98] transition-all">Batal</button>
+                <button id="customModalConfirmBtn" class="flex-1 px-4 py-3.5 text-white bg-indigo-600 rounded-[1rem] font-bold hover:bg-indigo-700 active:scale-[0.98] transition-all">OKE</button>
             </div>
         </div>
     </div>
 
-    <!-- Application Script -->
+    <!-- [OPT-9] Tailwind dimuat setelah body agar tidak block render -->
+    <script src="https://cdn.tailwindcss.com/3.4.1" defer></script>
+
     <script>
-        /**
-         * CUSTOM MODAL SYSTEM (Bypassing GAS Sandbox)
-         */
+        // ==========================================
+        // CUSTOM MODAL SYSTEM
+        // ==========================================
         const CustomModal = {
-            get el() { return document.getElementById('customModal'); },
-            get content() { return document.getElementById('customModalContent'); },
-            get title() { return document.getElementById('customModalTitle'); },
-            get message() { return document.getElementById('customModalMessage'); },
-            get inputWrapper() { return document.getElementById('customModalInputWrapper'); },
-            get input() { return document.getElementById('customModalInput'); },
-            get confirmBtn() { return document.getElementById('customModalConfirmBtn'); },
-            get cancelBtn() { return document.getElementById('customModalCancelBtn'); },
-            get icon() { return document.getElementById('customModalIcon'); },
+            _el: null, _content: null, _title: null, _msg: null,
+            _inputWrap: null, _input: null, _confirmBtn: null, _cancelBtn: null, _icon: null,
             
+            // [OPT-10] Cache DOM references sekali saja, bukan setiap akses (getter property)
+            init() {
+                this._el = document.getElementById('customModal');
+                this._content = document.getElementById('customModalContent');
+                this._title = document.getElementById('customModalTitle');
+                this._msg = document.getElementById('customModalMessage');
+                this._inputWrap = document.getElementById('customModalInputWrapper');
+                this._input = document.getElementById('customModalInput');
+                this._confirmBtn = document.getElementById('customModalConfirmBtn');
+                this._cancelBtn = document.getElementById('customModalCancelBtn');
+                this._icon = document.getElementById('customModalIcon');
+            },
+
             show(options) {
                 return new Promise((resolve) => {
-                    this.title.innerText = options.title || 'Informasi';
-                    this.message.innerText = options.message || '';
-                    this.confirmBtn.innerText = options.confirmText || 'OKE';
-                    this.cancelBtn.innerText = options.cancelText || 'Batal';
-                    this.input.value = '';
-                    
-                    if (options.showInput) {
-                        this.inputWrapper.classList.remove('hidden');
-                        if (options.placeholder) this.input.placeholder = options.placeholder;
-                    } else {
-                        this.inputWrapper.classList.add('hidden');
-                    }
-                    
-                    if (options.showCancel) {
-                        this.cancelBtn.classList.remove('hidden');
-                    } else {
-                        this.cancelBtn.classList.add('hidden');
-                    }
+                    this._title.textContent = options.title || 'Informasi';
+                    this._msg.textContent = options.message || '';
+                    this._confirmBtn.textContent = options.confirmText || 'OKE';
+                    this._cancelBtn.textContent = options.cancelText || 'Batal';
+                    this._input.value = '';
 
-                    // Icon setup
-                    let iconHtml = '';
-                    if (options.type === 'confirm') {
-                        iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
-                        this.icon.className = "w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mb-4 border border-amber-100";
-                    } else if (options.type === 'prompt') {
-                        iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>';
-                        this.icon.className = "w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-4 border border-indigo-100";
-                    } else {
-                        iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
-                        this.icon.className = "w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-4 border border-blue-100";
-                    }
-                    this.icon.innerHTML = iconHtml;
+                    this._inputWrap.classList.toggle('hidden', !options.showInput);
+                    this._cancelBtn.classList.toggle('hidden', !options.showCancel);
+                    if (options.showInput && options.placeholder) this._input.placeholder = options.placeholder;
 
-                    this.el.classList.remove('hidden');
-                    // Force a small delay to ensure 'hidden' removal is processed by the browser
-                    // especially important on lower-end mobile devices inside expensive layouts
-                    setTimeout(() => {
-                        this.el.style.opacity = '1';
-                        this.content.classList.remove('translate-y-full', 'sm:scale-95');
-                        this.content.classList.add('translate-y-0', 'sm:scale-100');
-                        if (options.showInput) this.input.focus();
-                    }, 50);
-
-                    const handleConfirm = () => {
-                        cleanup();
-                        resolve(options.showInput ? this.input.value : true);
+                    const icons = {
+                        confirm: ['<svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>', 'w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mb-4 border border-amber-100'],
+                        prompt: ['<svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>', 'w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-4 border border-indigo-100'],
+                        alert: ['<svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>', 'w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-4 border border-blue-100']
                     };
-                    const handleCancel = () => {
-                        cleanup();
-                        resolve(options.showInput ? null : false);
-                    };
+                    const [iconHtml, iconClass] = icons[options.type] || icons.alert;
+                    this._icon.className = iconClass;
+                    this._icon.innerHTML = iconHtml;
+
+                    this._el.classList.remove('hidden');
+                    requestAnimationFrame(() => {
+                        this._el.style.opacity = '1';
+                        this._content.classList.remove('translate-y-full', 'sm:scale-95');
+                        this._content.classList.add('translate-y-0', 'sm:scale-100');
+                        if (options.showInput) this._input.focus();
+                    });
+
+                    const handleConfirm = () => { cleanup(); resolve(options.showInput ? this._input.value : true); };
+                    const handleCancel = () => { cleanup(); resolve(options.showInput ? null : false); };
                     const cleanup = () => {
-                        this.confirmBtn.removeEventListener('click', handleConfirm);
-                        this.cancelBtn.removeEventListener('click', handleCancel);
+                        this._confirmBtn.removeEventListener('click', handleConfirm);
+                        this._cancelBtn.removeEventListener('click', handleCancel);
                         this.hide();
                     };
-
-                    this.confirmBtn.addEventListener('click', handleConfirm);
-                    this.cancelBtn.addEventListener('click', handleCancel);
+                    this._confirmBtn.addEventListener('click', handleConfirm, { once: true });
+                    this._cancelBtn.addEventListener('click', handleCancel, { once: true });
                 });
             },
-            
+
             hide() {
-                this.el.style.opacity = '0';
-                this.content.classList.remove('translate-y-0', 'sm:scale-100');
-                this.content.classList.add('translate-y-full', 'sm:scale-95');
-                setTimeout(() => {
-                    this.el.classList.add('hidden');
-                }, 300);
+                this._el.style.opacity = '0';
+                this._content.classList.remove('translate-y-0', 'sm:scale-100');
+                this._content.classList.add('translate-y-full', 'sm:scale-95');
+                setTimeout(() => this._el.classList.add('hidden'), 300);
             },
 
             alert(message, title = 'Informasi') {
                 return this.show({ type: 'alert', title, message, showCancel: false, confirmText: 'OKE' });
             },
-
             confirm(message, title = 'Konfirmasi') {
                 return this.show({ type: 'confirm', title, message, showCancel: true, confirmText: 'YA', cancelText: 'TIDAK' });
             },
-
             prompt(message, placeholder = '', title = 'Input') {
                 return this.show({ type: 'prompt', title, message, showInput: true, showCancel: true, placeholder, confirmText: 'LANJUT', cancelText: 'BATAL' });
             }
         };
 
-        /**
-         * KONFIGURASI API
-         */
+        // ==========================================
+        // KONFIGURASI API
+        // ==========================================
         const URL_API = "https://script.google.com/macros/s/AKfycbwalO-HqOZpSYlOjBXl9stx3PzZUWrTadTJeojZ_AuMWFNrJk44vlozgXXEUiNO5Fugog/exec";
         const USE_DUMMY_DATA = false;
-        let PROCTOR_KEY = localStorage.getItem('last_proctor_key') || "2025"; // Sinkron via Spreadsheet
+        let PROCTOR_KEY = localStorage.getItem('last_proctor_key') || "2025";
 
-        // Data Management
+        // State
         let examsBank = [];
         let secureLinks = {};
         let activeSelectedExamId = null;
         let kioskExamId = null;
-
-        // Interval Management
         let refreshIntervalTimer = null;
         let countdownTimer = null;
         let clockTimer = null;
-        let healthTimer = null; // Timer for device stats
+        let healthTimer = null;
         let wakeLock = null;
         let violationCount = 0;
         let isLeavingKiosk = false;
 
-        // DOM Elements
-        const elLoading = document.getElementById('loadingState');
-        const elError = document.getElementById('errorState');
-        const elEmpty = document.getElementById('emptyState');
-        const elList = document.getElementById('examList');
-        const statusContainer = document.getElementById('statusContainer');
-        const statusDot = document.getElementById('statusDot');
-        const statusText = document.getElementById('statusText');
-        const timeText = document.getElementById('serverTimeText');
+        // [OPT-11] DOM refs di-cache setelah DOMContentLoaded, bukan saat script parse
+        let elLoading, elError, elEmpty, elList, statusContainer, statusDot, statusText, timeText;
 
-        /**
-         * SECURITY FEATURES
-         */
+        function cacheDOMRefs() {
+            elLoading = document.getElementById('loadingState');
+            elError = document.getElementById('errorState');
+            elEmpty = document.getElementById('emptyState');
+            elList = document.getElementById('examList');
+            statusContainer = document.getElementById('statusContainer');
+            statusDot = document.getElementById('statusDot');
+            statusText = document.getElementById('statusText');
+            timeText = document.getElementById('serverTimeText');
+        }
+
+        // ==========================================
+        // SECURITY
+        // ==========================================
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.addEventListener('keydown', e => {
-            if (e.keyCode == 123) e.preventDefault(); // F12
+            if (e.keyCode === 123) e.preventDefault(); // F12
             if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) e.preventDefault();
-            if (e.ctrlKey && e.keyCode === 85) e.preventDefault();
-            if (e.ctrlKey && e.keyCode === 83) e.preventDefault();
+            if (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83)) e.preventDefault();
         });
-        window.addEventListener('beforeunload', function (e) {
-            const msg = 'Apakah Anda yakin ingin keluar? Ujian mungkin sedang berlangsung.';
+        window.addEventListener('beforeunload', e => {
             e.preventDefault();
-            e.returnValue = msg;
-            return msg;
+            e.returnValue = 'Apakah Anda yakin ingin keluar? Ujian mungkin sedang berlangsung.';
         });
 
+        // ==========================================
+        // HELPERS
+        // ==========================================
         function parseDate(dateStr) {
             if (!dateStr) return new Date(0);
             try {
                 if (dateStr.includes('T')) return new Date(dateStr);
-                const parts = dateStr.split(' ');
-                if (parts.length !== 2) return new Date(dateStr);
-                const dateParts = parts[0].split('-');
-                const timeParts = parts[1].split(':');
-                return new Date(dateParts[0], dateParts[1] - 1, dateParts[2], timeParts[0], timeParts[1]);
-            } catch (e) {
-                return new Date(0);
-            }
+                const [datePart, timePart] = dateStr.split(' ');
+                if (!timePart) return new Date(dateStr);
+                const [y, mo, d] = datePart.split('-');
+                const [h, mi] = timePart.split(':');
+                return new Date(+y, +mo - 1, +d, +h, +mi);
+            } catch { return new Date(0); }
         }
 
+        // [OPT-12] formatDateIndo: memoize objek arrays agar tidak dibuat ulang tiap panggilan
+        const _DAYS = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+        const _MONTHS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+
         function formatDateIndo(date) {
-            if (!date || isNaN(date.getTime())) return "";
-            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-            const day = days[date.getDay()];
-            const dd = date.getDate();
-            const mm = months[date.getMonth()];
-            return `${day}, ${dd} ${mm}`;
+            if (!date || isNaN(date.getTime())) return '';
+            return `${_DAYS[date.getDay()]}, ${date.getDate()} ${_MONTHS[date.getMonth()]}`;
         }
 
         function formatCountdown(diffMs) {
-            if (diffMs <= 0) return "Selesai";
-            const h = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
-            const m = Math.floor((diffMs / 1000 / 60) % 60);
-            const s = Math.floor((diffMs / 1000) % 60);
+            if (diffMs <= 0) return 'Selesai';
+            const h = Math.floor(diffMs / 3600000);
+            const m = Math.floor((diffMs % 3600000) / 60000);
+            const s = Math.floor((diffMs % 60000) / 1000);
             if (h > 0) return `${h}j ${m}m ${s}d`;
             return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
         }
 
         function updateClock() {
             const now = new Date();
-            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-            const day = days[now.getDay()];
-            const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            timeText.innerText = `${day}, ${timeStr}`;
+            const timeStr = now.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+            timeText.textContent = `${_DAYS[now.getDay()]}, ${timeStr}`;
         }
 
         function setAppStatus(state) {
-            statusContainer.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-sm transition-all duration-300';
-            switch (state) {
-                case 'online':
-                    statusContainer.classList.add('bg-white/20', 'backdrop-blur-md', 'border-white/20');
-                    statusDot.className = 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)] animate-pulse';
-                    statusText.innerText = 'ONLINE';
-                    statusText.className = 'text-[9px] font-bold text-white uppercase tracking-widest';
-                    break;
-                case 'offline':
-                case 'error':
-                    statusContainer.classList.add('bg-rose-500/80', 'backdrop-blur-md', 'border-rose-400/50');
-                    statusDot.className = 'w-2 h-2 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.6)]';
-                    statusText.innerText = 'TERPUTUS';
-                    statusText.className = 'text-[9px] font-bold text-white uppercase tracking-widest';
-                    break;
-                case 'sync':
-                    statusContainer.classList.add('bg-white/10', 'backdrop-blur-md', 'border-white/10');
-                    statusDot.className = 'w-2 h-2 rounded-full bg-blue-300 animate-ping';
-                    statusText.innerText = 'SYNC';
-                    statusText.className = 'text-[9px] font-bold text-white/80 uppercase tracking-widest';
-                    break;
-            }
+            // [OPT-13] Gunakan setAttribute class sekali, bukan multiple classList ops
+            const configs = {
+                online: {
+                    container: 'flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-sm transition-all duration-300 bg-white/20 backdrop-blur-md border-white/20',
+                    dot: 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)] animate-pulse',
+                    text: 'ONLINE'
+                },
+                offline: {
+                    container: 'flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-sm transition-all duration-300 bg-rose-500/80 backdrop-blur-md border-rose-400/50',
+                    dot: 'w-2 h-2 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.6)]',
+                    text: 'TERPUTUS'
+                },
+                sync: {
+                    container: 'flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-sm transition-all duration-300 bg-white/10 backdrop-blur-md border-white/10',
+                    dot: 'w-2 h-2 rounded-full bg-blue-300 animate-ping',
+                    text: 'SYNC'
+                }
+            };
+            const cfg = configs[state] || configs.offline;
+            statusContainer.className = cfg.container;
+            statusDot.className = cfg.dot;
+            statusText.textContent = cfg.text;
         }
 
+        // ==========================================
+        // DATA FETCH
+        // ==========================================
         async function fetchData(force = false) {
             const now = Date.now();
             const lastSync = parseInt(localStorage.getItem('last_sync_timestamp') || 0);
             const cachedData = localStorage.getItem('cached_exams_data');
-            const COOLDOWN_MS = 10000; // 10 Detik Throttling
+            const COOLDOWN_MS = 10000;
 
             const btn = document.getElementById('manualRefreshBtn');
             const btnText = document.getElementById('refreshBtnText');
 
-            // Tampilkan Skeleton Loading awal (hanya jika tidak ada cache)
             if (!cachedData) {
                 elLoading.classList.remove('hidden');
             }
             elError.classList.add('hidden');
             elEmpty.classList.add('hidden');
-            
-            // ANTI-SPAM LOGIC: Jika baru saja sync, jangan tembak server lagi
+
             if (!force && cachedData && (now - lastSync < COOLDOWN_MS)) {
-                console.info("Anti-Spam: Menggunakan cache lokal (Data masih segar).");
                 setAppStatus('online');
-                const data = JSON.parse(cachedData);
-                processFetchedData(data);
+                processFetchedData(JSON.parse(cachedData));
                 return;
             }
 
             if (force && btn) {
                 btn.disabled = true;
-                if (btnText) btnText.innerText = "Memperbarui...";
+                if (btnText) btnText.textContent = 'Memperbarui...';
             }
 
             setAppStatus('sync');
 
             try {
-                let data = [];
+                let data;
                 if (USE_DUMMY_DATA) {
-                    await new Promise(r => setTimeout(r, 800)); 
-                    const todayCurrent = new Date();
-                    const formatForJSON = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                    await new Promise(r => setTimeout(r, 600));
+                    const t = new Date();
+                    const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
                     data = {
                         exams: [
-                            { "id": "1", "nama": "Matematika X - Semester 1", "link": "https://forms.gle/demo1", "start": formatForJSON(new Date(todayCurrent.getTime() - 1800000)), "end": formatForJSON(new Date(todayCurrent.getTime() + 5400000)), "status": "aktif", "token": "MATH10" },
-                            { "id": "2", "nama": "Bahasa Indonesia X", "link": "https://forms.gle/demo2", "start": formatForJSON(new Date(todayCurrent.getTime() + 7200000)), "end": formatForJSON(new Date(todayCurrent.getTime() + 14400000)), "status": "aktif", "token": "INDO10" }
+                            { id:"1", nama:"Matematika X - Semester 1", link:"https://forms.gle/demo1", start:fmt(new Date(t-1800000)), end:fmt(new Date(t+5400000)), status:"aktif", token:"MATH10" },
+                            { id:"2", nama:"Bahasa Indonesia X", link:"https://forms.gle/demo2", start:fmt(new Date(t+7200000)), end:fmt(new Date(t+14400000)), status:"aktif", token:"INDO10" }
                         ],
                         config: { proctorKey: PROCTOR_KEY }
                     };
                 } else {
-                    const response = await fetch(URL_API);
-                    if (!response.ok) throw new Error("Gagal terhubung ke server.");
+                    // [OPT-14] AbortController: timeout 8 detik, tidak nunggu selamanya
+                    const ctrl = new AbortController();
+                    const timer = setTimeout(() => ctrl.abort(), 8000);
+                    const response = await fetch(URL_API, { signal: ctrl.signal });
+                    clearTimeout(timer);
+                    if (!response.ok) throw new Error('Gagal terhubung ke server.');
                     data = await response.json();
 
                     if (data.retryAlert) {
@@ -676,135 +626,105 @@
 
                 if (data.error) throw new Error(data.message);
 
-                // Update Cache
                 localStorage.setItem('cached_exams_data', JSON.stringify(data));
                 localStorage.setItem('last_sync_timestamp', now.toString());
-
                 processFetchedData(data);
                 setAppStatus('online');
 
             } catch (err) {
-                console.error(err);
                 setAppStatus('error');
-                
-                // Jika error tapi ada cache, gunakan cache sebagai fallback darurat
                 if (cachedData) {
-                    console.warn("Server Error: Menggunakan data cache sebagai fallback.");
                     processFetchedData(JSON.parse(cachedData));
                 } else {
                     elLoading.classList.add('hidden');
                     elError.classList.remove('hidden');
-                    document.getElementById('errorMessage').innerText = err.message || "Gagal menghubungi peladen sekolah.";
+                    document.getElementById('errorMessage').textContent = err.name === 'AbortError' ? 'Koneksi timeout. Periksa jaringan Anda.' : (err.message || 'Gagal menghubungi peladen sekolah.');
                 }
             } finally {
                 if (btn) {
                     setTimeout(() => {
                         btn.disabled = false;
-                        if (btnText) btnText.innerText = "Perbarui Data";
+                        if (btnText) btnText.textContent = 'Perbarui Data';
                     }, 2000);
                 }
             }
         }
 
-        // Fungsi Helper untuk memproses data hasil fetch/cache
         function processFetchedData(data) {
             let examsArray = Array.isArray(data) ? data : (data.exams || []);
-            
-            if (data.config && data.config.proctorKey) {
+            if (data.config?.proctorKey) {
                 PROCTOR_KEY = data.config.proctorKey;
                 localStorage.setItem('last_proctor_key', PROCTOR_KEY);
             }
-
             examsBank = examsArray.map(item => ({
                 ...item,
                 startObj: parseDate(item.start),
                 endObj: parseDate(item.end)
             }));
-
             processAndRenderExams();
         }
 
         function processAndRenderExams() {
             const now = new Date();
             let validExamsCount = 0;
-            secureLinks = {}; 
-            elList.innerHTML = '';
+            secureLinks = {};
+
+            // [OPT-15] Build HTML via array join, bukan string concat berulang
+            const fragments = [];
 
             examsBank.forEach(exam => {
                 if (exam.status?.toLowerCase() !== 'aktif') return;
-
-                const isUpcomingStr = now < exam.startObj;
-                const isActiveStr = now >= exam.startObj && now <= exam.endObj;
-                const isFinishedStr = now > exam.endObj;
-
-                if (isFinishedStr) return; 
+                const isActive = now >= exam.startObj && now <= exam.endObj;
+                const isFinished = now > exam.endObj;
+                if (isFinished) return;
 
                 validExamsCount++;
                 secureLinks[exam.id] = exam.link;
 
-                // DESIGN TERBARU KARTU UJIAN (SPLIT CARD)
-                const cardHtml = `
-                    <div class="bg-white rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.06)] relative flex flex-col mb-6 border border-slate-100/50 overflow-hidden transform transition-transform hover:-translate-y-1" id="card-${exam.id}">
-                        
-                        <!-- Top status line -->
-                        <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r ${isActiveStr ? 'from-indigo-500 to-blue-500' : 'from-slate-200 to-slate-200'} z-10"></div>
-                        
-                        <!-- Card Body (Info Area) -->
-                        <div class="p-5 sm:p-6 pb-3 sm:pb-4 relative">
-                            ${isActiveStr ? '<div class="absolute -top-10 -right-10 w-32 h-32 bg-indigo-50 rounded-full blur-2xl z-0 pointer-events-none"></div>' : ''}
-                            
-                            <div class="flex justify-between items-start mb-2 sm:mb-3 relative z-10">
-                                <div class="flex flex-col">
-                                    <div class="flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 ${isActiveStr ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-100 text-slate-500'} rounded-lg inline-flex w-max mb-2.5 sm:mb-3">
-                                        ${isActiveStr ? '<svg class="w-3.5 h-3.5 text-indigo-600 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>' : '<svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'}
-                                        <span class="text-[8px] sm:text-[9px] font-extrabold uppercase tracking-[0.15em]">${isActiveStr ? 'ZONA AKTIF' : 'ZONA TERJADWAL'}</span>
-                                    </div>
-                                    <h3 class="text-[16px] sm:text-[18px] font-extrabold text-slate-800 leading-snug tracking-tight pr-2 sm:pr-4">${exam.nama}</h3>
-                                </div>
+                const timeInfo = exam.start.split(' ')[1] + ' — ' + exam.end.split(' ')[1];
+                const countdownId = isActive ? `countdown-${exam.id}` : `countdown-start-${exam.id}`;
+                const statusLabel = isActive ? 'ZONA AKTIF' : 'ZONA TERJADWAL';
+                const statusIcon = isActive
+                    ? `<svg class="w-3.5 h-3.5 text-indigo-600 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>`
+                    : `<svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`;
+
+                const actionBtn = isActive
+                    ? `<button onclick="openTokenModal('${exam.id}','${exam.nama.replace(/'/g,"\\'")}','${exam.id}')" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold text-[13px] rounded-[0.85rem] shadow-[0_6px_20px_rgba(79,70,229,0.25)] transition-all flex justify-center items-center gap-2"><span>KERJAKAN SEKARANG</span><svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></button>`
+                    : `<button disabled class="w-full py-3.5 bg-slate-200/80 text-slate-400 font-bold text-[13px] rounded-[0.85rem] cursor-not-allowed border border-slate-200/50">BELUM DIBUKA</button>`;
+
+                fragments.push(`
+                    <div class="bg-white rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex flex-col border border-slate-100/50 overflow-hidden" id="card-${exam.id}">
+                        <div class="h-1.5 w-full bg-gradient-to-r ${isActive ? 'from-indigo-500 to-blue-500' : 'from-slate-200 to-slate-200'}"></div>
+                        <div class="p-5 pb-3 relative">
+                            <div class="flex items-center gap-1.5 px-2 py-1.5 ${isActive ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-100 text-slate-500'} rounded-lg inline-flex w-max mb-2.5">
+                                ${statusIcon}
+                                <span class="text-[8px] font-extrabold uppercase tracking-[0.15em]">${statusLabel}</span>
                             </div>
-                            
-                            <div class="flex items-center gap-2 text-slate-500 relative z-10 mb-1 mt-2 sm:mt-3">
-                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                <p class="text-[11px] sm:text-[12px] font-semibold tracking-wide">
-                                    <span class="text-indigo-600/80 font-bold">${formatDateIndo(exam.startObj)}</span>
-                                    <span class="mx-1 opacity-30">|</span>
-                                    ${exam.start.split(' ')[1]} — ${exam.end.split(' ')[1]}
-                                </p>
+                            <h3 class="text-[16px] font-extrabold text-slate-800 leading-snug tracking-tight pr-4">${exam.nama}</h3>
+                            <div class="flex items-center gap-2 text-slate-500 mt-2">
+                                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <p class="text-[11px] font-semibold tracking-wide"><span class="text-indigo-600/80 font-bold">${formatDateIndo(exam.startObj)}</span><span class="mx-1 opacity-30">|</span>${timeInfo}</p>
                             </div>
                         </div>
-
-                        <!-- Card Footer (Action Area) -->
-                        <div class="${isActiveStr ? 'bg-indigo-50/30' : 'bg-slate-50/50'} p-5 sm:p-6 pt-4 sm:pt-5 border-t border-slate-100 mt-auto flex flex-col gap-3 sm:gap-4 relative z-10">
-                            
+                        <div class="${isActive ? 'bg-indigo-50/30' : 'bg-slate-50/50'} p-5 pt-4 border-t border-slate-100 flex flex-col gap-3">
                             <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-1 sm:gap-1.5">
-                                    ${isActiveStr ? '<svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' : '<svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>'}
-                                    <span class="text-[9px] sm:text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">${isActiveStr ? 'WAKTU TERSISA:' : 'DIBUKA DALAM:'}</span>
-                                </div>
-                                <span class="text-[13px] sm:text-sm font-black ${isActiveStr ? 'text-rose-500' : 'text-slate-500'} font-mono bg-white px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg shadow-sm border border-slate-100/80 tracking-wider" id="${isActiveStr ? 'countdown-'+exam.id : 'countdown-start-'+exam.id}">--:--:--</span>
+                                <span class="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest">${isActive ? 'WAKTU TERSISA:' : 'DIBUKA DALAM:'}</span>
+                                <span class="text-[13px] font-black ${isActive ? 'text-rose-500' : 'text-slate-500'} font-mono bg-white px-2.5 py-1 rounded-lg shadow-sm border border-slate-100/80 tracking-wider" id="${countdownId}">--:--</span>
                             </div>
-                            
-                            ${isActiveStr ? `
-                                <button onclick="openTokenModal('${exam.id}', '${exam.nama}')" class="w-full py-3.5 sm:py-4 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold text-[13px] sm:text-[14px] rounded-[0.85rem] sm:rounded-xl shadow-[0_6px_20_rgba(79,70,229,0.25)] transition-all flex justify-center items-center gap-2">
-                                    <span>KERJAKAN SEKARANG</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-                                </button>
-                            ` : `
-                                <button disabled class="w-full py-3.5 sm:py-4 bg-slate-200/80 text-slate-400 font-bold text-[13px] sm:text-[14px] rounded-[0.85rem] sm:rounded-xl cursor-not-allowed border border-slate-200/50 shadow-inner">
-                                    BELUM DIBUKA
-                                </button>
-                            `}
+                            ${actionBtn}
                         </div>
                     </div>
-                `;
-                elList.insertAdjacentHTML('beforeend', cardHtml);
+                `);
             });
 
-            // Sembunyikan Skeleton & Tampilkan Konten Asli
+            // [OPT-16] Satu DOM write, bukan banyak insertAdjacentHTML
+            elList.innerHTML = fragments.join('');
+
             elLoading.classList.add('hidden');
             if (validExamsCount === 0) {
                 elEmpty.classList.remove('hidden');
                 elList.classList.add('hidden');
+                elList.classList.remove('flex');
             } else {
                 elEmpty.classList.add('hidden');
                 elList.classList.remove('hidden');
@@ -815,177 +735,140 @@
         function startCountdowns() {
             countdownTimer = setInterval(() => {
                 const now = new Date();
-
                 examsBank.forEach(exam => {
                     const elEnd = document.getElementById(`countdown-${exam.id}`);
                     const elStart = document.getElementById(`countdown-start-${exam.id}`);
-
                     if (elEnd && now <= exam.endObj) {
-                        elEnd.innerText = formatCountdown(exam.endObj - now);
-                        if (now >= exam.endObj) fetchData();
+                        elEnd.textContent = formatCountdown(exam.endObj - now);
+                        if (now > exam.endObj) fetchData();
                     }
-
                     if (elStart && now < exam.startObj) {
-                        elStart.innerText = formatCountdown(exam.startObj - now);
-                        if (now >= exam.startObj) fetchData();
-                    }
-
-                    if (kioskExamId === exam.id) {
-                        const kTimer = document.getElementById('kioskTimer');
-                        if (kTimer) {
-                            if (now <= exam.endObj) {
-                                kTimer.innerText = formatCountdown(exam.endObj - now);
-                            } else {
-                                kTimer.innerText = "WAKTU HABIS";
-                                kTimer.classList.replace('text-emerald-400', 'text-rose-400');
-                                kTimer.classList.replace('border-white/10', 'border-rose-400/30');
-                                kTimer.classList.add('bg-rose-900/40');
-                            }
-                        }
+                        const diff = exam.startObj - now;
+                        elStart.textContent = formatCountdown(diff);
+                        if (diff <= 0) fetchData();
                     }
                 });
-
             }, 1000);
         }
 
+        // ==========================================
+        // TOKEN MODAL
+        // ==========================================
         function openTokenModal(examId, examName) {
             activeSelectedExamId = examId;
-            document.getElementById('modalExamName').innerText = examName;
+            document.getElementById('modalExamName').textContent = examName;
             document.getElementById('tokenInput').value = '';
             document.getElementById('tokenError').classList.add('hidden');
 
             const modal = document.getElementById('tokenModal');
-            const modalContent = document.getElementById('tokenModalContent');
-
+            const mc = document.getElementById('tokenModalContent');
             modal.classList.remove('hidden');
-            setTimeout(() => {
+            requestAnimationFrame(() => {
                 modal.style.opacity = '1';
-                modalContent.classList.remove('translate-y-full', 'sm:scale-95');
-                modalContent.classList.add('translate-y-0', 'sm:scale-100');
+                mc.classList.remove('translate-y-full', 'sm:scale-95');
+                mc.classList.add('translate-y-0', 'sm:scale-100');
                 document.getElementById('tokenInput').focus();
-            }, 10);
+            });
         }
 
         function closeTokenModal() {
             const modal = document.getElementById('tokenModal');
-            const modalContent = document.getElementById('tokenModalContent');
-
+            const mc = document.getElementById('tokenModalContent');
             modal.style.opacity = '0';
-            modalContent.classList.remove('translate-y-0', 'sm:scale-100');
-            modalContent.classList.add('translate-y-full', 'sm:scale-95');
-
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                activeSelectedExamId = null;
-            }, 300);
+            mc.classList.remove('translate-y-0', 'sm:scale-100');
+            mc.classList.add('translate-y-full', 'sm:scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); activeSelectedExamId = null; }, 300);
         }
 
         function submitToken() {
             if (!activeSelectedExamId) return;
-
             const inputVal = document.getElementById('tokenInput').value.trim().toUpperCase();
             const examInfo = examsBank.find(e => e.id === activeSelectedExamId);
 
-            if (examInfo && examInfo.token) {
+            if (examInfo?.token) {
                 if (inputVal !== examInfo.token.toUpperCase()) {
                     document.getElementById('tokenError').classList.remove('hidden');
-                    const modalContent = document.getElementById('tokenModalContent');
-                    modalContent.classList.add('animate-shake');
-                    modalContent.animate([
-                        { transform: 'translateX(0px)' },
-                        { transform: 'translateX(-6px)' },
-                        { transform: 'translateX(6px)' },
-                        { transform: 'translateX(0px)' }
-                    ], { duration: 300 });
+                    document.getElementById('tokenModalContent').animate(
+                        [{ transform:'translateX(0)' },{ transform:'translateX(-6px)' },{ transform:'translateX(6px)' },{ transform:'translateX(0)' }],
+                        { duration: 300 }
+                    );
                     return;
                 }
-            } else {
-                if (inputVal === "") {
-                    document.getElementById('tokenError').classList.remove('hidden');
-                    return;
-                }
+            } else if (!inputVal) {
+                document.getElementById('tokenError').classList.remove('hidden');
+                return;
             }
-
             executeSecureRedirect(activeSelectedExamId);
         }
 
+        // Enter key on token input
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('tokenInput')?.addEventListener('keydown', e => {
+                if (e.key === 'Enter') submitToken();
+            });
+        });
+
+        // ==========================================
+        // KIOSK / FULLSCREEN
+        // ==========================================
         function requestFullscreenLock() {
-            const elem = document.documentElement;
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen().catch(e => console.log(e));
-            } else if (elem.webkitRequestFullscreen) {
-                elem.webkitRequestFullscreen().catch(e => console.log(e));
-            } else if (elem.msRequestFullscreen) {
-                elem.msRequestFullscreen().catch(e => console.log(e));
-            }
+            const el = document.documentElement;
+            (el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen)?.call(el)?.catch(() => {});
         }
 
         function exitFullscreenLock() {
-            if (document.exitFullscreen) {
-                document.exitFullscreen().catch(e => console.log(e));
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen().catch(e => console.log(e));
-            } else if (document.msExitFullscreen) {
-                document.msExitFullscreen().catch(e => console.log(e));
-            }
+            (document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen)?.call(document)?.catch(() => {});
         }
 
         async function exitKioskMode() {
             try {
-                // Ensure interaction: provide immediate visual feedback if possible
-                const isConfirmed = await CustomModal.confirm(
-                    "YAKIN INGIN KELUAR DARI UJIAN?\n\nJika belum menekan tombol Submit/Kirim di dalam formulir, jawaban Anda mungkin hilang!", 
-                    "Konfirmasi Keluar"
+                const ok = await CustomModal.confirm(
+                    'YAKIN INGIN KELUAR DARI UJIAN?\n\nJika belum menekan tombol Submit/Kirim di formulir, jawaban Anda mungkin hilang!',
+                    'Konfirmasi Keluar'
                 );
-
-                if(isConfirmed) {
-                    isLeavingKiosk = true; // Flag to prevent violation modal during exit
+                if (ok) {
+                    isLeavingKiosk = true;
                     stopDeviceMonitoring();
                     releaseWakeLock();
                     exitFullscreenLock();
                     const kiosk = document.getElementById('kioskContainer');
-                    if(kiosk) {
-                        kiosk.style.opacity = '0';
-                        kiosk.style.transition = 'opacity 0.3s ease-out';
+                    if (kiosk) {
+                        kiosk.style.cssText = 'opacity:0;transition:opacity 0.3s ease-out';
                         setTimeout(() => {
                             kiosk.remove();
                             kioskExamId = null;
-                            document.body.style.overflow = "auto";
+                            document.body.style.overflow = 'auto';
                             fetchData();
                         }, 300);
                     }
                 }
-            } catch (err) {
-                // Fallback jika modal gagal (jarang terjadi tapi aman)
-                if(confirm("YAKIN INGIN KELUAR DARI UJIAN?")) {
-                    location.reload();
-                }
+            } catch {
+                if (confirm('YAKIN INGIN KELUAR DARI UJIAN?')) location.reload();
             }
         }
 
         async function executeSecureRedirect(examId) {
             const link = secureLinks[examId];
             const examInfo = examsBank.find(e => e.id === examId);
-            
             if (!link || !examInfo) {
-                await CustomModal.alert("Link ujian tidak ditemukan atau sesi invalid.", "Gagal");
+                await CustomModal.alert('Link ujian tidak ditemukan atau sesi invalid.', 'Gagal');
                 fetchData();
                 return;
             }
 
             closeTokenModal();
             kioskExamId = examId;
-            document.body.style.overflow = "hidden";
+            document.body.style.overflow = 'hidden';
             violationCount = parseInt(localStorage.getItem(`violation_${examId}`)) || 0;
 
             const kioskHtml = `
-                <div id="kioskContainer" class="fixed inset-0 z-[10000] bg-slate-50 flex flex-col h-[100dvh] w-[100dvw] transition-opacity duration-300">
-                    <div class="bg-slate-900 border-b border-white/10 text-white px-4 py-3 flex justify-between items-center shadow-xl relative z-[10001]">
+                <div id="kioskContainer" class="fixed inset-0 z-[10000] bg-slate-50 flex flex-col h-[100dvh] w-[100dvw]" style="opacity:1;transition:opacity 0.3s">
+                    <div class="bg-slate-900 border-b border-white/10 text-white px-4 py-3 flex justify-between items-center shadow-xl z-[10001]">
                         <div class="flex items-center gap-3 overflow-hidden flex-1">
                             <div class="flex items-center gap-1.5 bg-black/40 border border-white/5 py-1 px-2.5 rounded-xl">
                                 <div class="flex items-center gap-1.5 pr-2 border-r border-white/10">
                                     <div class="w-3.5 h-3.5 flex items-center justify-center text-emerald-400" id="kioskBatteryIcon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M20,10V14H22V10H20M18,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H18A1,1 0 0,0 19,17V7A1,1 0 0,0 18,6Z" /></svg>
+                                        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M20,10V14H22V10H20M18,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H18A1,1 0 0,0 19,17V7A1,1 0 0,0 18,6Z"/></svg>
                                     </div>
                                     <span class="text-[10px] font-black font-mono text-white/90" id="kioskBatteryText">--%</span>
                                 </div>
@@ -997,212 +880,144 @@
                                         <div class="w-0.5 h-2.5 bg-white/20 rounded-full"></div>
                                     </div>
                                 </div>
-                                <div class="pl-2 ml-1.5 border-l border-white/10 flex items-center gap-1 ${violationCount > 0 ? '' : 'hidden'}" id="kioskViolationTracker" title="Pelanggaran">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-rose-500 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                <div class="pl-2 ml-1.5 border-l border-white/10 items-center gap-1 ${violationCount > 0 ? 'flex' : 'hidden'}" id="kioskViolationTracker">
+                                    <svg class="h-3.5 w-3.5 text-rose-500 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                                     <span class="text-[10px] font-black font-mono text-rose-400" id="kioskViolationCount">${violationCount}</span>
                                 </div>
                             </div>
-                            <span class="font-bold text-xs sm:text-[14px] text-slate-200 truncate mr-1 tracking-wide opacity-90">${examInfo.nama}</span>
-                            <span class="bg-black/50 border border-white/10 px-2.5 py-1 rounded-xl text-xs font-mono font-black tracking-widest text-emerald-400 whitespace-nowrap shadow-inner" id="kioskTimer">--:--</span>
+                            <span class="font-bold text-xs text-slate-200 truncate mr-1 tracking-wide opacity-90">${examInfo.nama}</span>
+                            <span class="bg-black/50 border border-white/10 px-2.5 py-1 rounded-xl text-xs font-mono font-black tracking-widest text-emerald-400 whitespace-nowrap" id="kioskTimer">--:--</span>
                         </div>
-                        <button onclick="exitKioskMode()" class="bg-rose-600 hover:bg-rose-500 active:scale-95 transition-transform duration-200 text-white text-[11px] sm:text-xs font-extrabold px-4 py-2 rounded-xl shadow-md whitespace-nowrap flex-shrink-0 ml-3">
-                            KELUAR
-                        </button>
+                        <button onclick="exitKioskMode()" class="bg-rose-600 hover:bg-rose-500 active:scale-95 text-white text-[11px] font-extrabold px-4 py-2 rounded-xl whitespace-nowrap flex-shrink-0 ml-3">KELUAR</button>
                     </div>
                     <div class="flex-1 w-full bg-slate-50 relative">
                         <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
-                             <div class="loader-dots relative w-20 h-5 mb-3"><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div></div>
-                             <p class="text-xs text-slate-500 font-semibold tracking-wide">Menghubungkan Halaman Ujian...</p>
+                            <div class="loader-dots relative w-20 h-5 mb-3"><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div></div>
+                            <p class="text-xs text-slate-500 font-semibold">Menghubungkan Halaman Ujian...</p>
                         </div>
-                        <iframe src="${link}" class="w-full h-full border-none z-10 relative bg-transparent" allow="fullscreen" sandbox="allow-scripts allow-top-navigation allow-forms allow-same-origin allow-popups allow-modals"></iframe>
+                        <iframe src="${link}" class="w-full h-full border-none z-10 relative bg-transparent" allow="fullscreen" sandbox="allow-scripts allow-top-navigation allow-forms allow-same-origin allow-popups allow-modals" loading="eager"></iframe>
                     </div>
                 </div>
             `;
-            
             document.body.insertAdjacentHTML('beforeend', kioskHtml);
+
+            // Kiosk timer
+            const kioskTimerEl = document.getElementById('kioskTimer');
+            if (kioskTimerEl) {
+                const updateKioskTimer = () => {
+                    const remaining = examInfo.endObj - new Date();
+                    if (remaining <= 0) { kioskTimerEl.textContent = 'SELESAI'; return; }
+                    kioskTimerEl.textContent = formatCountdown(remaining);
+                };
+                updateKioskTimer();
+                setInterval(updateKioskTimer, 1000);
+            }
+
             requestFullscreenLock();
-            
-            // Activate Security & Health Monitoring
             isLeavingKiosk = false;
             startDeviceMonitoring();
             setupAntiCheat();
             requestWakeLock();
         }
 
-        /**
-         * ANTI-CHEAT & DEVICE HEALTH LOGIC
-         */
+        // ==========================================
+        // ANTI-CHEAT & DEVICE MONITORING
+        // ==========================================
         async function startDeviceMonitoring() {
-            const updateStats = async () => {
+            const update = async () => {
                 if (isLeavingKiosk) return;
-                
-                // Update Battery
                 try {
                     if (navigator.getBattery) {
-                        const battery = await navigator.getBattery();
-                        const level = Math.round(battery.level * 100);
-                        const elText = document.getElementById('kioskBatteryText');
-                        const elIcon = document.getElementById('kioskBatteryIcon');
-                        if (elText) elText.innerText = level + '%';
-                        if (elIcon) elIcon.style.color = level < 20 ? '#fb7185' : (level < 50 ? '#fbbf24' : '#34d399');
+                        const bat = await navigator.getBattery();
+                        const lvl = Math.round(bat.level * 100);
+                        const elTxt = document.getElementById('kioskBatteryText');
+                        const elIco = document.getElementById('kioskBatteryIcon');
+                        if (elTxt) elTxt.textContent = lvl + '%';
+                        if (elIco) elIco.style.color = lvl < 20 ? '#fb7185' : lvl < 50 ? '#fbbf24' : '#34d399';
                     }
-                } catch (e) {}
-
-                // Update Network/Signal
+                } catch {}
                 const elSignal = document.getElementById('kioskSignalIcon');
                 if (elSignal) {
                     const bars = elSignal.children;
-                    const isOnline = navigator.onLine;
+                    const online = navigator.onLine;
                     for (let i = 0; i < bars.length; i++) {
-                        bars[i].className = `w-0.5 rounded-full ${isOnline ? 'bg-emerald-400' : 'bg-white/20'}`;
-                        bars[i].style.height = (1 + i * 0.5) * 4 + 'px';
+                        bars[i].className = `w-0.5 rounded-full ${online ? 'bg-emerald-400' : 'bg-white/20'}`;
+                        bars[i].style.height = ((1 + i * 0.5) * 4) + 'px';
                     }
                 }
             };
-            
-            updateStats();
-            healthTimer = setInterval(updateStats, 10000);
+            update();
+            healthTimer = setInterval(update, 10000);
         }
 
         function stopDeviceMonitoring() {
             if (healthTimer) clearInterval(healthTimer);
         }
 
-        function playViolationSound() {
-            try {
-                // Vibration (Tactile Alert) - Works on Android
-                if ('vibrate' in navigator) {
-                    navigator.vibrate([300, 100, 300, 100, 500]);
-                }
-
-                // Audio Context
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                
-                // Play a two-tone alarm (Be-Boop)
-                const playTone = (freq, start, duration) => {
-                    const osc = audioCtx.createOscillator();
-                    const gain = audioCtx.createGain();
-                    osc.type = 'square';
-                    osc.frequency.setValueAtTime(freq, start);
-                    gain.gain.setValueAtTime(0.1, start);
-                    gain.gain.exponentialRampToValueAtTime(0.01, start + duration);
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.start(start);
-                    osc.stop(start + duration);
-                };
-
-                const now = audioCtx.currentTime;
-                playTone(880, now, 0.15); // High tone
-                playTone(440, now + 0.2, 0.4); // Low tone
-            } catch (e) {
-                console.warn("Audio/Vibration Alert failed:", e);
-            }
-        }
-
         function setupAntiCheat() {
-            const handleViolation = async () => {
-                if (isLeavingKiosk || !kioskExamId) return;
-                
-                // Hanya picu jika aplikasi benar-benar tidak terlihat (keluar tab/app)
-                if (document.visibilityState === 'hidden') {
-                    violationCount++;
-                    
-                    // Mainkan suara & vibrasi
-                    playViolationSound();
-                    
-                    // Visual Flash pada Body
-                    document.body.classList.add('animate-violation');
-                    setTimeout(() => document.body.classList.remove('animate-violation'), 1000);
-
-                    // Simpan histori pelanggaran ke local storage agar persisten di perangkat
-                    localStorage.setItem(`violation_${kioskExamId}`, violationCount);
-                    
-                    // Update tampilan tracker
-                    const elTracker = document.getElementById('kioskViolationTracker');
-                    const elCount = document.getElementById('kioskViolationCount');
-                    if (elTracker && elCount) {
-                        elTracker.classList.remove('hidden');
-                        elCount.innerText = violationCount;
-                        elCount.classList.add('animate-ping');
-                        setTimeout(() => elCount.classList.remove('animate-ping'), 600);
-                    }
-
-                    await CustomModal.alert(
-                        `Peringatan Pelanggaran #${violationCount}!\n\nAnda dilarang keluar dari aplikasi atau membuka aplikasi lain selama ujian berlangsung. Aktivitas Anda telah dicatat oleh sistem lokal.`,
-                        "DETEKSI KECURANGAN"
-                    );
-                    
-                    // Re-lock jika memungkinkan
-                    requestFullscreenLock();
+            document.addEventListener('visibilitychange', async () => {
+                if (isLeavingKiosk || !kioskExamId || document.visibilityState !== 'hidden') return;
+                violationCount++;
+                localStorage.setItem(`violation_${kioskExamId}`, violationCount);
+                const elT = document.getElementById('kioskViolationTracker');
+                const elC = document.getElementById('kioskViolationCount');
+                if (elT && elC) {
+                    elT.classList.remove('hidden');
+                    elT.classList.add('flex');
+                    elC.textContent = violationCount;
                 }
-            };
-
-            // Gunakan visibilitychange sebagai standar deteksi yang paling akurat
-            // 'blur' sengaja dilepas karena memicu alarm palsu saat keyboard muncul atau klik di dalam iframe
-            document.addEventListener('visibilitychange', handleViolation);
+                await CustomModal.alert(`Peringatan #${violationCount}! Anda dilarang keluar dari aplikasi selama ujian berlangsung. Aktivitas Anda dicatat.`, 'DETEKSI KECURANGAN');
+                requestFullscreenLock();
+            });
         }
 
         async function requestWakeLock() {
             try {
-                if ('wakeLock' in navigator) {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                    console.log('Screen Wake Lock active');
-                }
-            } catch (err) {
-                console.warn(`${err.name}, ${err.message}`);
-            }
+                if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
+            } catch {}
         }
 
         function releaseWakeLock() {
-            if (wakeLock !== null) {
-                wakeLock.release().then(() => {
-                    wakeLock = null;
-                });
-            }
+            wakeLock?.release().then(() => { wakeLock = null; });
         }
 
+        // ==========================================
+        // PWA ENFORCEMENT
+        // ==========================================
         function setupPWAEnforcement() {
             let deferredPrompt;
 
+            // [OPT-17] Register SW setelah load, bukan di dalam load (sudah di DOMContentLoaded)
             if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('./sw.js').catch(err => console.error('SW Registration Failed:', err));
-                });
+                navigator.serviceWorker.register('./sw.js').catch(() => {});
             }
 
-            window.addEventListener('beforeinstallprompt', (e) => {
+            window.addEventListener('beforeinstallprompt', e => {
                 e.preventDefault();
                 deferredPrompt = e;
             });
 
-            // Multi-layer standalone detection:
-            // 1. CSS media query (most reliable)
-            // 2. iOS Safari native property  
-            // 3. URL param from manifest start_url
-            // 4. Window size heuristic (PWA app windows have no browser chrome overhead)
-            const mediaStandalone = window.matchMedia('(display-mode: standalone)').matches;
-            const iosStandalone = window.navigator.standalone === true;
-            const urlStandalone = new URLSearchParams(window.location.search).get('mode') === 'standalone';
-            const sessionBypass = sessionStorage.getItem('pwa_bypass') === '1';
-            const proctorBypass = localStorage.getItem('pwa_proctor_bypass') === 'true';
-            
-            const isStandalone = mediaStandalone || iosStandalone || urlStandalone || sessionBypass || proctorBypass;
+            const isStandalone =
+                window.matchMedia('(display-mode: standalone)').matches ||
+                window.navigator.standalone === true ||
+                new URLSearchParams(window.location.search).get('mode') === 'standalone' ||
+                sessionStorage.getItem('pwa_bypass') === '1' ||
+                localStorage.getItem('pwa_proctor_bypass') === 'true';
+
+            const ua = navigator.userAgent;
+            const isPC = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+            const isIos = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+            const isMacSafari = /Macintosh/.test(ua) && /Safari/.test(ua) && !/Chrome/.test(ua);
+            const isWebView = /(wv|WhatsApp|Instagram|Line|FBAN|FBAV|BytedanceWebview)/i.test(ua);
 
             const gate = document.getElementById('pwaInstallGate');
-            const isPC = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-            const isMacSafari = /Macintosh/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
-            const isWebView = /(wv|WhatsApp|Instagram|Line|FBAN|FBAV|BytedanceWebview)/i.test(navigator.userAgent);
 
-            // Helper: show manual install guide panel
-            function showManualPanel(title, step1, step2, titleColor) {
-                document.getElementById('pwaAndroidWrapper').classList.add('hidden');
-                document.getElementById('pwaAndroidWrapper').classList.remove('flex');
-                document.getElementById('pwaManualWrapper').classList.remove('hidden');
-                document.getElementById('pwaManualWrapper').classList.add('flex');
+            function showManualPanel(title, step1, step2, titleColor = '') {
+                document.getElementById('pwaAndroidWrapper').style.display = 'none';
+                const wrap = document.getElementById('pwaManualWrapper');
+                wrap.classList.add('show');
                 const titleEl = document.getElementById('pwaManualTitle');
-                titleEl.innerText = title;
+                titleEl.textContent = title;
                 if (titleColor) titleEl.style.color = titleColor;
                 document.getElementById('pwaManualStep1').innerHTML = step1;
                 document.getElementById('pwaManualStep2').innerHTML = step2;
@@ -1210,90 +1025,71 @@
 
             function showManualFallback() {
                 if (isIos || isMacSafari) {
-                    showManualPanel(
-                        "Panduan Khusus Apple (iOS)",
-                        'Tekan Ikon <strong class="text-blue-600">Share</strong> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg> di menu terbawah Browser Safari.',
-                        'Gulir ke bawah dan pilih <span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold">Add to Home Screen</span>'
-                    );
+                    showManualPanel('Panduan Khusus Apple (iOS)',
+                        'Tekan ikon <strong>Share</strong> di menu bawah browser Safari.',
+                        'Gulir ke bawah dan pilih <span class="step-key">Add to Home Screen</span>');
                 } else if (isWebView) {
-                    showManualPanel(
-                        "Buka di Browser Asli",
+                    showManualPanel('Buka di Browser Asli',
                         'Anda membuka Ujian dari dalam WhatsApp/Sosmed yang memblokir instalasi.',
-                        'Tekan <strong>Tiga Titik ⋮</strong> pojok kanan atas, lalu pilih <span class="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold">Buka di Chrome</span>.',
-                        '#e11d48'
-                    );
+                        'Tekan <strong>Tiga Titik ⋮</strong> pojok kanan atas, lalu pilih <span class="step-key" style="background:#dbeafe;color:#1d4ed8">Buka di Chrome</span>.', '#e11d48');
                 } else if (isPC) {
-                    showManualPanel(
-                        "Panduan Instalasi PC/Laptop",
-                        'Perhatikan <strong>Bilah Alamat (URL)</strong> di bagian kanan atas peramban Anda.',
-                        'Klik ikon Install <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg> atau pilih <span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold">Install Aplikasi</span>.'
-                    );
+                    showManualPanel('Panduan Instalasi PC/Laptop',
+                        'Perhatikan <strong>Bilah Alamat (URL)</strong> di bagian kanan atas browser Anda.',
+                        'Klik ikon Install atau pilih <span class="step-key">Install Aplikasi</span>.');
                 } else {
-                    showManualPanel(
-                        "Mohon Install Manual",
-                        'Tekan Ikon <strong>Tiga Titik ⋮</strong> di pojok kanan atas browser Anda.',
-                        'Pilih <span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold">Tambahkan ke Layar Utama</span> atau <span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold">Install Aplikasi</span>.'
-                    );
+                    showManualPanel('Mohon Install Manual',
+                        'Tekan ikon <strong>Tiga Titik ⋮</strong> di pojok kanan atas browser Anda.',
+                        'Pilih <span class="step-key">Tambahkan ke Layar Utama</span> atau <span class="step-key">Install Aplikasi</span>.');
                 }
             }
 
-            // Chrome Windows bug: display-mode:standalone sometimes returns false even in PWA window
-            const noBrowserChrome = isPC && (window.outerHeight > 0) && (Math.abs(window.outerHeight - window.innerHeight) < 80);
+            // Chrome Windows quirk
+            const noBrowserChrome = isPC && window.outerHeight > 0 && Math.abs(window.outerHeight - window.innerHeight) < 80;
             const isStandaloneApp = isStandalone || noBrowserChrome;
 
             if (isStandaloneApp) {
-                // ✅ Running as standalone / PWA - enter app
-                if (gate) gate.remove();
+                gate?.remove();
                 initApp();
             } else {
-                // Not standalone - show install gate
-                document.body.style.overflow = "hidden";
-                
-                // Show bypass button universally after 3 seconds as safety net for all bugged Chrome apps
+                document.body.style.overflow = 'hidden';
                 setTimeout(() => {
-                    const bypassBtn = document.getElementById('pwaBypassBtn');
-                    if (bypassBtn) bypassBtn.style.display = 'block';
+                    const b = document.getElementById('pwaBypassBtn');
+                    if (b) b.style.display = 'block';
                 }, 3000);
 
-                if (isIos || isMacSafari || isWebView) {
-                    showManualFallback();
-                }
+                if (isIos || isMacSafari || isWebView) showManualFallback();
 
                 document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
                     if (deferredPrompt) {
                         try {
                             deferredPrompt.prompt();
-                            const { outcome } = await deferredPrompt.userChoice;
+                            await deferredPrompt.userChoice;
                             deferredPrompt = null;
-                        } catch(e) {
-                            showManualFallback();
-                        }
+                        } catch { showManualFallback(); }
                     } else {
                         showManualFallback();
                     }
                 });
 
-                // PROCTOR SECRET BYPASS: Tap logo 5x to enter proctor mode
-                let logoTaps = 0;
-                let tapTimer;
+                // Proctor secret bypass: tap logo 5x
+                let logoTaps = 0, tapTimer;
                 const gateLogo = document.querySelector('#pwaInstallGate img');
                 if (gateLogo) {
                     gateLogo.style.cursor = 'pointer';
                     gateLogo.addEventListener('click', async () => {
                         logoTaps++;
                         clearTimeout(tapTimer);
-                        tapTimer = setTimeout(() => { logoTaps = 0; }, 2000); // Reset taps after 2s of inactivity
-
+                        tapTimer = setTimeout(() => { logoTaps = 0; }, 2000);
                         if (logoTaps >= 5) {
                             logoTaps = 0;
-                            const input = await CustomModal.prompt("MASUKKAN KODE OTORISASI PENGAWAS:", "KODE PENGAWAS");
+                            const input = await CustomModal.prompt('MASUKKAN KODE OTORISASI PENGAWAS:', 'KODE PENGAWAS');
                             if (input === PROCTOR_KEY) {
                                 localStorage.setItem('pwa_proctor_bypass', 'true');
-                                await CustomModal.alert("OTORISASI BERHASIL. Mode Pengawas diaktifkan untuk perangkat ini.", "Sukses");
-                                if (gate) gate.remove();
+                                await CustomModal.alert('OTORISASI BERHASIL. Mode Pengawas diaktifkan.', 'Sukses');
+                                gate?.remove();
                                 initApp();
                             } else if (input !== null) {
-                                await CustomModal.alert("KODE SALAH.", "Otorisasi Gagal");
+                                await CustomModal.alert('KODE SALAH.', 'Otorisasi Gagal');
                             }
                         }
                     });
@@ -1302,33 +1098,30 @@
         }
 
         function bypassAndEnter() {
-            // User confirms they already installed. Save flag to sessionStorage and bypass gate.
             sessionStorage.setItem('pwa_bypass', '1');
-            const gate = document.getElementById('pwaInstallGate');
-            if (gate) gate.remove();
+            document.getElementById('pwaInstallGate')?.remove();
             document.body.style.overflow = '';
             initApp();
         }
 
         function initApp() {
+            cacheDOMRefs();
+            CustomModal.init();
             fetchData();
             updateClock();
             clockTimer = setInterval(updateClock, 1000);
             function scheduleNextRefresh() {
-                const delayMs = 30000 + Math.floor(Math.random() * 15000);
                 refreshIntervalTimer = setTimeout(() => {
                     if (!activeSelectedExamId && !kioskExamId) fetchData();
                     scheduleNextRefresh();
-                }, delayMs);
+                }, 30000 + Math.floor(Math.random() * 15000));
             }
             scheduleNextRefresh();
             startCountdowns();
         }
 
-        window.addEventListener('DOMContentLoaded', setupPWAEnforcement);
-
-
-
+        // [OPT-18] Entry point: DOMContentLoaded (cepat) bukan load (lambat - nunggu gambar dll)
+        document.addEventListener('DOMContentLoaded', setupPWAEnforcement);
     </script>
 </body>
 </html>
