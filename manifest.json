@@ -10,15 +10,9 @@
   "icons": [
     {
       "src": "https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png",
-      "sizes": "any",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png",
       "sizes": "192x192 512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ]
 }
