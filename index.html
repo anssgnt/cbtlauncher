@@ -156,7 +156,7 @@
         <div class="bg-white rounded-[1.25rem] p-3.5 sm:p-4 shadow-[0_8px_30px_rgb(0,0,0,0.06)] mb-6 sm:mb-8 flex flex-col items-center justify-center border border-slate-100 transform transition-transform hover:scale-[1.01]">
             <div class="flex items-center gap-1.5 mb-1 sm:mb-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                <p class="text-[10px] font-extrabold text-indigo-600 uppercase tracking-[0.15em]">ASAT T.A 2025/2026</p>
+                <p class="text-[10px] font-extrabold text-indigo-600 uppercase tracking-[0.15em]">ASAS/ASAT T.A 2025/2026</p>
             </div>
             <div class="flex items-center gap-2 mt-0.5">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -238,47 +238,47 @@
     </main>
 
     <!-- Token Modal (Bottom Sheet style) -->
-    <div id="tokenModal" class="hidden fixed inset-0 z-[2147483646] flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all duration-300" style="opacity: 0;">
+    <div id="tokenModal" class="hidden fixed inset-0 z-[2147483646] flex items-start sm:items-center justify-center p-4 pt-10 sm:pt-4 transition-all duration-300" style="opacity: 0;">
         <!-- Backdrop Blur -->
         <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeTokenModal()"></div>
         
         <!-- Modal Content -->
-        <div class="bg-white relative rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden transform translate-y-full sm:translate-y-0 sm:scale-95 transition-transform duration-300" id="tokenModalContent">
+        <div class="bg-white relative rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl w-full max-w-[320px] sm:max-w-sm mx-auto overflow-hidden transform -translate-y-full sm:scale-95 transition-transform duration-300" id="tokenModalContent">
 
             <!-- Drag Handle (Mobile) -->
-            <div class="w-full flex justify-center pt-4 pb-2 sm:hidden absolute top-0 z-10 pointer-events-none">
+            <div class="w-full flex justify-center pt-3 pb-2 sm:hidden absolute top-0 z-10 pointer-events-none">
                 <div class="w-10 h-1.5 bg-slate-200 rounded-full"></div>
             </div>
 
-            <div class="p-8 pt-10 sm:pt-8 pb-5 flex flex-col items-center text-center">
-                <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-4 border border-indigo-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+            <div class="p-5 pt-8 sm:p-6 pb-4 flex flex-col items-center text-center">
+                <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-[1.1rem] flex items-center justify-center mb-3 border border-indigo-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                 </div>
-                <h3 class="text-xl font-extrabold text-slate-800 tracking-tight">KODE UJIAN</h3>
-                <p class="text-sm text-slate-500 font-semibold mt-1 truncate w-full px-4" id="modalExamName">Nama Ujian</p>
+                <h3 class="text-[17px] sm:text-lg font-extrabold text-slate-800 tracking-tight">KODE UJIAN</h3>
+                <p class="text-[12px] sm:text-[13px] text-slate-500 font-semibold mt-1 truncate w-full px-2" id="modalExamName">Nama Ujian</p>
             </div>
 
-            <div class="px-8 pb-6">
+            <div class="px-6 pb-5">
                 <div class="relative group">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <svg class="h-6 w-6 text-indigo-300 group-focus-within:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-indigo-300 group-focus-within:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                     </div>
-                    <input type="text" id="tokenInput" class="w-full bg-slate-50 border-2 border-slate-200/80 rounded-2xl pl-12 pr-4 py-4 font-mono text-center text-2xl font-black text-indigo-700 tracking-[0.2em] focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 transition-all uppercase placeholder:tracking-normal placeholder:font-bold placeholder:text-slate-300 placeholder:text-[15px]" placeholder="KODE AKSES" autocomplete="off" spellcheck="false" maxlength="10">
+                    <input type="text" id="tokenInput" class="w-full bg-slate-50 border-2 border-slate-200/80 rounded-xl pl-10 pr-3 py-3 font-mono text-center text-xl font-black text-indigo-700 tracking-[0.2em] focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 transition-all uppercase placeholder:tracking-normal placeholder:font-bold placeholder:text-slate-300 placeholder:text-[13px]" placeholder="KODE AKSES" autocomplete="off" spellcheck="false" maxlength="10">
                 </div>
-                <div id="tokenError" class="mt-3 hidden animate-pulse">
-                    <div class="flex items-center justify-center gap-1.5 bg-rose-50 text-rose-600 px-3 py-2 rounded-xl border border-rose-100 shadow-sm">
-                        <p class="text-xs font-bold">Kode salah, silakan cek ulang.</p>
+                <div id="tokenError" class="mt-2 hidden animate-pulse">
+                    <div class="flex items-center justify-center gap-1 bg-rose-50 text-rose-600 px-3 py-1.5 rounded-lg border border-rose-100 shadow-sm">
+                        <p class="text-[11px] font-bold">Kode salah, silakan cek ulang.</p>
                     </div>
                 </div>
             </div>
 
-            <div class="p-6 bg-slate-50 border-t border-slate-100 flex gap-3 pb-8 sm:pb-6">
-                <button onclick="closeTokenModal()" class="flex-[0.8] px-4 py-3.5 text-slate-500 bg-white border border-slate-300 rounded-[1rem] font-bold hover:bg-slate-50 active:scale-[0.98] transition-all focus:outline-none shadow-sm">
+            <div class="p-4 sm:p-5 bg-slate-50 border-t border-slate-100 flex gap-2.5 pb-6 sm:pb-5">
+                <button onclick="closeTokenModal()" class="flex-[0.8] px-3 py-3 text-slate-500 bg-white border border-slate-300 rounded-[0.85rem] text-[13px] font-bold hover:bg-slate-50 active:scale-[0.98] transition-all focus:outline-none shadow-sm">
                     Kembali
                 </button>
-                <button onclick="submitToken()" class="flex-[1.2] px-4 py-3.5 text-white bg-indigo-600 border border-transparent rounded-[1rem] font-bold hover:bg-indigo-700 shadow-[0_4px_10px_rgba(79,70,229,0.2)] active:scale-[0.98] transition-all focus:outline-none">
+                <button onclick="submitToken()" class="flex-[1.2] px-3 py-3 text-white bg-indigo-600 border border-transparent rounded-[0.85rem] text-[13px] font-bold hover:bg-indigo-700 shadow-[0_4px_10px_rgba(79,70,229,0.2)] active:scale-[0.98] transition-all focus:outline-none">
                     Mulai
                 </button>
             </div>
@@ -286,9 +286,9 @@
     </div>
 
     <!-- Custom Universal Modal (Alert/Confirm/Prompt) -->
-    <div id="customModal" class="hidden fixed inset-0 z-[2147483647] flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all duration-300" style="opacity: 0;">
+    <div id="customModal" class="hidden fixed inset-0 z-[2147483647] flex items-start sm:items-center justify-center p-4 pt-10 sm:pt-4 transition-all duration-300" style="opacity: 0;">
         <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" id="customModalBackdrop"></div>
-        <div class="bg-white relative rounded-t-[1.5rem] sm:rounded-[2rem] shadow-2xl w-full max-w-[320px] sm:max-w-sm mx-auto overflow-hidden transform translate-y-full sm:translate-y-0 sm:scale-95 transition-transform duration-300" id="customModalContent">
+        <div class="bg-white relative rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl w-full max-w-[320px] sm:max-w-sm mx-auto overflow-hidden transform -translate-y-full sm:scale-95 transition-transform duration-300" id="customModalContent">
             <div class="w-full flex justify-center pt-3 pb-2 sm:hidden absolute top-0 z-10 pointer-events-none">
                 <div class="w-10 h-1.5 bg-slate-200 rounded-full"></div>
             </div>
@@ -351,15 +351,25 @@
 
                     // Icon setup
                     let iconHtml = '';
-                    if (options.type === 'confirm') {
-                        iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
-                        this.icon.className = "w-12 h-12 bg-amber-50 text-amber-600 rounded-[1.1rem] flex items-center justify-center mb-3 border border-amber-100";
-                    } else if (options.type === 'prompt') {
-                        iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>';
-                        this.icon.className = "w-12 h-12 bg-indigo-50 text-indigo-600 rounded-[1.1rem] flex items-center justify-center mb-3 border border-indigo-100";
+                    if (options.type === 'danger') {
+                        iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 animate-pulse shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>';
+                        this.icon.className = "w-16 h-16 bg-rose-100 text-rose-600 rounded-[1.1rem] flex items-center justify-center mb-3 border border-rose-200 shadow-[0_0_20px_rgba(225,29,72,0.4)]";
+                        document.getElementById('customModalTitle').className = "text-[17px] sm:text-lg font-black text-rose-600 tracking-tight uppercase";
+                        this.confirmBtn.className = "flex-1 px-3 py-3 text-white bg-rose-600 border border-transparent rounded-[0.85rem] text-[13px] font-bold hover:bg-rose-700 shadow-[0_4px_15px_rgba(225,29,72,0.4)] active:scale-[0.98] transition-all focus:outline-none";
                     } else {
-                        iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
-                        this.icon.className = "w-12 h-12 bg-blue-50 text-blue-600 rounded-[1.1rem] flex items-center justify-center mb-3 border border-blue-100";
+                        document.getElementById('customModalTitle').className = "text-[17px] sm:text-lg font-extrabold text-slate-800 tracking-tight";
+                        this.confirmBtn.className = "flex-1 px-3 py-3 text-white bg-indigo-600 border border-transparent rounded-[0.85rem] text-[13px] font-bold hover:bg-indigo-700 shadow-[0_4px_10px_rgba(79,70,229,0.25)] active:scale-[0.98] transition-all focus:outline-none";
+                        
+                        if (options.type === 'confirm') {
+                            iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+                            this.icon.className = "w-12 h-12 bg-amber-50 text-amber-600 rounded-[1.1rem] flex items-center justify-center mb-3 border border-amber-100";
+                        } else if (options.type === 'prompt') {
+                            iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>';
+                            this.icon.className = "w-12 h-12 bg-indigo-50 text-indigo-600 rounded-[1.1rem] flex items-center justify-center mb-3 border border-indigo-100";
+                        } else {
+                            iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+                            this.icon.className = "w-12 h-12 bg-blue-50 text-blue-600 rounded-[1.1rem] flex items-center justify-center mb-3 border border-blue-100";
+                        }
                     }
                     this.icon.innerHTML = iconHtml;
 
@@ -368,7 +378,7 @@
                     // especially important on lower-end mobile devices inside expensive layouts
                     setTimeout(() => {
                         this.el.style.opacity = '1';
-                        this.content.classList.remove('translate-y-full', 'sm:scale-95');
+                        this.content.classList.remove('-translate-y-full', 'sm:scale-95');
                         this.content.classList.add('translate-y-0', 'sm:scale-100');
                         if (options.showInput) this.input.focus();
                     }, 50);
@@ -395,7 +405,7 @@
             hide() {
                 this.el.style.opacity = '0';
                 this.content.classList.remove('translate-y-0', 'sm:scale-100');
-                this.content.classList.add('translate-y-full', 'sm:scale-95');
+                this.content.classList.add('-translate-y-full', 'sm:scale-95');
                 setTimeout(() => {
                     this.el.classList.add('hidden');
                 }, 300);
@@ -403,6 +413,10 @@
 
             alert(message, title = 'Informasi') {
                 return this.show({ type: 'alert', title, message, showCancel: false, confirmText: 'OKE' });
+            },
+
+            danger(message, title = 'Peringatan') {
+                return this.show({ type: 'danger', title, message, showCancel: false, confirmText: 'SAYA MENGERTI' });
             },
 
             confirm(message, title = 'Konfirmasi') {
@@ -854,7 +868,7 @@
             modal.classList.remove('hidden');
             setTimeout(() => {
                 modal.style.opacity = '1';
-                modalContent.classList.remove('translate-y-full', 'sm:scale-95');
+                modalContent.classList.remove('-translate-y-full', 'sm:scale-95');
                 modalContent.classList.add('translate-y-0', 'sm:scale-100');
                 document.getElementById('tokenInput').focus();
             }, 10);
@@ -866,7 +880,7 @@
 
             modal.style.opacity = '0';
             modalContent.classList.remove('translate-y-0', 'sm:scale-100');
-            modalContent.classList.add('translate-y-full', 'sm:scale-95');
+            modalContent.classList.add('-translate-y-full', 'sm:scale-95');
 
             setTimeout(() => {
                 modal.classList.add('hidden');
@@ -1090,9 +1104,9 @@
                     }
 
                     AlarmSystem.start();
-                    await CustomModal.alert(
-                        `Peringatan Pelanggaran #${violationCount}!\n\nAnda dilarang keluar dari aplikasi atau membuka aplikasi lain selama ujian berlangsung. Aktivitas Anda telah dicatat oleh sistem lokal.\n\nSilakan tutup pesan ini untuk mematikan alarm.`,
-                        "DETEKSI KECURANGAN"
+                    await CustomModal.danger(
+                        `Peringatan Pelanggaran #${violationCount}!\n\nAnda meminimalkan aplikasi atau membuka aplikasi lain selama ujian berlangsung. Pelanggaran Anda dicatat.\n\nKlik mengerti untuk mematikan alarm.`,
+                        "KECURANGAN TERDETEKSI"
                     );
                     AlarmSystem.stop();
                     isViolationModalOpen = false;
