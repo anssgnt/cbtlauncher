@@ -46,6 +46,9 @@ self.addEventListener('fetch', event => {
   
   const url = event.request.url;
 
+  // Only handle http and https schemes (ignore chrome-extension, etc.)
+  if (!url.startsWith('http')) return;
+
   // Bypass cache for Google Apps Script API
   if (url.includes('script.google.com')) return;
 
@@ -64,7 +67,7 @@ self.addEventListener('fetch', event => {
       }).catch(() => {
         // Fallback for failed network requests
         if (url.includes('logo')) return caches.match(FALLBACK_LOGO);
-        return null; // Return null if no cache and network fails
+        return null;
       });
 
       return cachedResponse || fetchPromise;
