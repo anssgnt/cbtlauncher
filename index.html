@@ -2,1612 +2,1311 @@
 <html lang="id">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>CBT Online – SMP Negeri 1 Dander</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Spensada Exam</title>
 
-  <!-- Preconnect: sambungkan ke CDN lebih awal agar download lebih cepat -->
-  <link rel="preconnect" href="https://www.gstatic.com">
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-  <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com">
+    <!-- PWA Setup -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#1E40AF">
+    <link rel="apple-touch-icon" href="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
 
-  <!-- CSS: load pertama (non-blocking) -->
-  <link rel="stylesheet" href="style.css">
+    <!-- Tailwind CSS (Pinned version for production) -->
+    <script src="https://cdn.tailwindcss.com/3.4.1"></script>
+    
+    <!-- Favicon Fix 404 -->
+    <link rel="icon" type="image/x-icon" href="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png">
 
-  <!-- Dynamic PWA Manifest -->
-  <link id="pwa-manifest" rel="manifest" href="">
+    <!-- Google Fonts: Plus Jakarta Sans for premium feel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-  <!-- Firebase SDK: defer = download paralel, eksekusi SETELAH HTML selesai di-parse -->
-  <script defer src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <style>
+        /* Base Styles & Typography */
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            background-color: #f1f5f9; /* Soft slate background */
+            -webkit-font-smoothing: antialiased;
+            overscroll-behavior-y: none; /* Mencegah pull-to-refresh di Chrome Mobile */
+        }
 
-  <!-- JSZip: defer, hanya dipakai saat import Excel -->
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+        /* Input rules */
+        input {
+            -webkit-user-select: auto;
+            user-select: auto;
+        }
+        input[type="text"] {
+            font-size: 16px; /* Prevent iOS zoom */
+        }
 
-  <!-- XLSX: defer (tidak pakai async lagi agar urutan eksekusi terjaga) -->
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        /* Skeleton Loading Animation */
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
+        }
+        .skeleton {
+            position: relative;
+            overflow: hidden;
+            background-color: #e2e8f0;
+            border-radius: 0.5rem;
+        }
+        .skeleton::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            transform: translateX(-100%);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 0px; } /* Clean, no scrollbar like mobile apps */
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Loader Animation */
+        .loader-dots div { animation-timing-function: cubic-bezier(0, 1, 1, 0); }
+        .loader-dots div:nth-child(1) { left: 8px; animation: loader-dots1 0.6s infinite; }
+        .loader-dots div:nth-child(2) { left: 8px; animation: loader-dots2 0.6s infinite; }
+        .loader-dots div:nth-child(3) { left: 32px; animation: loader-dots2 0.6s infinite; }
+        .loader-dots div:nth-child(4) { left: 56px; animation: loader-dots3 0.6s infinite; }
+        @keyframes loader-dots1 { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        @keyframes loader-dots3 { 0% { transform: scale(1); } 100% { transform: scale(0); } }
+        @keyframes loader-dots2 { 0% { transform: translate(0, 0); } 100% { transform: translate(24px, 0); } }
+    </style>
 </head>
 
-<body>
+<body class="text-slate-800 min-h-screen relative overflow-x-hidden">
 
-  <div class="app-container">
-
-    <div id="login-view" class="view active portal-layout">
-      <!-- Wavy Header Background -->
-      <div class="wave-bg-container">
-        <div class="wave-content">
-          <div class="centric-header stagger-1">
-            <div class="centric-logo" id="school-logo-container" style="position: relative;">
-              <img id="school-logo-img" src=""
-                style="display:none; max-width:100%; max-height:100%; object-fit:contain;">
-              <svg id="default-logo-svg" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L2 7L12 12L22 7L12 2Z" />
-                <path d="M2 9V14C2 14 7.5 17.5 12 19.5C16.5 17.5 22 14 22 14V9L12 14L2 9Z" />
-              </svg>
-              <!-- Armor 1000 Sync Badge -->
-              <div id="sync-badge"
-                style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); background: #10B981; color: white; font-size: 9px; padding: 3px 8px; border-radius: 12px; font-weight: 800; box-shadow: 0 4px 12px rgba(16,185,129,0.4); display: none; white-space: nowrap; border: 2px solid white; z-index: 10;">
-                UJIAN READY
-              </div>
-            </div>
-            <div class="centric-identity">
-              <h1 id="portal-school-sub">SMP Negeri 7</h1>
-              <p>Computer Based Test Portal</p>
-            </div>
-          </div>
-
-          <div class="centric-clock-wrapper stagger-2">
-            <div class="portal-clock-container">
-              <svg class="clock-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-              </svg>
-              <div id="portal-clock" class="portal-clock-centric">Memuat waktu...</div>
-            </div>
-          </div>
+    <!-- PWA Install Gatecade -->
+    <div id="pwaInstallGate" class="fixed inset-0 z-[99999] bg-slate-50 flex flex-col items-center justify-center p-6 text-center transform transition-all duration-300">
+        <div class="w-20 h-20 sm:w-24 sm:h-24 bg-white border border-slate-200 rounded-[1.5rem] sm:rounded-[2rem] shadow-xl flex items-center justify-center mb-6 sm:mb-8 relative overflow-hidden transform hover:scale-105 transition-all">
+            <div class="absolute inset-0 bg-blue-100/30 blur-xl"></div>
+            <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" alt="Logo" class="w-12 h-12 sm:w-16 sm:h-16 object-contain relative z-10 drop-shadow-sm">
         </div>
-
-        <!-- SVG Wave -->
-        <svg class="wave-svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
-          <path fill="#ffffff" fill-opacity="1"
-            d="M0,256L48,245.3C96,235,192,213,288,213.3C384,213,480,235,576,234.7C672,235,768,213,864,186.7C960,160,1056,128,1152,122.7C1248,117,1344,139,1392,149.3L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z">
-          </path>
-        </svg>
-      </div>
-
-      <!-- Panel Kanan: Form -->
-      <div class="saas-login-container stagger-2">
-        <div class="login-header">
-          <h2>Selamat Datang</h2>
-          <p>Temukan nama lengkap Anda untuk masuk</p>
-          <div id="login-alert" class="alert alert-danger" style="margin-top:12px; display:none;"></div>
-          <div class="alert alert-info"
-            style="margin-top:12px; font-size:0.85rem; border-color:rgba(14,165,233,0.2); background:rgba(14,165,233,0.05); color:#0369A1; text-align:left; line-height:1.4;">
-            <strong>💡 Tips:</strong> Harap buka halaman ini 5-10 menit sebelum ujian dimulai agar inisialisasi data
-            selesai lebih awal dan akses soal menjadi lebih cepat saat token dibagikan.
-          </div>
-        </div>
-
-        <div class="form-group search-group">
-          <svg class="search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
-          <input type="text" id="userName" class="input-ultra" placeholder="Ketik nama Anda di sini..."
-            autocomplete="off">
-          <div id="autocomplete-list" class="autocomplete-items"></div>
-        </div>
-
-        <!-- hidden portal-active-exams (masih diperlukan oleh script.js) -->
-        <div id="portal-active-exams" style="display:none;"></div>
-
-        <!-- Panduan Ringkas (Modal Trigger) -->
-        <button class="btn btn-warning btn-block"
-          style="margin-top: 16px; border:none; box-shadow:none; padding:16px; border-radius:12px; font-size:1rem;"
-          onclick="openGuideModal()">
-          <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
-            </path>
-          </svg>
-          Lihat Panduan Ujian
-        </button>
-
-        <!-- System Status Indicator -->
-        <div id="init-status-container"
-          style="display:flex; align-items:center; justify-content:center; gap:8px; margin-top:24px; margin-bottom:8px; font-size:0.75rem; color:var(--text-muted); opacity:0.8;">
-          <span id="init-dot" class="status-dot-pulse"
-            style="width:8px; height:8px; border-radius:50%; background:#94a3b8; display:inline-block;"></span>
-          <span id="init-text">Menyiapkan sistem...</span>
-        </div>
-
-        <!-- Copyright -->
-        <div class="login-footer">
-          <svg class="shield-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
-            </path>
-          </svg>
-          <p>© 2026 <span id="ph-sekolah-2">SMP Negeri 7</span>. Hak cipta dilindungi.</p>
-        </div>
-      </div>
-    </div>
-
-
-    <!-- ══════════════════════════════════════
-       1b. LOGIN CONFIRM VIEW
-  ══════════════════════════════════════ -->
-    <div id="login-confirm-view" class="view portal-layout">
-      <!-- Wavy Header Background Mini -->
-      <div class="wave-bg-container-mini">
-        <div class="wave-content">
-           <div class="confirm-avatar-wrap" style="margin: 0; position: relative; z-index: 5;">
-             <div class="confirm-avatar" style="box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                </svg>
-             </div>
-             <div class="confirm-avatar-badge">
-                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                </svg>
-             </div>
-           </div>
-        </div>
-        <!-- SVG Wave -->
-        <svg class="wave-svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
-          <path fill="#FFFFFF" fill-opacity="1" d="M0,256L48,245.3C96,235,192,213,288,213.3C384,213,480,235,576,234.7C672,235,768,213,864,186.7C960,160,1056,128,1152,122.7C1248,117,1344,139,1392,149.3L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-        </svg>
-      </div>
-
-      <div class="saas-login-container" style="margin-top: -40px; position: relative; z-index: 10; width: 100%; max-width: 620px;">
-        <div style="text-align: center; padding: 10px 20px;">
-          <div class="confirm-heading">
-            <h2 style="font-size: 1.6rem; font-weight: 800; color: #111827; margin-bottom: 8px;">Konfirmasi</h2>
-            <p style="font-size: 0.95rem; color: #4B5563; margin-bottom: 24px;">Lanjutkan jika data di bawah ini benar.</p>
-          </div>
-          <div id="confirm-name-text">-</div>
-          <div class="confirm-actions">
-            <button id="btnCancelLogin" class="btn btn-outline" title="Bukan, Kembali">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M19 12H5M5 12l7-7M5 12l7 7" />
-              </svg>
-              Bukan Saya
+        <h2 class="text-[20px] sm:text-[22px] font-extrabold text-slate-800 mb-1.5 tracking-tight">Pasang Aplikasi Ujian</h2>
+        <p class="text-[12px] sm:text-[13px] text-slate-500 font-medium mb-6 sm:mb-8 max-w-xs leading-relaxed px-2 sm:px-4">Sistem ujian dilindungi. Akses dari browser langsung telah diblokir. Wajib menginstall Aplikasi CBT Spensada di Perangkat Anda.</p>
+        
+        <div id="pwaAndroidWrapper" class="w-full max-w-xs flex flex-col gap-3">
+            <button id="pwaInstallBtn" class="w-full py-3.5 sm:py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[14px] sm:text-[15px] font-bold rounded-[1.25rem] shadow-[0_8px_20px_rgba(79,70,229,0.25)] active:scale-95 transition-transform flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                Install Aplikasi Sekarang
             </button>
-            <button id="btnConfirmLogin" class="btn btn-primary" title="Ya, Lanjutkan">
-              <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" fill="none" stroke-width="2" />
-              </svg>
-              Ya, Lanjutkan
+            <p class="text-[11px] text-slate-400 mt-2 font-semibold">Instalasi Otomatis (Android/Windows)</p>
+        </div>
+
+        <div id="pwaManualWrapper" class="hidden w-full max-w-sm flex-col items-center bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mt-4 fade-in">
+            <p id="pwaManualTitle" class="text-[12px] font-extrabold text-indigo-500 mb-5 uppercase tracking-[0.1em] text-center w-full">Panduan Instalasi Manual</p>
+            <div class="flex items-start gap-4 mb-4 text-left w-full">
+                <div class="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0 mt-0.5">1</div>
+                <p id="pwaManualStep1" class="text-[13px] text-slate-600 font-medium leading-normal">Tekan Ikon navigasi browser Anda (Misal: <strong class="text-slate-800">Tiga Titik ⋮</strong> di pojok kanan atas).</p>
+            </div>
+            <div class="flex items-start gap-4 text-left w-full">
+                <div class="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0 mt-0.5">2</div>
+                <p id="pwaManualStep2" class="text-[13px] text-slate-600 font-medium leading-normal">Pilih menu <span class="text-slate-800 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold whitespace-nowrap mt-2 inline-block">Tambahkan ke Layar Utama</span> atau <span class="text-slate-800 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold whitespace-nowrap mt-2 inline-block">Install Aplikasi</span>.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Top App Background (Curved Header Background) -->
+    <div class="fixed top-0 left-0 w-full h-[240px] sm:h-[280px] bg-gradient-to-br from-[#1E40AF] via-[#3730A3] to-[#312E81] rounded-b-[2.5rem] shadow-xl z-[-1] overflow-hidden">
+        <!-- Abstract Decorations behind header -->
+        <div class="absolute -top-10 -right-10 w-48 h-48 bg-white opacity-[0.07] rounded-full blur-2xl"></div>
+        <div class="absolute top-20 -left-10 w-32 h-32 bg-white opacity-[0.05] rounded-full blur-xl"></div>
+        <div class="absolute bottom-10 right-20 w-40 h-40 bg-indigo-400 opacity-20 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="w-full max-w-md mx-auto pt-6 sm:pt-8 px-5 sm:px-6 pb-2 flex items-center justify-between">
+        <div class="flex items-center gap-3 sm:gap-3.5">
+            <div class="bg-white/10 p-1.5 rounded-[0.9rem] backdrop-blur-md border border-white/20 shadow-[0_4px_15px_rgba(0,0,0,0.1)] flex-shrink-0 relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent"></div>
+                <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" alt="Logo" class="w-9 h-9 sm:w-10 sm:h-10 object-contain drop-shadow-md relative z-10 transition-transform duration-300 hover:scale-105" onerror="this.style.display='none'">
+            </div>
+            <div class="flex flex-col">
+                <h1 class="text-[20px] sm:text-[22px] font-extrabold text-white tracking-tight leading-tight">Spensada Exam</h1>
+                <p class="text-[10px] sm:text-[11px] text-indigo-100 font-medium opacity-90 mt-0.5 tracking-wide">Sistem Ujian Mobile</p>
+            </div>
+        </div>
+        
+        <div id="statusBadge" class="flex flex-col items-end opacity-90 transition-all duration-300">
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-sm" id="statusContainer">
+                <div class="w-2 h-2 rounded-full bg-slate-300" id="statusDot"></div>
+                <span class="text-[9px] font-bold text-white uppercase tracking-wider" id="statusText">Offline</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-md w-full mx-auto px-4 sm:px-5 pt-5 sm:pt-6 pb-12 flex flex-col relative z-10">
+
+        <!-- Info Card (Overlapping header) -->
+        <div class="bg-white rounded-[1.25rem] p-3.5 sm:p-4 shadow-[0_8px_30px_rgb(0,0,0,0.06)] mb-6 sm:mb-8 flex flex-col items-center justify-center border border-slate-100 transform transition-transform hover:scale-[1.01]">
+            <div class="flex items-center gap-1.5 mb-1 sm:mb-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                <p class="text-[10px] font-extrabold text-indigo-600 uppercase tracking-[0.15em]">ASAS/ASAT T.A 2025/2026</p>
+            </div>
+            <div class="flex items-center gap-2 mt-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p class="text-[15px] font-bold text-slate-700" id="serverTimeText">--:--:--</p>
+            </div>
+        </div>
+
+        <!-- State: Loading (Skeleton) -->
+        <div id="loadingState" class="flex flex-col gap-6 fade-in">
+            <!-- Skeleton Card 1 -->
+            <div class="bg-white rounded-[1.5rem] shadow-sm border border-slate-100 overflow-hidden">
+                <div class="h-1.5 w-full bg-slate-100"></div>
+                <div class="p-6">
+                    <div class="w-24 h-5 skeleton mb-4"></div>
+                    <div class="w-full h-7 skeleton mb-3"></div>
+                    <div class="w-3/4 h-4 skeleton"></div>
+                </div>
+                <div class="p-6 pt-0 border-t border-slate-50 mt-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="w-20 h-3 skeleton"></div>
+                        <div class="w-24 h-8 skeleton"></div>
+                    </div>
+                    <div class="w-full h-12 skeleton rounded-xl"></div>
+                </div>
+            </div>
+            <!-- Skeleton Card 2 -->
+            <div class="bg-white rounded-[1.5rem] shadow-sm border border-slate-100 overflow-hidden opacity-60">
+                <div class="h-1.5 w-full bg-slate-100"></div>
+                <div class="p-6">
+                    <div class="w-24 h-5 skeleton mb-4"></div>
+                    <div class="w-full h-7 skeleton mb-3"></div>
+                </div>
+                <div class="p-6 pt-0 border-t border-slate-50 mt-4">
+                    <div class="w-full h-12 skeleton rounded-xl"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- State: Error -->
+        <div id="errorState" class="hidden flex-col items-center justify-center py-12 px-6 bg-white rounded-[2rem] text-center fade-in border border-rose-100 shadow-[0_8px_30px_rgba(225,29,72,0.06)]">
+            <div class="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 mb-4 shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <h3 class="text-xl font-extrabold text-slate-800 mb-1">Jaringan Terputus</h3>
+            <p class="text-sm text-slate-500 mb-6 px-2" id="errorMessage">Gagal menghubungi peladen sekolah.</p>
+            <button onclick="fetchData(true)" class="w-full py-3.5 bg-slate-800 hover:bg-slate-900 active:scale-[0.98] text-white font-bold rounded-[1rem] transition-all shadow-md focus:outline-none flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                Coba Sinkronisasi Ulang
             </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-
-    <!-- ══════════════════════════════════════
-       1c. SCHEDULE VIEW
-  ══════════════════════════════════════ -->
-    <div id="schedule-view" class="view portal-layout">
-      <!-- Wavy Header Background Mini -->
-      <div class="wave-bg-container-mini" style="min-height: 25vh;">
-        <div class="wave-content" style="flex-direction: row; justify-content: space-between; width: 100%; max-width: 580px; align-items: center; z-index: 5;">
-          <div class="schedule-header-left" style="display: flex; align-items: center; gap: 14px;">
-            <div class="schedule-header-icon" style="width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,0.9); color: #92400E; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width: 22px; height: 22px;">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <div>
-              <h2 class="schedule-header-title" style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #111827;">Daftar Ujian</h2>
-              <div class="schedule-header-sub" id="schedule-user-name" style="font-size: 0.85rem; font-weight: 500; color: #4B5563;">-</div>
-            </div>
-          </div>
-          <button id="btnScheduleLogout" class="btn btn-outline" style="background: rgba(255,255,255,0.9); border:none; color:#111827; padding: 8px 12px; border-radius: 8px; font-weight: 600; display:flex; gap:6px; align-items:center; box-shadow: 0 4px 12px rgba(0,0,0,0.05);" title="Keluar">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
-              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
-            </svg>
-            Keluar
-          </button>
-        </div>
-        <!-- SVG Wave -->
-        <svg class="wave-svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
-          <path fill="#FFFFFF" fill-opacity="1" d="M0,256L48,245.3C96,235,192,213,288,213.3C384,213,480,235,576,234.7C672,235,768,213,864,186.7C960,160,1056,128,1152,122.7C1248,117,1344,139,1392,149.3L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-        </svg>
-      </div>
-
-      <div class="saas-login-container" style="margin-top: -40px; position: relative; z-index: 10; width: 100%; max-width: 620px;">
-      <!-- Armor 1000: Pre-sync H-1 Section -->
-      <div id="pre-sync-container" class="card"
-        style="background: #EEF2FF; border: 1px dashed #6366F1; margin: 0 20px 20px 20px; padding: 16px; border-radius: 16px;">
-        <div id="pre-sync-content-not-synced">
-          <h4 style="margin:0 0 4px 0; color: #4338CA; display: flex; align-items: center; gap: 8px; font-size: 1rem;">
-            <span>📥</span> Persiapan Offline
-          </h4>
-          <p style="font-size: 0.75rem; color: #4B5563; margin-bottom: 12px; line-height: 1.3;">
-            Download soal sekarang untuk kelancaran ujian besok.
-          </p>
-          <button id="btnSyncAllSoal" class="btn btn-primary"
-            style="width: 100%; background: #4F46E5; border: none; font-size: 0.85rem; padding: 10px;">
-            Mulai Sinkronisasi
-          </button>
-          <div id="sync-all-progress" style="display:none; margin-top:12px;">
-            <div style="height: 6px; background: #E0E7FF; border-radius: 10px; overflow: hidden; margin-bottom: 8px;">
-              <div id="sync-all-bar" style="width: 0%; height: 100%; background: #4F46E5; transition: width 0.3s;"></div>
-            </div>
-            <div id="sync-all-text" style="font-size: 0.7rem; color: #6366F1; font-weight: 600; text-align: center;">
-              Menyiapkan...</div>
-          </div>
-        </div>
-        <div id="pre-sync-content-synced" style="display: none; text-align: center; color: #059669; font-size: 0.85rem; font-weight: 600; padding: 4px;">
-           ✅ Siswa atas nama <span id="sync-synced-name"></span> sudah tersinkronisasi 100%.
-        </div>
-      </div>
-
-      <div id="schedule-list" style="padding:0 20px 20px 20px;display:flex;flex-direction:column;gap:14px;"></div>
-      </div> <!-- End of saas-login-container -->
-    </div>
-
-    <!-- ══════════════════════════════════════
-       3. DASHBOARD VIEW
-  ══════════════════════════════════════ -->
-    <div id="dashboard-view" class="view">
-      <div class="dash-wrap">
-        <!-- Page Header -->
-        <div class="dash-page-header">
-          <div class="dash-page-icon">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-          <div>
-            <h2 class="dash-page-title">Informasi Ujian</h2>
-            <p class="dash-page-sub">Periksa detail sebelum memulai</p>
-          </div>
-        </div>
-        <!-- Info Card -->
-        <div class="dash-info-card">
-          <div class="info-row">
-            <span class="info-label">Nama Peserta</span>
-            <span class="info-value" id="dash-name">-</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Kelas</span>
-            <span class="info-value" id="dash-kelas">-</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Mata Pelajaran</span>
-            <span class="info-value" id="dash-exam">-</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Durasi</span>
-            <span class="info-value" id="dash-time">-</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Jumlah Soal</span>
-            <span class="info-value" id="dash-count">-</span>
-          </div>
-        </div>
-        <!-- Start Button -->
-        <button id="btnStartExam" class="btn btn-primary btn-block dash-start-btn" title="Mulai Ujian">
-          <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
-            <polygon points="5 3 19 12 5 21 5 3" />
-          </svg>
-          Mulai Ujian Sekarang
-        </button>
-      </div>
-    </div>
-
-
-    <!-- ══════════════════════════════════════
-       4. EXAM VIEW
-  ══════════════════════════════════════ -->
-    <div id="exam-view" class="view" style="padding:0; background: #FFFFFF;">
-      <!-- Modern Header -->
-      <div class="modern-exam-header">
-        <div class="header-left">
-          <button id="btnOpenMenu" class="header-menu-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          <div class="header-info">
-            <div id="exam-title" class="exam-main-title">SIMULASI 1</div>
-            <div id="exam-user-info" class="exam-status-sub">Memuat Data...</div>
-          </div>
-        </div>
-        <div class="header-right">
-          <div id="exam-timer" class="modern-timer">00:57:59</div>
-        </div>
-      </div>
-
-      <!-- Progress Area -->
-      <div class="exam-progress-area">
-        <div class="progress-labels">
-          <span id="q-progress-text">SOAL 9 / 40 (ISIAN)</span>
-          <span id="q-percentage">22%</span>
-        </div>
-        <div class="modern-progress-bg">
-          <div id="q-progress-bar" class="modern-progress-fill" style="width: 22%;"></div>
-        </div>
-      </div>
-
-      <!-- Content Area -->
-      <div class="exam-content-scrollable">
-        <div class="question-wrapper">
-          <!-- Question Type Badge -->
-          <div id="q-type-badge" class="q-type-badge">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path
-                d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z" />
-            </svg>
-            <span>SOAL ISIAN</span>
-          </div>
-
-          <!-- Question Text -->
-          <div id="q-text" class="modern-question-text">Memuat soal...</div>
-
-          <div id="q-image-container" style="display:none; text-align:center; margin: 16px 0;"></div>
-
-          <!-- Answer Input Area -->
-          <div id="q-options" class="modern-answer-area">
-            <!-- Will be filled by JS: can be options or textarea -->
-          </div>
-
-          <!-- Instruction Alert -->
-          <div id="q-instruction" class="modern-info-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 16v-4M12 8h.01" />
-            </svg>
-            <p>Ketik jawaban berupa angka tanpa spasi atau tanda baca.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Modern Bottom Navigation -->
-      <div class="modern-footer">
-        <div class="footer-actions">
-          <button id="btnPrev" class="btn-footer btn-footer-outline">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
-
-          <button id="btnGrid" class="btn-footer btn-footer-soft">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <rect x="3" y="3" width="7" height="7" />
-              <rect x="14" y="3" width="7" height="7" />
-              <rect x="14" y="14" width="7" height="7" />
-              <rect x="3" y="14" width="7" height="7" />
-            </svg>
-          </button>
-
-          <button id="btnDoubt" class="btn-footer btn-footer-warning">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-              <line x1="12" y1="9" x2="12" y2="13" />
-              <line x1="12" y1="17" x2="12.01" y2="17" />
-            </svg>
-          </button>
-
-          <button id="btnNext" class="btn-footer btn-footer-primary">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
-
-
-
-          <button id="btnSubmit" class="btn-footer btn-footer-success" style="display:none;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M20 6L9 17l-5-5" />
-            </svg>
-          </button>
-        </div>
-        <!-- iOS Style Indicator -->
-        <div class="home-indicator"></div>
-      </div>
-    </div> <!-- End exam-view -->
-
-
-    <!-- ══════════════════════════════════════
-       5. RESULT VIEW
-  ══════════════════════════════════════ -->
-    <div id="result-view" class="view">
-      <div class="result-card">
-        <!-- Confetti dots -->
-        <div class="result-dots"></div>
-        <!-- Trophy icon -->
-        <div class="result-trophy">
-          <svg fill="currentColor" viewBox="0 0 24 24">
-            <path
-              d="M5 3h14v3c0 3.87-2.69 7.1-6.3 7.83L12 14v3h2a1 1 0 010 2H10a1 1 0 010-2h2v-3l-.7-.17C7.69 13.1 5 9.87 5 6V3zM3 3H5v3c0 1.1.35 2.12.94 2.94A8.03 8.03 0 013 6V3zm18 0v3c0 1.1-.35 2.12-.94 2.94A8.03 8.03 0 0021 6V3h-2V3h2z" />
-          </svg>
-        </div>
-        <h2>Ujian Selesai!</h2>
-        <p class="result-sub">Jawaban Anda telah berhasil dikumpulkan.</p>
-        <div class="result-score-wrap">
-          <div id="result-score">100</div>
-          <span class="result-score-label">Nilai Akhir</span>
-        </div>
-        <button id="btnLogout" class="btn btn-primary btn-block result-home-btn" title="Kembali ke Awal">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-            <polyline points="9 22 9 12 15 12 15 22" />
-          </svg>
-          Kembali ke Beranda
-        </button>
-      </div>
-    </div>
-
-
-    <!-- ══════════════════════════════════════
-       6. ADMIN DASHBOARD VIEW
-  ══════════════════════════════════════ -->
-    <div id="admin-dash-view" class="view admin-layout">
-      <!-- SIDEBAR -->
-      <div class="admin-sidebar">
-        <div class="admin-sidebar-header">
-          <div class="admin-brand">
-            <div class="admin-brand-icon">
-              <svg fill="currentColor" viewBox="0 0 24 24">
-                <path
-                  d="M12 15.5A3.5 3.5 0 0 1 8.5 12A3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5a3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97c0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11.5c-.04.34-.07.67-.07 1c0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49-.01.61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z" />
-              </svg>
-            </div>
-            <div>
-              <h2>Admin Panel</h2>
-              <p>CBT Online Manajemen</p>
-            </div>
-          </div>
-        </div>
-        <div class="admin-sidebar-nav">
-          <button class="admin-sidebar-btn active" data-tab="tab-monitor"
-            onclick="document.getElementById('admin-page-title').innerText='Monitor Ujian'; document.getElementById('admin-page-subtitle').innerText='Pantau status ujian secara real-time';">
-            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
-              </path>
-            </svg>
-            Monitor Ujian
-          </button>
-          <button class="admin-sidebar-btn" data-tab="tab-siswa"
-            onclick="document.getElementById('admin-page-title').innerText='Data Siswa'; document.getElementById('admin-page-subtitle').innerText='Kelola data peserta ujian';">
-            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
-              </path>
-            </svg>
-            Data Siswa
-          </button>
-          <button class="admin-sidebar-btn" data-tab="tab-soal"
-            onclick="document.getElementById('admin-page-title').innerText='Bank Soal'; document.getElementById('admin-page-subtitle').innerText='Manajemen daftar soal dan jawaban';">
-            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-              </path>
-            </svg>
-            Bank Soal
-          </button>
-          <button class="admin-sidebar-btn" data-tab="tab-jadwal"
-            onclick="document.getElementById('admin-page-title').innerText='Jadwal Ujian'; document.getElementById('admin-page-subtitle').innerText='Atur waktu dan sesi pelaksanaan ujian';">
-            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-            </svg>
-            Jadwal Ujian
-          </button>
-          <button class="admin-sidebar-btn" data-tab="tab-hasil"
-            onclick="loadAdminHasil(1); document.getElementById('admin-page-title').innerText='Hasil & Radar'; document.getElementById('admin-page-subtitle').innerText='Lihat skor dan log pelanggaran peserta';">
-            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-            </svg>
-            Hasil & Radar
-          </button>
-          <button class="admin-sidebar-btn" data-tab="tab-settings"
-            onclick="loadAdminSettings(); document.getElementById('admin-page-title').innerText='Pengaturan'; document.getElementById('admin-page-subtitle').innerText='Konfigurasi keamanan dan identitas server';">
-            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
-              </path>
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-            </svg>
-            Pengaturan
-          </button>
-          <div style="flex:1;"></div>
-          <button id="btnAdminLogout" class="admin-sidebar-btn btn-logout" style="color:#EF4444;">
-            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-            </svg>
-            Keluar
-          </button>
-        </div>
-      </div>
-
-      <!-- MAIN CONTENT -->
-      <div class="admin-main">
-        <div class="admin-main-header">
-          <div class="admin-header-title">
-            <h2 id="admin-page-title">Monitor Ujian</h2>
-            <p id="admin-page-subtitle">Pantau status ujian secara real-time</p>
-          </div>
-          <div class="admin-profile">
-            <div class="admin-avatar">
-              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-              </svg>
-            </div>
-            <div class="admin-profile-text">
-              <strong>Admin</strong>
-              <span>Super Admin</span>
-            </div>
-            <svg class="chevron-down" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </div>
         </div>
 
-        <div class="admin-main-content">
-          <!-- TAB 1: MONITORING -->
-          <div id="tab-monitor" class="admin-tab-content" style="display:flex;flex-direction:column;gap:24px;">
-
-            <!-- Card Token -->
-            <div class="admin-hero-card card-yellow">
-              <div class="hero-card-bg">
-                <svg class="bg-shape shape-1" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                  <path fill="#FEF08A"
-                    d="M45.7,-76.4C58.9,-69.1,69.1,-55.4,77.7,-41C86.3,-26.6,93.3,-11.3,91.8,3.2C90.3,17.7,80.3,31.4,70.5,44.1C60.7,56.8,51.1,68.5,38.8,75.1C26.5,81.7,11.5,83.2,-2.7,87.6C-16.9,92,-30.3,99.3,-41.8,94.9C-53.3,90.5,-62.9,74.4,-70.6,60.2C-78.3,46,-84.1,33.7,-88.1,20.5C-92.1,7.3,-94.3,-6.8,-90.4,-19.1C-86.5,-31.4,-76.5,-41.9,-65.4,-50.2C-54.3,-58.5,-42.1,-64.6,-30.2,-72.4C-18.3,-80.2,-6.7,-89.7,4.8,-92.5C16.3,-95.3,32.5,-83.7,45.7,-76.4Z"
-                    transform="translate(100 100) scale(1.1)" />
+        <!-- State: Empty -->
+        <div id="emptyState" class="hidden flex-col items-center justify-center py-16 px-6 bg-white rounded-[2rem] text-center fade-in shadow-sm border border-slate-100">
+            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-5 shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
-                <svg class="bg-shape shape-2" fill="none" stroke="#EAB308" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z">
-                  </path>
+            </div>
+            <h3 class="text-[18px] font-extrabold text-slate-800 mb-1">Belum Tersedia</h3>
+            <p class="text-sm text-slate-500 mb-5 px-1 leading-relaxed">Tidak ada jadwal aktif saat ini. Menunggu intruksi proktor.</p>
+            <button onclick="fetchData(true)" id="manualRefreshBtn" class="flex items-center justify-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-600 font-bold text-xs rounded-full hover:bg-indigo-100 transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-              </div>
-              <div class="hero-card-content">
-                <div class="hero-icon-wrap text-warning bg-warning-soft">
-                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z">
-                    </path>
-                  </svg>
-                </div>
-                <div class="hero-text-wrap">
-                  <span class="badge badge-wait"
-                    style="margin-bottom:8px; display:inline-block; border:none; padding:6px 12px; font-size:0.75rem;">TOKEN</span>
-                  <h3>Token Aktif Dan Pengumuman</h3>
-                  <div id="admin-token-list" style="display:flex;flex-direction:column;gap:8px;">
-                    <p class="text-muted" style="font-size:0.9rem;">Memuat token...</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Card Sync Progress (Armor 1000) -->
-            <div class="admin-hero-card" style="background:#F5F3FF; border: 1px dashed #C4B5FD;">
-              <div class="hero-card-content">
-                <div class="hero-icon-wrap" style="color: #7C3AED; background: #EDE9FE;">
-                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
-                  </svg>
-                </div>
-                <div class="hero-text-wrap" style="flex:1;">
-                  <span class="badge" style="background: #8B5CF6; color: white; border:none; padding:6px 12px; font-size:0.75rem; margin-bottom:8px; display:inline-block;">OFFLINE READY</span>
-                  <h3>Status Sinkronisasi H-1</h3>
-                  <div style="display:flex; justify-content:space-between; margin-bottom: 4px; font-size: 0.85rem; font-weight: 600; color: #4C1D95;">
-                    <span id="admin-sync-count">Memuat data...</span>
-                  </div>
-                  <p class="text-muted" style="font-size: 0.8rem; margin-top: 4px;">Siswa yang telah men-download soal. <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.7rem; margin-left: 8px;" onclick="loadAdminSyncStatus()">Refresh Data</button></p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Card Status -->
-            <div class="admin-hero-card card-blue">
-              <div class="hero-card-bg">
-                <svg class="bg-shape shape-1" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                  <path fill="#DBEAFE"
-                    d="M42.7,-73.4C55.9,-66.1,66.1,-52.4,74.7,-38C83.3,-23.6,90.3,-8.3,88.8,6.2C87.3,20.7,77.3,34.4,67.5,47.1C57.7,59.8,48.1,71.5,35.8,78.1C23.5,84.7,8.5,86.2,-5.7,90.6C-19.9,95,-33.3,102.3,-44.8,97.9C-56.3,93.5,-65.9,77.4,-73.6,63.2C-81.3,49,-87.1,36.7,-91.1,23.5C-95.1,10.3,-97.3,-3.8,-93.4,-16.1C-89.5,-28.4,-79.5,-38.9,-68.4,-47.2C-57.3,-55.5,-45.1,-61.6,-33.2,-69.4C-21.3,-77.2,-9.7,-86.7,1.8,-89.5C13.3,-92.3,29.5,-80.7,42.7,-73.4Z"
-                    transform="translate(100 100) scale(1.1)" />
-                </svg>
-                <svg class="bg-shape shape-2" fill="none" stroke="#3B82F6" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
-                  </path>
-                </svg>
-              </div>
-              <div class="hero-card-content">
-                <div class="hero-icon-wrap text-primary bg-primary-soft">
-                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-                    </path>
-                  </svg>
-                </div>
-                <div class="hero-text-wrap" style="flex:1;">
-                  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
-                    <span class="badge badge-done"
-                      style="border:none; padding:6px 12px; font-size:0.75rem;">STATUS</span>
-                    <label
-                      style="font-size:0.8rem; color:var(--text-main); display:flex; align-items:center; gap:8px; font-weight:600; background:var(--surface-0); padding:8px 14px; border-radius:8px; border:1px solid #E5E7EB; cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,0.02); z-index:10;">
-                      <input type="checkbox" id="chkAbsenMode" onchange="toggleAbsenMode()"
-                        style="width:16px; height:16px; accent-color:var(--primary);"> Hanya Bolos/Kosong
-                    </label>
-                  </div>
-                  <h3>Kepesertaan Ujian</h3>
-                  <div id="admin-monitoring-list" style="display:flex;flex-direction:column;gap:10px;">
-                    <p class="text-muted" style="font-size:0.9rem;">Sinkronisasi data server...</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- TAB 2: SISWA -->
-          <div id="tab-siswa" class="admin-tab-content" style="display:none;flex-direction:column;gap:18px;">
-            <div
-              style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
-              <h3 style="font-size:1.1rem;margin:0;">Manajemen Data Siswa</h3>
-              <div style="display:flex; gap:8px;">
-                <button class="btn btn-outline" onclick="openImportModal('siswa')"
-                  style="padding:8px 12px; font-size:0.8rem;">📥 Import CSV</button>
-                <button class="btn btn-primary" onclick="openSiswaModal()" style="padding:8px 12px; font-size:0.8rem;">➕
-                  Tambah</button>
-              </div>
-            </div>
-            <div class="table-responsive">
-              <table class="data-table" id="admin-siswa-table">
-                <thead>
-                  <tr>
-                    <th>ID/NIS</th>
-                    <th>Nama Siswa</th>
-                    <th>Kelas</th>
-                    <th>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody id="admin-siswa-tbody">
-                  <tr>
-                    <td colspan="4" class="text-center text-muted">Memuat data...</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- TAB 3: SOAL -->
-          <div id="tab-soal" class="admin-tab-content" style="display:none;flex-direction:column;gap:18px;">
-            <div
-              style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
-              <h3 style="font-size:1.1rem;margin:0;">Bank Soal</h3>
-              <div style="display:flex; gap:8px;">
-                <button class="btn btn-outline" onclick="openImportModal('soal')"
-                  style="padding:8px 12px; font-size:0.8rem;">📥 Import CSV</button>
-                <button class="btn btn-primary" onclick="openBankSoalModal()"
-                  style="padding:8px 12px; font-size:0.8rem;">➕ Bank Soal</button>
-              </div>
-            </div>
-            <div class="table-responsive">
-              <table class="data-table" id="admin-soal-table">
-                <thead>
-                  <tr>
-                    <th>Kode Bank Soal</th>
-                    <th>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody id="admin-soal-tbody">
-                  <tr>
-                    <td colspan="2" class="text-center text-muted">Memuat data...</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- TAB 4: JADWAL -->
-          <div id="tab-jadwal" class="admin-tab-content" style="display:none;flex-direction:column;gap:18px;">
-            <div
-              style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
-              <h3 style="font-size:1.1rem;margin:0;">Jadwal Ujian</h3>
-              <button class="btn btn-primary" onclick="openJadwalModal()" style="padding:8px 12px; font-size:0.8rem;">➕
-                Jadwal Baru</button>
-            </div>
-            <div>
-              <h3 style="font-size:0.9rem;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-                <span class="badge badge-wait">📅 Live</span>
-                Kontrol Cepat Ujian
-              </h3>
-              <div id="admin-jadwal-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
-                <p class="text-muted" style="font-size:0.875rem;">Memuat konfigurasi jadwal...</p>
-              </div>
-            </div>
-
-            <div class="table-responsive">
-              <table class="data-table" id="admin-jadwal-table">
-                <thead>
-                  <tr>
-                    <th>Kode Ujian</th>
-                    <th>Nama Ujian</th>
-                    <th>Bank Soal</th>
-                    <th>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody id="admin-jadwal-tbody">
-                  <tr>
-                    <td colspan="4" class="text-center text-muted">Memuat data...</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- TAB 5: HASIL & RADAR -->
-          <div id="tab-hasil" class="admin-tab-content" style="display:none;flex-direction:column;gap:24px;">
-
-            <!-- Hasil -->
-            <div>
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <h3 style="font-size:0.9rem;margin:0;display:flex;align-items:center;gap:8px;">
-                  <span class="badge badge-done">🏆 Nilai</span> 150 Record Terbaru
-                </h3>
-                <div style="display:flex; gap:6px;">
-                  <button class="btn btn-outline" style="padding:4px 10px;font-size:0.75rem;"
-                    onclick="loadAdminHasil()">↻ Refresh</button>
-                  <button class="btn btn-outline"
-                    style="padding:4px 10px;font-size:0.75rem; color:#059669; border-color:#10B981;"
-                    onclick="exportTableToCSV('admin-hasil-table', 'Rekap_Nilai.csv')">↓ CSV</button>
-                </div>
-              </div>
-              <div class="table-responsive">
-                <table class="data-table" id="admin-hasil-table">
-                  <thead>
-                    <tr>
-                      <th>Waktu</th>
-                      <th>Nama Peserta</th>
-                      <th>Ujian</th>
-                      <th>Skor</th>
-                    </tr>
-                  </thead>
-                  <tbody id="admin-hasil-tbody">
-                    <tr>
-                      <td colspan="4" class="text-muted" style="text-align:center;">Data nilai...</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div id="admin-hasil-pagination" class="pagination-controls"></div>
-            </div>
-
-            <!-- Radar -->
-            <div>
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <h3 style="font-size:0.9rem;margin:0;display:flex;align-items:center;gap:8px;">
-                  <span class="badge" style="background:#EF4444;color:#FFF;">🚨 Radar</span> 100 Log Pelanggaran
-                </h3>
-                <button class="btn btn-outline"
-                  style="padding:4px 10px;font-size:0.75rem; color:#059669; border-color:#10B981;"
-                  onclick="exportTableToCSV('admin-radar-table', 'Log_Pelanggaran.csv')">↓ CSV</button>
-              </div>
-              <div class="table-responsive">
-                <table class="data-table" id="admin-radar-table">
-                  <thead>
-                    <tr>
-                      <th>Waktu</th>
-                      <th>Peserta</th>
-                      <th>Ujian</th>
-                      <th>Tipe Pelanggaran</th>
-                    </tr>
-                  </thead>
-                  <tbody id="admin-radar-tbody">
-                    <tr>
-                      <td colspan="4" class="text-muted" style="text-align:center;">Data radar...</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div id="admin-radar-pagination" class="pagination-controls"></div>
-            </div>
-
-          </div>
-
-          <!-- TAB 6: PENGATURAN -->
-          <div id="tab-settings" class="admin-tab-content" style="display:none;flex-direction:column;gap:18px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-              <h3 style="font-size:1.1rem;margin:0;">Identitas Sekolah & Sistem</h3>
-            </div>
-
-            <div class="card" style="display:flex; flex-direction:column; gap:16px; margin-bottom:16px;">
-              <div class="form-group">
-                <label>Nama Sekolah (Digunakan di Kop Berita Acara & Judul Browser)</label>
-                <input type="text" id="cfgSchoolName" class="form-control" placeholder="Contoh: SMP Negeri 1 Dander"
-                  value="SMP Negeri 1 Dander">
-              </div>
-              <div class="form-group">
-                <label>Sub-Judul / Nama Instansi (Digunakan di Layar Utama / Login)</label>
-                <input type="text" id="cfgSchoolSub" class="form-control" placeholder="Contoh: MGMP INF/KKA BJN"
-                  value="MGMP INF/KKA BJN">
-              </div>
-              <div class="form-group">
-                <label>Logo Sekolah (Format Gambar, ukuran ideal persegi)</label>
-                <div style="display:flex; gap:16px; align-items:center; margin-top:8px;">
-                  <div id="cfgLogoPreview"
-                    style="width:80px; height:80px; border:2px dashed var(--border); border-radius:12px; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#f8fafc;">
-                    <span style="font-size:0.7rem; color:var(--text-muted);">No Logo</span>
-                  </div>
-                  <div style="flex:1;">
-                    <input type="file" id="cfgLogoInput" accept="image/*" class="form-control"
-                      style="font-size:0.8rem; padding:8px;">
-                    <p style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">File akan dikonversi ke
-                      Base64 (Maks 1MB disarankan)</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="card"
-              style="display:flex; flex-direction:column; gap:16px; margin-bottom:16px; border: 1px dashed var(--accent);">
-              <div style="font-weight:600; color:var(--accent);">Pemeliharaan Sistem</div>
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="font-size:0.8rem; color:var(--text-muted);">Nama siswa tidak muncul saat login? Klik ini
-                  untuk memperbaiki database.</div>
-                <button class="btn btn-outline" onclick="fixPesertaIndex()"
-                  style="padding:8px 12px; font-size:0.75rem; border-color:var(--accent); color:var(--accent);">🔧 Fix
-                  Search Index</button>
-              </div>
-            </div>
-
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-              <h3 style="font-size:1.1rem;margin:0;">Pengaturan Keamanan CBT</h3>
-              <button class="btn btn-primary" onclick="saveAdminSettings()"
-                style="padding:8px 12px; font-size:0.8rem;">💾 Simpan Pengaturan</button>
-            </div>
-
-            <div class="card" style="display:flex; flex-direction:column; gap:16px;">
-              <!-- PWA Enforcer -->
-              <div
-                style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:12px;">
-                <div>
-                  <div style="font-weight:600; color:var(--text-main);">Paksa Mode PWA</div>
-                  <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">Siswa wajib "Add to Home
-                    Screen" / Install aplikasi sebelum ujian. Tidak bisa dikerjakan via tab browser biasa.</div>
-                </div>
-                <label class="toggle-switch">
-                  <input type="checkbox" id="cfgPWA">
-                  <span class="slider round"></span>
-                </label>
-              </div>
-
-              <!-- Fullscreen -->
-              <div
-                style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:12px;">
-                <div>
-                  <div style="font-weight:600; color:var(--text-main);">Ujian Fullscreen</div>
-                  <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">Layar ujian otomatis
-                    fullscreen. UI browser (address bar) akan disembunyikan.</div>
-                </div>
-                <label class="toggle-switch">
-                  <input type="checkbox" id="cfgFullscreen">
-                  <span class="slider round"></span>
-                </label>
-              </div>
-
-              <!-- Anti-Cheat (Blur) -->
-              <div
-                style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:12px;">
-                <div>
-                  <div style="font-weight:600; color:var(--text-main);">Deteksi Anti-Cheat (Ganti Tab)</div>
-                  <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">Membunyikan peringatan keras
-                    dan membekukan layar selama 5 detik jika siswa ketahuan pindah aplikasi/tab.</div>
-                </div>
-                <label class="toggle-switch">
-                  <input type="checkbox" id="cfgAntiCheat">
-                  <span class="slider round"></span>
-                </label>
-              </div>
-
-              <!-- Minimal Mengerjakan -->
-              <div
-                style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:12px;">
-                <div>
-                  <div style="font-weight:600; color:var(--text-main);">Waktu Minimal Ujian (Menit)</div>
-                  <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">Siswa tidak bisa mengumpulkan
-                    jawaban jika durasi pengerjaan belum mencapai angka ini.</div>
-                </div>
-                <input type="number" id="cfgMinTime" class="form-control" style="width:80px; text-align:center;" min="0"
-                  placeholder="0">
-              </div>
-
-              <!-- Bypass Code -->
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="flex:1; margin-right:16px;">
-                  <div style="font-weight:600; color:var(--text-main);">Kode Bypass PWA</div>
-                  <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">Kode darurat untuk siswa yang
-                    <b>tidak bisa install PWA</b>. Bagikan hanya ke siswa bermasalah. Kosongkan untuk menonaktifkan.
-                  </div>
-                </div>
-                <input type="text" id="cfgBypassCode" class="form-control"
-                  style="width:130px; text-align:center; font-family:monospace; letter-spacing:2px; text-transform:uppercase; font-size:1rem;"
-                  placeholder="Contoh: CBT2026" maxlength="12" oninput="this.value=this.value.toUpperCase()">
-              </div>
-            </div>
-
-            <!-- Firebase Config (Advanced) -->
-            <div
-              style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; margin-bottom:12px;">
-              <h3 style="font-size:1.1rem;margin:0; color:var(--danger);">Koneksi & Database (Advanced)</h3>
-            </div>
-            <div class="card"
-              style="display:flex; flex-direction:column; gap:12px; border: 1px solid var(--danger-soft); margin-bottom: 20px;">
-              <p style="font-size:0.8rem; color:var(--danger); font-weight:600;">⚠️ Peringatan: Jangan ubah data di
-                bawah ini kecuali Anda memindahkan server database ke Firebase lain.</p>
-              <div class="grid-2" style="gap:12px;">
-                <div class="form-group"><label style="font-size:0.8rem;">API Key</label><input type="password"
-                    id="fbApiKey" class="form-control" style="font-size:0.85rem;"></div>
-                <div class="form-group"><label style="font-size:0.8rem;">Auth Domain</label><input type="text"
-                    id="fbAuthDomain" class="form-control" style="font-size:0.85rem;"></div>
-                <div class="form-group"><label style="font-size:0.8rem;">Database URL</label><input type="text"
-                    id="fbDbUrl" class="form-control" style="font-size:0.85rem;"></div>
-                <div class="form-group"><label style="font-size:0.8rem;">Project ID</label><input type="text"
-                    id="fbProjectId" class="form-control" style="font-size:0.85rem;"></div>
-                <div class="form-group"><label style="font-size:0.8rem;">Storage Bucket</label><input type="text"
-                    id="fbStorageBucket" class="form-control" style="font-size:0.85rem;"></div>
-                <div class="form-group"><label style="font-size:0.8rem;">Messaging ID</label><input type="text"
-                    id="fbMessagingId" class="form-control" style="font-size:0.85rem;"></div>
-                <div class="form-group" style="grid-column: span 2;"><label style="font-size:0.8rem;">App
-                    ID</label><input type="text" id="fbAppId" class="form-control" style="font-size:0.85rem;"></div>
-              </div>
-              <button class="btn btn-outline" onclick="resetFirebaseConfig()"
-                style="color:var(--danger); border-color:var(--danger); margin-top:8px; font-size:0.8rem;">🔄 Reset ke
-                Bawaan Sistem</button>
-            </div>
-          </div>
-
+                <span id="refreshBtnText">Perbarui Data</span>
+            </button>
         </div>
-      </div>
-    </div>
-  </div>
 
-  </div><!-- /.app-container -->
-
-
-  <!-- ══════════════════════════════════════
-     OVERLAYS & MODALS
-══════════════════════════════════════ -->
-
-  <div class="overlay" id="overlay"></div>
-
-  <!-- Anti-Cheat Overlays -->
-  <div id="pwa-blocker-overlay" class="overlay"
-    style="background:#f8fafc; z-index:99999; flex-direction:column; text-align:center; padding:24px; overflow-y:auto;">
-    <div style="width:100%; max-width:440px; margin:0 auto;">
-
-      <!-- Ikon -->
-      <div
-        style="width:80px;height:80px;background:linear-gradient(135deg,#1D4ED8,#0EA5E9);border-radius:24px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 24px rgba(29,78,216,0.25);">
-        <svg style="width:42px;height:42px;color:white;" fill="none" stroke="currentColor" stroke-width="1.5"
-          viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-        </svg>
-      </div>
-
-      <h2 style="font-size:1.4rem;font-weight:800;color:#1e293b;margin-bottom:8px;">Wajib Install Aplikasi</h2>
-      <p style="font-size:0.9rem;color:#64748b;line-height:1.6;margin-bottom:20px;">Ujian ini hanya bisa dikerjakan
-        melalui aplikasi yang terinstall (PWA / Add to Home Screen).</p>
-
-      <!-- Tombol Install Otomatis (muncul jika browser support) -->
-      <button id="btnTriggerInstall"
-        style="display:none;width:100%;padding:14px;background:linear-gradient(135deg,#1D4ED8,#0EA5E9);color:white;border:none;border-radius:14px;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:12px;box-shadow:0 4px 16px rgba(29,78,216,0.3);letter-spacing:0.3px;">
-        ⬇️ Install Aplikasi Sekarang
-      </button>
-
-      <!-- Panduan manual -->
-      <div
-        style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:16px;text-align:left;margin-bottom:12px;">
-        <div
-          style="font-size:0.78rem;font-weight:700;text-transform:uppercase;color:#94a3b8;margin-bottom:10px;letter-spacing:0.5px;">
-          Cara Install Manual</div>
-        <div style="font-size:0.85rem;color:#334155;line-height:1.7;">
-          <div style="display:flex;gap:10px;margin-bottom:6px;align-items:flex-start;">
-            <span style="font-size:1rem;">📱</span>
-            <span><b>Android Chrome:</b> Ketuk menu (⋮) → <em>Tambahkan ke Layar Utama</em></span>
-          </div>
-          <div style="display:flex;gap:10px;margin-bottom:6px;align-items:flex-start;">
-            <span style="font-size:1rem;">🍎</span>
-            <span><b>iPhone Safari:</b> Ketuk ikon Share → <em>Add to Home Screen</em></span>
-          </div>
-          <div style="display:flex;gap:10px;align-items:flex-start;">
-            <span style="font-size:1rem;">💻</span>
-            <span><b>PC Chrome:</b> Ikon install (⊕) di address bar → <em>Install</em></span>
-          </div>
+        <!-- State: Data List -->
+        <!-- Penggunaan gap-6 dan flex-col untuk memberi jarak absolut antar kotak -->
+        <div id="examList" class="hidden flex-col gap-6 pb-10">
+            <!-- Exam cards will be injected here -->
         </div>
-      </div>
 
-      <!-- Tombol sudah install -->
-      <button onclick="window.location.reload()"
-        style="width:100%;padding:13px;background:white;color:#1D4ED8;border:2px solid #1D4ED8;border-radius:14px;font-size:0.95rem;font-weight:700;cursor:pointer;margin-bottom:20px;">
-        ✅ Saya Sudah Install — Muat Ulang
-      </button>
+    </main>
 
-      <!-- Divider bypass -->
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-        <div style="flex:1;height:1px;background:#e2e8f0;"></div>
-        <span style="font-size:0.75rem;color:#94a3b8;white-space:nowrap;">atau gunakan kode bypass dari pengawas</span>
-        <div style="flex:1;height:1px;background:#e2e8f0;"></div>
-      </div>
+    <!-- Token Modal (Bottom Sheet style) -->
+    <div id="tokenModal" class="hidden fixed inset-0 z-[2147483646] flex items-start sm:items-center justify-center p-4 pt-10 sm:pt-4 transition-all duration-300" style="opacity: 0;">
+        <!-- Backdrop Blur -->
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeTokenModal()"></div>
+        
+        <!-- Modal Content -->
+        <div class="bg-white relative rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl w-full max-w-[320px] sm:max-w-sm mx-auto overflow-hidden transform -translate-y-full sm:scale-95 transition-transform duration-300" id="tokenModalContent">
 
-      <!-- Bypass Code Input -->
-      <div style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:16px;">
-        <div
-          style="font-size:0.78rem;font-weight:700;text-transform:uppercase;color:#94a3b8;margin-bottom:10px;letter-spacing:0.5px;">
-          🔑 Kode Bypass (untuk HP bermasalah)</div>
-        <div style="display:flex;gap:8px;">
-          <input id="pwaBypassInput" type="text" placeholder="Masukkan kode bypass..."
-            style="flex:1;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.95rem;outline:none;font-family:monospace;letter-spacing:2px;text-transform:uppercase;"
-            onkeydown="if(event.key==='Enter') verifyPwaBypass()" oninput="this.value=this.value.toUpperCase()">
-          <button onclick="verifyPwaBypass()"
-            style="padding:11px 16px;background:#475569;color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.9rem;white-space:nowrap;">
-            Masuk
-          </button>
+            <!-- Drag Handle (Mobile) -->
+            <div class="w-full flex justify-center pt-3 pb-2 sm:hidden absolute top-0 z-10 pointer-events-none">
+                <div class="w-10 h-1.5 bg-slate-200 rounded-full"></div>
+            </div>
+
+            <div class="p-5 pt-8 sm:p-6 pb-4 flex flex-col items-center text-center">
+                <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-[1.1rem] flex items-center justify-center mb-3 border border-indigo-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </div>
+                <h3 class="text-[17px] sm:text-lg font-extrabold text-slate-800 tracking-tight">KODE UJIAN</h3>
+                <p class="text-[12px] sm:text-[13px] text-slate-500 font-semibold mt-1 truncate w-full px-2" id="modalExamName">Nama Ujian</p>
+            </div>
+
+            <div class="px-6 pb-5">
+                <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-indigo-300 group-focus-within:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    </div>
+                    <input type="text" id="tokenInput" class="w-full bg-slate-50 border-2 border-slate-200/80 rounded-xl pl-10 pr-3 py-3 font-mono text-center text-xl font-black text-indigo-700 tracking-[0.2em] focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 transition-all uppercase placeholder:tracking-normal placeholder:font-bold placeholder:text-slate-300 placeholder:text-[13px]" placeholder="KODE AKSES" autocomplete="off" spellcheck="false" maxlength="10">
+                </div>
+                <div id="tokenError" class="mt-2 hidden animate-pulse">
+                    <div class="flex items-center justify-center gap-1 bg-rose-50 text-rose-600 px-3 py-1.5 rounded-lg border border-rose-100 shadow-sm">
+                        <p class="text-[11px] font-bold">Kode salah, silakan cek ulang.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 sm:p-5 bg-slate-50 border-t border-slate-100 flex gap-2.5 pb-6 sm:pb-5">
+                <button onclick="closeTokenModal()" class="flex-[0.8] px-3 py-3 text-slate-500 bg-white border border-slate-300 rounded-[0.85rem] text-[13px] font-bold hover:bg-slate-50 active:scale-[0.98] transition-all focus:outline-none shadow-sm">
+                    Kembali
+                </button>
+                <button onclick="submitToken()" class="flex-[1.2] px-3 py-3 text-white bg-indigo-600 border border-transparent rounded-[0.85rem] text-[13px] font-bold hover:bg-indigo-700 shadow-[0_4px_10px_rgba(79,70,229,0.2)] active:scale-[0.98] transition-all focus:outline-none">
+                    Mulai
+                </button>
+            </div>
         </div>
-        <div id="pwaBypassError" style="display:none;margin-top:8px;font-size:0.8rem;color:#ef4444;font-weight:600;">
-          Kode bypass tidak valid.</div>
-      </div>
-
-    </div>
-  </div>
-
-  <div id="cheat-alert-overlay" class="overlay"
-    style="background:#DC2626; color:white; z-index:100000; flex-direction:column; text-align:center; padding:20px;">
-    <div style="font-size:5rem; margin-bottom:20px;">⚠️</div>
-    <h2 style="font-size:2rem; font-weight:900; margin-bottom:12px;">PELANGGARAN TERDETEKSI</h2>
-    <p style="font-size:1.1rem; max-width:400px; line-height:1.5; margin-bottom:20px;">Anda terdeteksi keluar dari layar
-      ujian! Waktu penalti akan <strong>dilipatgandakan</strong> untuk pelanggaran berikutnya.</p>
-    <div style="background:rgba(0,0,0,0.2); padding:10px 20px; border-radius:8px; font-weight:700; font-size:1.2rem;"
-      id="cheat-countdown">5</div>
-  </div>
-
-  <!-- Question Grid Bottom Sheet -->
-  <div class="q-grid-container" id="qGridContainer">
-    <div class="q-grid-header">
-      <div>
-        <h3>Navigasi Soal</h3>
-        <p style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">Ketuk nomor untuk berpindah soal</p>
-      </div>
-      <button class="btn btn-outline" id="btnCloseGrid"
-        style="padding:7px 14px;font-size:0.85rem;width:auto;border-radius:0;">Tutup</button>
-    </div>
-    <div class="q-grid" id="qGrid"></div>
-    <div style="margin-top:16px;display:flex;gap:14px;flex-wrap:wrap;font-size:0.77rem;color:var(--text-muted);">
-      <div style="display:flex;align-items:center;gap:6px;">
-        <div style="width:14px;height:14px;background:white;border:1.5px solid var(--border-strong);">
-        </div>Belum
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;">
-        <div style="width:14px;height:14px;background:var(--primary);"></div>Sudah
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;">
-        <div style="width:14px;height:14px;background:var(--warning);"></div>Ragu-ragu
-      </div>
-    </div>
-  </div>
-
-  <!-- Token Modal -->
-  <div class="overlay" id="token-overlay"></div>
-  <div class="card modal-card" id="token-modal" style="
-  position:fixed;top:50%;left:50%;
-  transform:translate(-50%,-50%) scale(0.95);
-  display:none;flex-direction:column;
-  width:90%;max-width:360px;
-  opacity:0;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-">
-    <div style="text-align:center;margin-bottom:20px;">
-      <div
-        style="width:56px;height:56px;background:linear-gradient(135deg,#1D4ED8,#0EA5E9);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;box-shadow:var(--shadow-pri-sm);">
-        <svg style="width:26px;height:26px;color:white;" fill="none" stroke="currentColor" stroke-width="1.5"
-          viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-        </svg>
-      </div>
-      <h3 style="margin-bottom:6px;">Token Ujian</h3>
-      <p class="text-muted" style="font-size:0.875rem;">Minta token dari pengawas ruang.</p>
-    </div>
-    <input type="text" id="examTokenInput" class="form-control" placeholder="TOKEN..." autocomplete="off"
-      style="margin-bottom:20px;">
-    <div style="display:flex;gap:10px;">
-      <button id="btnCancelToken" class="btn btn-outline" style="flex:1;">Batal</button>
-      <button id="btnSubmitToken" class="btn btn-primary" style="flex:1;">Mulai</button>
-    </div>
-  </div>
-
-  <!-- Image Zoom Modal -->
-  <div class="overlay" id="zoom-overlay" onclick="closeZoomModal()"
-    style="z-index:999;display:none;justify-content:center;align-items:center;background:rgba(15,23,90,0.85);">
-    <button
-      style="position:absolute;top:20px;right:20px;background:rgba(0,0,0,0.4);border:none;color:white;width:40px;height:40px;border-radius:50%;font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;">&times;</button>
-    <img id="zoom-image" src=""
-      style="max-width:95vw;max-height:85vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.3);pointer-events:none;" />
-  </div>
-
-  <!-- Admin Auth Modal -->
-  <div class="overlay" id="admin-overlay" style="z-index:1003;"></div>
-  <div class="card modal-card" id="admin-login-modal" style="
-  position:fixed;top:50%;left:50%;
-  transform:translate(-50%,-50%) scale(0.95);
-  z-index:1004;display:none;flex-direction:column;
-  width:90%;max-width:360px;
-  opacity:0;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-">
-    <div style="text-align:center;margin-bottom:20px;">
-      <div
-        style="width:56px;height:56px;background:linear-gradient(135deg,#DC2626,#EF4444);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;box-shadow:0 4px 12px rgba(239,68,68,0.3);">
-        <svg style="width:26px;height:26px;color:white;" fill="none" stroke="currentColor" stroke-width="1.5"
-          viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-      </div>
-      <h3 style="margin-bottom:6px;">Otorisasi Proktor</h3>
-      <p class="text-muted" style="font-size:0.875rem;">Masukkan sandi keamanan</p>
-    </div>
-    <input type="password" id="adminTokenInput" class="form-control" placeholder="••••••••" autocomplete="off"
-      style="text-align:center;margin-bottom:20px;">
-    <div style="display:flex;gap:10px;">
-      <button id="btnCancelAdmin" class="btn btn-outline" style="flex:1;">Tutup</button>
-      <button id="btnSubmitAdmin" class="btn btn-danger" style="flex:1;">Verifikasi</button>
-    </div>
-  </div>
-
-  <!-- Generic Import Modal -->
-  <div class="overlay" id="import-overlay" style="z-index:1005;"></div>
-  <div class="card modal-card" id="import-modal" style="
-  position:fixed;top:50%;left:50%;
-  transform:translate(-50%,-50%) scale(0.95);
-  z-index:1006;display:none;flex-direction:column;
-  width:90%;max-width:400px;
-  opacity:0;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  ">
-    <h3 style="margin-bottom:12px;" id="import-title">Import Data</h3>
-    <p class="text-muted" style="font-size:0.875rem; margin-bottom:6px;" id="import-desc">Pilih file Excel (.xlsx) untuk
-      diunggah.</p>
-    <a href="#" id="import-download-btn" onclick="downloadTemplateExcel(); return false;"
-      style="font-size:0.8rem; margin-bottom:16px; display:inline-block; color:var(--primary); font-weight:600; text-decoration:none;">⬇️
-      Unduh Template Excel</a>
-
-    <div id="import-extra-inputs" style="display:none; flex-direction:column; gap:10px; margin-bottom:16px;">
-      <input type="text" id="importBankId" class="form-control" placeholder="Kode Bank Soal (cth: MTK_9)">
     </div>
 
-    <input type="file" id="importFileInput" accept=".xlsx, .xls" class="form-control"
-      style="margin-bottom:20px; padding:10px;">
-
-    <div style="display:flex;gap:10px;">
-      <button class="btn btn-outline" style="flex:1;" onclick="closeImportModal()">Batal</button>
-      <button class="btn btn-primary" style="flex:1;" onclick="processImport()">Mulai Import</button>
-    </div>
-  </div>
-
-  <!-- Siswa CRUD Modal -->
-  <div class="overlay" id="siswa-overlay" style="z-index:1005;"></div>
-  <div class="card modal-card" id="siswa-modal" style="
-  position:fixed;top:50%;left:50%;
-  transform:translate(-50%,-50%) scale(0.95);
-  z-index:1006;display:none;flex-direction:column;
-  width:90%;max-width:400px;
-  opacity:0;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  ">
-    <h3 style="margin-bottom:12px;" id="siswa-modal-title">Tambah Siswa</h3>
-
-    <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
-      <div>
-        <label style="font-size:0.8rem; color:var(--text-muted); font-weight:600; margin-bottom:4px; display:block;">NIS
-          / ID Siswa</label>
-        <input type="text" id="siswaIdInput" class="form-control" placeholder="Cth: 12345">
-      </div>
-      <div>
-        <label
-          style="font-size:0.8rem; color:var(--text-muted); font-weight:600; margin-bottom:4px; display:block;">Nama
-          Siswa</label>
-        <input type="text" id="siswaNamaInput" class="form-control" placeholder="Cth: Budi Santoso">
-      </div>
-      <div>
-        <label
-          style="font-size:0.8rem; color:var(--text-muted); font-weight:600; margin-bottom:4px; display:block;">Kelas</label>
-        <input type="text" id="siswaKelasInput" class="form-control" placeholder="Cth: 9A">
-      </div>
-    </div>
-
-    <div style="display:flex;gap:10px;">
-      <button class="btn btn-outline" style="flex:1;" onclick="closeSiswaModal()">Batal</button>
-      <button class="btn btn-primary" style="flex:1;" onclick="saveSiswa()">Simpan</button>
-    </div>
-  </div>
-
-  <!-- Soal Quick Edit Modal -->
-  <div class="overlay" id="soal-edit-overlay" style="z-index:1009;"></div>
-  <div class="card modal-card" id="soal-edit-modal" style="
-  position:fixed;top:50%;left:50%;
-  transform:translate(-50%,-50%) scale(0.95);
-  z-index:1010;display:none;flex-direction:column;
-  width:95%;max-width:600px; max-height:85vh; overflow-y:auto;
-  opacity:0;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  ">
-    <h3 style="margin-bottom:12px;" id="soal-edit-title">Edit Soal</h3>
-
-    <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
-      <input type="hidden" id="soalEditBankId">
-      <input type="hidden" id="soalEditId">
-
-      <div>
-        <label
-          style="font-size:0.8rem; color:var(--text-muted); font-weight:600; margin-bottom:4px; display:block;">Teks
-          Soal</label>
-        <textarea id="soalEditPertanyaan" class="form-control" rows="4" style="resize:vertical;"></textarea>
-      </div>
-      <div>
-        <label
-          style="font-size:0.8rem; color:var(--text-muted); font-weight:600; margin-bottom:4px; display:block;">Tautan
-          Gambar Soal (Opsional)</label>
-        <input type="text" id="soalEditGambar" class="form-control" placeholder="https://...">
-      </div>
-
-      <div style="border:1px solid var(--border); border-radius:8px; padding:12px; background:var(--bg-subtle);">
-        <label style="font-size:0.8rem; color:var(--text-main); font-weight:700; margin-bottom:8px; display:block;">Opsi
-          & Kunci Jawaban (PG)</label>
-        <div id="soalEditOpsiContainer" style="display:flex; flex-direction:column; gap:8px;">
-          <!-- Opsi generated via JS -->
+    <!-- Custom Universal Modal (Alert/Confirm/Prompt) -->
+    <div id="customModal" class="hidden fixed inset-0 z-[2147483647] flex items-start sm:items-center justify-center p-4 pt-10 sm:pt-4 transition-all duration-300" style="opacity: 0;">
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" id="customModalBackdrop"></div>
+        <div class="bg-white relative rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl w-full max-w-[320px] sm:max-w-sm mx-auto overflow-hidden transform -translate-y-full sm:scale-95 transition-transform duration-300" id="customModalContent">
+            <div class="w-full flex justify-center pt-3 pb-2 sm:hidden absolute top-0 z-10 pointer-events-none">
+                <div class="w-10 h-1.5 bg-slate-200 rounded-full"></div>
+            </div>
+            <div class="p-5 pt-8 sm:p-6 sm:pt-6 pb-4 flex flex-col items-center text-center">
+                <div id="customModalIcon" class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-[1.1rem] flex items-center justify-center mb-3 border border-indigo-100">
+                </div>
+                <h3 id="customModalTitle" class="text-[17px] sm:text-lg font-extrabold text-slate-800 tracking-tight">TITLE</h3>
+                <p id="customModalMessage" class="text-[12px] sm:text-[13px] text-slate-500 font-medium mt-1.5 px-2 leading-relaxed">Message goes here.</p>
+            </div>
+            <div id="customModalInputWrapper" class="px-6 pb-5 hidden">
+                <input type="text" id="customModalInput" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-3 py-3 font-bold text-slate-700 focus:outline-none focus:border-indigo-500 transition-all text-center uppercase text-[13px]" placeholder="...">
+            </div>
+            <div class="p-4 sm:p-5 bg-slate-50 border-t border-slate-100 flex gap-2.5 pb-6 sm:pb-5">
+                <button id="customModalCancelBtn" class="hidden flex-1 px-3 py-3 text-slate-500 bg-white border border-slate-300 rounded-[0.85rem] text-[13px] font-bold hover:bg-slate-50 active:scale-[0.98] transition-all focus:outline-none shadow-sm">
+                    Batal
+                </button>
+                <button id="customModalConfirmBtn" class="flex-1 px-3 py-3 text-white bg-indigo-600 border border-transparent rounded-[0.85rem] text-[13px] font-bold hover:bg-indigo-700 shadow-[0_4px_10px_rgba(79,70,229,0.25)] active:scale-[0.98] transition-all focus:outline-none">
+                    OKE
+                </button>
+            </div>
         </div>
-        <div style="margin-top:12px;">
-          <label
-            style="font-size:0.8rem; color:var(--text-muted); font-weight:600; margin-bottom:4px; display:block;">Kunci
-            Jawaban Benar</label>
-          <input type="text" id="soalEditKunci" class="form-control"
-            placeholder="Contoh: A (untuk PG) atau A,C (untuk Kompleks)">
-        </div>
-      </div>
     </div>
 
-    <div style="display:flex;gap:10px;">
-      <button class="btn btn-outline" style="flex:1;" onclick="closeSoalEditModal()">Batal</button>
-      <button class="btn btn-primary" style="flex:1;" onclick="saveSoalEdit()">Simpan</button>
-    </div>
-  </div>
+    <!-- Application Script -->
+    <script>
+        /**
+         * CUSTOM MODAL SYSTEM (Bypassing GAS Sandbox)
+         */
+        const CustomModal = {
+            get el() { return document.getElementById('customModal'); },
+            get content() { return document.getElementById('customModalContent'); },
+            get title() { return document.getElementById('customModalTitle'); },
+            get message() { return document.getElementById('customModalMessage'); },
+            get inputWrapper() { return document.getElementById('customModalInputWrapper'); },
+            get input() { return document.getElementById('customModalInput'); },
+            get confirmBtn() { return document.getElementById('customModalConfirmBtn'); },
+            get cancelBtn() { return document.getElementById('customModalCancelBtn'); },
+            get icon() { return document.getElementById('customModalIcon'); },
+            
+            show(options) {
+                return new Promise((resolve) => {
+                    this.title.innerText = options.title || 'Informasi';
+                    this.message.innerText = options.message || '';
+                    this.confirmBtn.innerText = options.confirmText || 'OKE';
+                    this.cancelBtn.innerText = options.cancelText || 'Batal';
+                    this.input.value = '';
+                    
+                    if (options.showInput) {
+                        this.inputWrapper.classList.remove('hidden');
+                        if (options.placeholder) this.input.placeholder = options.placeholder;
+                    } else {
+                        this.inputWrapper.classList.add('hidden');
+                    }
+                    
+                    if (options.showCancel) {
+                        this.cancelBtn.classList.remove('hidden');
+                    } else {
+                        this.cancelBtn.classList.add('hidden');
+                    }
 
-  <!-- Admin Preview Soal Modal -->
-  <div class="overlay" id="preview-overlay" style="z-index:1007;"></div>
-  <div class="card modal-card" id="admin-preview-modal" style="
-  position:fixed;top:50%;left:50%;
-  transform:translate(-50%,-50%) scale(0.95);
-  z-index:1008;display:none;flex-direction:column;
-  width:95%;max-width:800px; height:90vh; max-height:800px;
-  opacity:0;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  padding:0; overflow:hidden;
-">
-    <div
-      style="padding:16px 20px; border-bottom:1px solid var(--border); background:var(--surface-0); display:flex; justify-content:space-between; align-items:center; z-index:10;">
-      <div>
-        <h3 style="margin:0; font-size:1.1rem; color:var(--text-main);" id="preview-title">Bank Soal</h3>
-        <p style="margin:0; font-size:0.8rem; color:var(--danger); font-weight:600; margin-top:2px;">RAHASIA: Terdapat
-          Kunci Jawaban</p>
-      </div>
-      <button id="btnClosePreview" class="btn btn-outline" style="padding:6px 12px; font-size:0.85rem;"
-        onclick="hideAdminPreview()">Tutup</button>
-    </div>
-    <div id="preview-content-area"
-      style="flex:1; overflow-y:auto; padding:20px; background:var(--bg-page); display:flex; flex-direction:column;">
-      <div class="question-container" style="flex:1;">
-        <div class="question-number" id="prev-q-number"
-          style="display:inline-block; margin-bottom:15px; font-weight:700; color:var(--primary); background:var(--surface-1); padding:6px 12px;">
-          SOAL 1</div>
-        <div class="question-text" id="prev-q-text">Memuat soal...</div>
-        <div id="prev-q-image-container" style="display:none;text-align:center;margin-bottom:20px;"></div>
-        <div class="option-list" id="prev-q-options"></div>
-      </div>
-    </div>
-    <div
-      style="padding:16px; border-top:1px solid var(--border); background:var(--surface-0); display:flex; justify-content:space-between; align-items:center;">
-      <button id="btnPrevPreview" class="btn btn-outline" style="min-width:100px;" onclick="navigatePreview(-1)">&laquo;
-        Prev</button>
-      <div id="prev-q-indicator" style="font-size:0.9rem; font-weight:600; color:var(--text-muted);">1 / 10</div>
-      <button id="btnNextPreview" class="btn btn-primary" style="min-width:100px;" onclick="navigatePreview(1)">Next
-        &raquo;</button>
-    </div>
-  </div>
+                    // Icon setup
+                    let iconHtml = '';
+                    if (options.type === 'danger') {
+                        iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 animate-pulse shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>';
+                        this.icon.className = "w-16 h-16 bg-rose-100 text-rose-600 rounded-[1.1rem] flex items-center justify-center mb-3 border border-rose-200 shadow-[0_0_20px_rgba(225,29,72,0.4)]";
+                        document.getElementById('customModalTitle').className = "text-[17px] sm:text-lg font-black text-rose-600 tracking-tight uppercase";
+                        this.confirmBtn.className = "flex-1 px-3 py-3 text-white bg-rose-600 border border-transparent rounded-[0.85rem] text-[13px] font-bold hover:bg-rose-700 shadow-[0_4px_15px_rgba(225,29,72,0.4)] active:scale-[0.98] transition-all focus:outline-none";
+                    } else {
+                        document.getElementById('customModalTitle').className = "text-[17px] sm:text-lg font-extrabold text-slate-800 tracking-tight";
+                        this.confirmBtn.className = "flex-1 px-3 py-3 text-white bg-indigo-600 border border-transparent rounded-[0.85rem] text-[13px] font-bold hover:bg-indigo-700 shadow-[0_4px_10px_rgba(79,70,229,0.25)] active:scale-[0.98] transition-all focus:outline-none";
+                        
+                        if (options.type === 'confirm') {
+                            iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+                            this.icon.className = "w-12 h-12 bg-amber-50 text-amber-600 rounded-[1.1rem] flex items-center justify-center mb-3 border border-amber-100";
+                        } else if (options.type === 'prompt') {
+                            iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>';
+                            this.icon.className = "w-12 h-12 bg-indigo-50 text-indigo-600 rounded-[1.1rem] flex items-center justify-center mb-3 border border-indigo-100";
+                        } else {
+                            iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+                            this.icon.className = "w-12 h-12 bg-blue-50 text-blue-600 rounded-[1.1rem] flex items-center justify-center mb-3 border border-blue-100";
+                        }
+                    }
+                    this.icon.innerHTML = iconHtml;
 
-  <!-- Jadwal Builder Modal -->
-  <div class="overlay" id="jadwal-overlay" style="z-index:1005;"></div>
-  <div class="card modal-card" id="jadwal-modal" style="
-  position:fixed;top:50%;left:50%;
-  transform:translate(-50%,-50%) scale(0.95);
-  z-index:1006;display:none;flex-direction:column;
-  width:95%;max-width:500px;
-  opacity:0;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  max-height:90vh; overflow-y:auto;
-  ">
-    <h3 style="margin-bottom:12px;">Buat Jadwal Ujian Baru</h3>
+                    this.el.classList.remove('hidden');
+                    // Force a small delay to ensure 'hidden' removal is processed by the browser
+                    // especially important on lower-end mobile devices inside expensive layouts
+                    setTimeout(() => {
+                        this.el.style.opacity = '1';
+                        this.content.classList.remove('-translate-y-full', 'sm:scale-95');
+                        this.content.classList.add('translate-y-0', 'sm:scale-100');
+                        if (options.showInput) this.input.focus();
+                    }, 50);
 
-    <div class="form-group">
-      <label>Kode Ujian (Tanpa Spasi)</label>
-      <input type="text" id="jId" class="form-control" placeholder="Contoh: PAS_MTK_9">
-    </div>
-    <div class="form-group">
-      <label>Nama Ujian</label>
-      <input type="text" id="jNama" class="form-control" placeholder="Contoh: Penilaian Akhir Semester Matematika">
-    </div>
-    <div class="form-group">
-      <label>Pilih Bank Soal</label>
-      <select id="jSoal" class="form-control" style="background:#fff;"></select>
-    </div>
-    <div style="display:flex; gap:10px;">
-      <div class="form-group" style="flex:1;">
-        <label>Durasi (Menit)</label>
-        <input type="number" id="jDurasi" class="form-control" value="60">
-      </div>
-      <div class="form-group" style="flex:1;">
-        <label>Min. Selesai (Menit)</label>
-        <input type="number" id="jMinSelesai" class="form-control" value="0" placeholder="0 = bebas">
-      </div>
-    </div>
-    <div style="display:flex; gap:10px;">
-      <div class="form-group" style="flex:1;">
-        <label>Waktu Mulai</label>
-        <input type="datetime-local" id="jMulai" class="form-control">
-      </div>
-      <div class="form-group" style="flex:1;">
-        <label>Waktu Selesai</label>
-        <input type="datetime-local" id="jSelesai" class="form-control">
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Target Kelas (Pisahkan dengan Koma)</label>
-      <input type="text" id="jKelas" class="form-control" placeholder="Kosongkan untuk semua kelas">
-    </div>
+                    const handleConfirm = () => {
+                        cleanup();
+                        resolve(options.showInput ? this.input.value : true);
+                    };
+                    const handleCancel = () => {
+                        cleanup();
+                        resolve(options.showInput ? null : false);
+                    };
+                    const cleanup = () => {
+                        this.confirmBtn.removeEventListener('click', handleConfirm);
+                        this.cancelBtn.removeEventListener('click', handleCancel);
+                        this.hide();
+                    };
 
-    <div style="display:flex;gap:10px; margin-top:10px;">
-      <button class="btn btn-outline" style="flex:1;" onclick="closeJadwalModal()">Batal</button>
-      <button class="btn btn-primary" style="flex:1;" onclick="saveJadwal()">Simpan</button>
-    </div>
-  </div>
+                    this.confirmBtn.addEventListener('click', handleConfirm);
+                    this.cancelBtn.addEventListener('click', handleCancel);
+                });
+            },
+            
+            hide() {
+                this.el.style.opacity = '0';
+                this.content.classList.remove('translate-y-0', 'sm:scale-100');
+                this.content.classList.add('-translate-y-full', 'sm:scale-95');
+                setTimeout(() => {
+                    this.el.classList.add('hidden');
+                }, 300);
+            },
 
-  <!-- Modal Konfigurasi Cetak -->
-  <div class="overlay" id="print-overlay" style="z-index:1010;"></div>
-  <div class="card modal-card" id="print-config-modal" style="
-  position:fixed;top:50%;left:50%;
-  transform:translate(-50%,-50%) scale(0.95);
-  z-index:1011;display:none;flex-direction:column;
-  width:95%;max-width:500px;
-  opacity:0;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  max-height:90vh; overflow-y:auto;
-  ">
-    <h3 style="margin-bottom:12px;">Konfigurasi Berita Acara & Presensi</h3>
-    <input type="hidden" id="printExamId">
+            alert(message, title = 'Informasi') {
+                return this.show({ type: 'alert', title, message, showCancel: false, confirmText: 'OKE' });
+            },
 
-    <div class="form-group">
-      <label>Mata Pelajaran / Nama Ujian</label>
-      <input type="text" id="printExamName" class="form-control" readonly style="background:var(--surface-0);">
-    </div>
-    <div class="form-group">
-      <label>Pilih Kelas</label>
-      <select id="printKelas" class="form-control">
-        <option value="">-- Memuat Kelas... --</option>
-      </select>
-    </div>
-    <div style="display:flex; gap:10px;">
-      <div class="form-group" style="flex:1;">
-        <label>Tanggal Pelaksanaan</label>
-        <input type="date" id="printTanggal" class="form-control">
-      </div>
-      <div class="form-group" style="flex:1;">
-        <label>Sesi & Ruang</label>
-        <input type="text" id="printRuang" class="form-control" placeholder="Contoh: Sesi 1 / Lab 1">
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Nama Pengawas (beserta NIP jika ada)</label>
-      <input type="text" id="printPengawas" class="form-control" placeholder="Contoh: Budi Santoso, S.Pd.">
-    </div>
-    <div class="form-group">
-      <label>Nama Proktor (beserta NIP jika ada)</label>
-      <input type="text" id="printProktor" class="form-control" placeholder="Contoh: Andi, S.Kom.">
-    </div>
+            danger(message, title = 'Peringatan') {
+                return this.show({ type: 'danger', title, message, showCancel: false, confirmText: 'SAYA MENGERTI' });
+            },
 
-    <div style="display:flex;gap:10px; margin-top:10px;">
-      <button class="btn btn-outline" style="flex:1;" onclick="closePrintModal()">Batal</button>
-      <button class="btn btn-primary" style="flex:1;" onclick="executePrint()"><span
-          style="margin-right:6px;">🖨️</span> Cetak Sekarang</button>
-    </div>
-  </div>
+            confirm(message, title = 'Konfirmasi') {
+                return this.show({ type: 'confirm', title, message, showCancel: true, confirmText: 'YA', cancelText: 'TIDAK' });
+            },
 
-  <!-- Modal Panduan Ujian -->
-  <div class="overlay" id="guide-overlay" style="z-index:1020;" onclick="closeGuideModal()"></div>
-  <div class="card modal-card" id="guide-modal" style="
-  position:fixed;top:50%;left:50%;
-  transform:translate(-50%,-50%) scale(0.95);
-  z-index:1021;display:none;flex-direction:column;
-  width:90%;max-width:400px;
-  opacity:0;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  padding:24px;
-  ">
-    <div style="text-align:center; margin-bottom:20px;">
-      <div
-        style="width:60px; height:60px; background:var(--warning-soft); color:var(--warning); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
-        <svg style="width:30px; height:30px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
-          </path>
-        </svg>
-      </div>
-      <h3 style="margin:0; font-size:1.25rem;">Panduan Ujian</h3>
-      <p style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">Baca petunjuk berikut dengan teliti</p>
-    </div>
+            prompt(message, placeholder = '', title = 'Input') {
+                return this.show({ type: 'prompt', title, message, showInput: true, showCancel: true, placeholder, confirmText: 'LANJUT', cancelText: 'BATAL' });
+            }
+        };
 
-    <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:24px;">
-      <div style="display:flex; gap:12px; align-items:flex-start;">
-        <div style="font-weight:700; color:var(--primary); font-size:1rem;">01</div>
-        <div style="font-size:0.9rem; color:var(--text-main);">Ketik nama Anda di kolom pencarian dan pilih nama yang
-          sesuai dari daftar.</div>
-      </div>
-      <div style="display:flex; gap:12px; align-items:flex-start;">
-        <div style="font-weight:700; color:var(--primary); font-size:1rem;">02</div>
-        <div style="font-size:0.9rem; color:var(--text-main);">Pastikan Anda memiliki <b>Token Valid</b> dari pengawas
-          untuk memulai ujian.</div>
-      </div>
-      <div style="display:flex; gap:12px; align-items:flex-start;">
-        <div style="font-weight:700; color:var(--primary); font-size:1rem;">03</div>
-        <div style="font-size:0.9rem; color:var(--text-main);"><b>Anti-Cheat Aktif:</b> Jangan keluar dari layar ujian
-          atau pindah aplikasi, atau ujian Anda akan dibekukan.</div>
-      </div>
-      <div style="display:flex; gap:12px; align-items:flex-start;">
-        <div style="font-weight:700; color:var(--primary); font-size:1rem;">04</div>
-        <div style="font-size:0.9rem; color:var(--text-main);">Jawaban tersimpan otomatis. Jika koneksi terputus, Anda
-          bisa melanjutkan kembali.</div>
-      </div>
-    </div>
+        /**
+         * ALARM SYSTEM (Web Audio API Siren)
+         */
+        const AlarmSystem = {
+            audioCtx: null,
+            oscillator: null,
+            lfo: null,
+            gainNode: null,
+            isPlaying: false,
 
-    <button class="btn btn-primary btn-block" onclick="closeGuideModal()">Saya Mengerti</button>
-  </div>
+            init() {
+                if (this.audioCtx) return;
+                try {
+                    this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // UNLOCK AUDIO CONTEXT: Mainkan suara hening sesaat untuk membuka blokir autoplay di iOS/Safari
+                    if (this.audioCtx.state === 'suspended') {
+                        this.audioCtx.resume();
+                    }
+                    const dummyOsc = this.audioCtx.createOscillator();
+                    dummyOsc.connect(this.audioCtx.destination);
+                    dummyOsc.start(0);
+                    dummyOsc.stop(0.001);
+                } catch (e) {
+                    console.error("Web Audio API not supported", e);
+                }
+            },
 
-  <!-- LAYAR CETAK (Tersembunyi secara default, hanya tampil di @media print atau JS) -->
-  <div id="print-view" style="display:none; background:white; color:black; width:100%; min-height:100vh;">
-    <!-- HALAMAN 1: BERITA ACARA -->
-    <div class="print-page">
-      <div class="print-header"
-        style="text-align:center; border-bottom:3px solid black; padding-bottom:10px; margin-bottom:20px;">
-        <h2 style="margin:0; font-size:16pt; text-transform:uppercase;">BERITA ACARA PELAKSANAAN UJIAN</h2>
-        <h3 style="margin:5px 0 0 0; font-size:14pt; font-weight:normal;" id="ph-sekolah">SMP NEGERI 1 DANDER</h3>
-      </div>
-      <div style="text-align:justify; line-height:1.6; font-size:12pt; margin-bottom:20px;">
-        Pada hari ini <span class="print-line" id="pb-hari" style="min-width:150px;"></span> tanggal <span
-          class="print-line" id="pb-tanggal" style="min-width:150px;"></span>
-        telah diselenggarakan ujian <span class="print-line" id="pb-mapel" style="min-width:200px;"></span>
-        untuk kelas <span class="print-line" id="pb-kelas" style="min-width:100px;"></span>
-        di ruang <span class="print-line" id="pb-ruang" style="min-width:100px;"></span>.
-      </div>
+            start() {
+                this.init();
+                if (!this.audioCtx || this.isPlaying) return;
+                
+                if (this.audioCtx.state === 'suspended') {
+                    this.audioCtx.resume();
+                }
 
-      <table style="width:100%; font-size:12pt; margin-bottom:20px; border-collapse:collapse;">
-        <tr>
-          <td style="width:30%; padding:8px 0;">1. Jumlah Peserta Seharusnya</td>
-          <td style="width:5%; text-align:center;">:</td>
-          <td style="border-bottom:1px dotted black; width:15%; text-align:center;" id="pb-jml-total"></td>
-          <td>Orang</td>
-        </tr>
-        <tr>
-          <td style="padding:8px 0;">2. Jumlah Peserta Hadir</td>
-          <td style="text-align:center;">:</td>
-          <td style="border-bottom:1px dotted black; text-align:center;" id="pb-jml-hadir"></td>
-          <td>Orang</td>
-        </tr>
-        <tr>
-          <td style="padding:8px 0;">3. Jumlah Peserta Tidak Hadir</td>
-          <td style="text-align:center;">:</td>
-          <td style="border-bottom:1px dotted black; text-align:center;" id="pb-jml-absen"></td>
-          <td>Orang</td>
-        </tr>
-      </table>
+                this.isPlaying = true;
+                this.oscillator = this.audioCtx.createOscillator();
+                this.gainNode = this.audioCtx.createGain();
+                this.lfo = this.audioCtx.createOscillator();
 
-      <div style="font-size:12pt; margin-bottom:10px;">Catatan selama pelaksanaan ujian:</div>
-      <div style="border:1px solid black; min-height:150px; margin-bottom:40px; padding:10px;"></div>
+                this.oscillator.type = 'triangle';
+                
+                // Siren effect using LFO (Low Frequency Oscillator)
+                const lfoGain = this.audioCtx.createGain();
 
-      <table style="width:100%; font-size:12pt; text-align:center; margin-top:40px;">
-        <tr>
-          <td style="width:50%;">
-            <b>Proktor</b>
-            <br><br><br><br>
-            <span id="pb-ttd-proktor" style="text-decoration:underline; font-weight:bold;"></span>
-          </td>
-          <td style="width:50%;">
-            <b>Pengawas</b>
-            <br><br><br><br>
-            <span id="pb-ttd-pengawas" style="text-decoration:underline; font-weight:bold;"></span>
-          </td>
-        </tr>
-      </table>
-    </div>
+                this.lfo.type = 'sine';
+                this.lfo.frequency.value = 1; // 1Hz siren cycle
+                lfoGain.gain.value = 300; // Frequency variation range (Hz)
 
-    <!-- HALAMAN 2: DAFTAR HADIR -->
-    <div class="print-page" style="page-break-before: always;">
-      <div class="print-header"
-        style="text-align:center; border-bottom:3px solid black; padding-bottom:10px; margin-bottom:20px;">
-        <h2 style="margin:0; font-size:16pt; text-transform:uppercase;">DAFTAR HADIR PESERTA UJIAN</h2>
-        <h3 style="margin:5px 0 0 0; font-size:14pt; font-weight:normal;" id="ph-sekolah-print">SMP NEGERI 1 DANDER</h3>
-      </div>
+                this.lfo.connect(lfoGain);
+                lfoGain.connect(this.oscillator.frequency);
 
-      <table style="width:100%; font-size:11pt; margin-bottom:20px;">
-        <tr>
-          <td style="width:15%;">Mata Pelajaran</td>
-          <td style="width:35%;">: <b id="pd-mapel"></b></td>
-          <td style="width:15%;">Tanggal</td>
-          <td style="width:35%;">: <b id="pd-tanggal"></b></td>
-        </tr>
-        <tr>
-          <td>Kelas</td>
-          <td>: <b id="pd-kelas"></b></td>
-          <td>Sesi / Ruang</td>
-          <td>: <b id="pd-ruang"></b></td>
-        </tr>
-      </table>
+                this.oscillator.frequency.value = 600; // Base frequency
+                this.gainNode.gain.setValueAtTime(0.5, this.audioCtx.currentTime);
 
-      <table class="print-table" style="width:100%; font-size:11pt; border-collapse:collapse; text-align:left;">
-        <thead>
-          <tr>
-            <th style="width:5%; text-align:center; padding:8px; border:1px solid black;">No.</th>
-            <th style="width:20%; padding:8px; border:1px solid black;">Username/ID</th>
-            <th style="width:40%; padding:8px; border:1px solid black;">Nama Peserta</th>
-            <th colspan="2" style="width:35%; text-align:center; padding:8px; border:1px solid black;">Tanda Tangan</th>
-          </tr>
-        </thead>
-        <tbody id="print-siswa-tbody">
-          <!-- Diisi oleh JS -->
-        </tbody>
-      </table>
+                this.oscillator.connect(this.gainNode);
+                this.gainNode.connect(this.audioCtx.destination);
 
-      <table style="width:100%; font-size:11pt; text-align:center; margin-top:40px;">
-        <tr>
-          <td style="width:50%;">
-            <b>Proktor</b>
-            <br><br><br><br>
-            <span id="pd-ttd-proktor" style="text-decoration:underline; font-weight:bold;"></span>
-          </td>
-          <td style="width:50%;">
-            <b>Pengawas</b>
-            <br><br><br><br>
-            <span id="pd-ttd-pengawas" style="text-decoration:underline; font-weight:bold;"></span>
-          </td>
-        </tr>
-      </table>
-    </div>
-  </div>
+                this.lfo.start();
+                this.oscillator.start();
+            },
+
+            stop() {
+                if (!this.isPlaying) return;
+                try {
+                    if (this.oscillator) {
+                        this.oscillator.stop();
+                        this.oscillator.disconnect();
+                    }
+                    if (this.lfo) {
+                        this.lfo.stop();
+                        this.lfo.disconnect();
+                    }
+                    if (this.gainNode) {
+                        this.gainNode.disconnect();
+                    }
+                } catch (e) {}
+                this.isPlaying = false;
+            }
+        };
+
+        /**
+         * KONFIGURASI API
+         */
+        const URL_API = "https://script.google.com/macros/s/AKfycbwalO-HqOZpSYlOjBXl9stx3PzZUWrTadTJeojZ_AuMWFNrJk44vlozgXXEUiNO5Fugog/exec";
+        const USE_DUMMY_DATA = false;
+        let PROCTOR_KEY = localStorage.getItem('last_proctor_key') || "2025"; // Sinkron via Spreadsheet
+
+        // Data Management
+        let examsBank = [];
+        let secureLinks = {};
+        let activeSelectedExamId = null;
+        let kioskExamId = null;
+
+        // Interval Management
+        let refreshIntervalTimer = null;
+        let countdownTimer = null;
+        let clockTimer = null;
+        let healthTimer = null; // Timer for device stats
+        let wakeLock = null;
+        let violationCount = 0;
+        let isLeavingKiosk = false;
+
+        // DOM Elements
+        const elLoading = document.getElementById('loadingState');
+        const elError = document.getElementById('errorState');
+        const elEmpty = document.getElementById('emptyState');
+        const elList = document.getElementById('examList');
+        const statusContainer = document.getElementById('statusContainer');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const timeText = document.getElementById('serverTimeText');
+
+        /**
+         * SECURITY FEATURES
+         */
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.keyCode == 123) e.preventDefault(); // F12
+            if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) e.preventDefault();
+            if (e.ctrlKey && e.keyCode === 85) e.preventDefault();
+            if (e.ctrlKey && e.keyCode === 83) e.preventDefault();
+        });
+        window.addEventListener('beforeunload', function (e) {
+            const msg = 'Apakah Anda yakin ingin keluar? Ujian mungkin sedang berlangsung.';
+            e.preventDefault();
+            e.returnValue = msg;
+            return msg;
+        });
+
+        function parseDate(dateStr) {
+            if (!dateStr) return new Date(0);
+            try {
+                if (dateStr.includes('T')) return new Date(dateStr);
+                const parts = dateStr.split(' ');
+                if (parts.length !== 2) return new Date(dateStr);
+                const dateParts = parts[0].split('-');
+                const timeParts = parts[1].split(':');
+                return new Date(dateParts[0], dateParts[1] - 1, dateParts[2], timeParts[0], timeParts[1]);
+            } catch (e) {
+                return new Date(0);
+            }
+        }
+
+        function formatDateIndo(date) {
+            if (!date || isNaN(date.getTime())) return "";
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+            const day = days[date.getDay()];
+            const dd = date.getDate();
+            const mm = months[date.getMonth()];
+            return `${day}, ${dd} ${mm}`;
+        }
+
+        function formatCountdown(diffMs) {
+            if (diffMs <= 0) return "Selesai";
+            const h = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
+            const m = Math.floor((diffMs / 1000 / 60) % 60);
+            const s = Math.floor((diffMs / 1000) % 60);
+            if (h > 0) return `${h}j ${m}m ${s}d`;
+            return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const day = days[now.getDay()];
+            const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            timeText.innerText = `${day}, ${timeStr}`;
+        }
+
+        function setAppStatus(state) {
+            statusContainer.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-sm transition-all duration-300';
+            switch (state) {
+                case 'online':
+                    statusContainer.classList.add('bg-white/20', 'backdrop-blur-md', 'border-white/20');
+                    statusDot.className = 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)] animate-pulse';
+                    statusText.innerText = 'ONLINE';
+                    statusText.className = 'text-[9px] font-bold text-white uppercase tracking-widest';
+                    break;
+                case 'offline':
+                case 'error':
+                    statusContainer.classList.add('bg-rose-500/80', 'backdrop-blur-md', 'border-rose-400/50');
+                    statusDot.className = 'w-2 h-2 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.6)]';
+                    statusText.innerText = 'TERPUTUS';
+                    statusText.className = 'text-[9px] font-bold text-white uppercase tracking-widest';
+                    break;
+                case 'sync':
+                    statusContainer.classList.add('bg-white/10', 'backdrop-blur-md', 'border-white/10');
+                    statusDot.className = 'w-2 h-2 rounded-full bg-blue-300 animate-ping';
+                    statusText.innerText = 'SYNC';
+                    statusText.className = 'text-[9px] font-bold text-white/80 uppercase tracking-widest';
+                    break;
+            }
+        }
+
+        async function fetchData(force = false) {
+            const now = Date.now();
+            const lastSync = parseInt(localStorage.getItem('last_sync_timestamp') || 0);
+            const cachedData = localStorage.getItem('cached_exams_data');
+            const COOLDOWN_MS = 10000; // 10 Detik Throttling
+
+            const btn = document.getElementById('manualRefreshBtn');
+            const btnText = document.getElementById('refreshBtnText');
+
+            // Tampilkan Skeleton Loading awal (hanya jika tidak ada cache)
+            if (!cachedData) {
+                elLoading.classList.remove('hidden');
+            }
+            elError.classList.add('hidden');
+            elEmpty.classList.add('hidden');
+            
+            // ANTI-SPAM LOGIC: Jika baru saja sync, jangan tembak server lagi
+            if (!force && cachedData && (now - lastSync < COOLDOWN_MS)) {
+                console.info("Anti-Spam: Menggunakan cache lokal (Data masih segar).");
+                setAppStatus('online');
+                const data = JSON.parse(cachedData);
+                processFetchedData(data);
+                return;
+            }
+
+            if (force && btn) {
+                btn.disabled = true;
+                if (btnText) btnText.innerText = "Memperbarui...";
+            }
+
+            setAppStatus('sync');
+
+            try {
+                let data = [];
+                if (USE_DUMMY_DATA) {
+                    await new Promise(r => setTimeout(r, 800)); 
+                    const todayCurrent = new Date();
+                    const formatForJSON = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                    data = {
+                        exams: [
+                            { "id": "1", "nama": "Matematika X - Semester 1", "link": "https://forms.gle/demo1", "start": formatForJSON(new Date(todayCurrent.getTime() - 1800000)), "end": formatForJSON(new Date(todayCurrent.getTime() + 5400000)), "status": "aktif", "token": "MATH10" },
+                            { "id": "2", "nama": "Bahasa Indonesia X", "link": "https://forms.gle/demo2", "start": formatForJSON(new Date(todayCurrent.getTime() + 7200000)), "end": formatForJSON(new Date(todayCurrent.getTime() + 14400000)), "status": "aktif", "token": "INDO10" }
+                        ],
+                        config: { proctorKey: PROCTOR_KEY }
+                    };
+                } else {
+                    const response = await fetch(URL_API);
+                    if (!response.ok) throw new Error("Gagal terhubung ke server.");
+                    data = await response.json();
+
+                    if (data.retryAlert) {
+                        setAppStatus('sync');
+                        setTimeout(() => fetchData(true), 3000);
+                        return;
+                    }
+                }
+
+                if (data.error) throw new Error(data.message);
+
+                // Update Cache
+                localStorage.setItem('cached_exams_data', JSON.stringify(data));
+                localStorage.setItem('last_sync_timestamp', now.toString());
+
+                processFetchedData(data);
+                setAppStatus('online');
+
+            } catch (err) {
+                console.error(err);
+                setAppStatus('error');
+                
+                // Jika error tapi ada cache, gunakan cache sebagai fallback darurat
+                if (cachedData) {
+                    console.warn("Server Error: Menggunakan data cache sebagai fallback.");
+                    processFetchedData(JSON.parse(cachedData));
+                } else {
+                    elLoading.classList.add('hidden');
+                    elError.classList.remove('hidden');
+                    document.getElementById('errorMessage').innerText = err.message || "Gagal menghubungi peladen sekolah.";
+                }
+            } finally {
+                if (btn) {
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        if (btnText) btnText.innerText = "Perbarui Data";
+                    }, 2000);
+                }
+            }
+        }
+
+        // Fungsi Helper untuk memproses data hasil fetch/cache
+        function processFetchedData(data) {
+            let examsArray = Array.isArray(data) ? data : (data.exams || []);
+            
+            if (data.config && data.config.proctorKey) {
+                PROCTOR_KEY = data.config.proctorKey;
+                localStorage.setItem('last_proctor_key', PROCTOR_KEY);
+            }
+
+            examsBank = examsArray.map(item => ({
+                ...item,
+                startObj: parseDate(item.start),
+                endObj: parseDate(item.end)
+            }));
+
+            processAndRenderExams();
+        }
+
+        function processAndRenderExams() {
+            const now = new Date();
+            let validExamsCount = 0;
+            secureLinks = {}; 
+            elList.innerHTML = '';
+
+            examsBank.forEach(exam => {
+                if (exam.status?.toLowerCase() !== 'aktif') return;
+
+                const isUpcomingStr = now < exam.startObj;
+                const isActiveStr = now >= exam.startObj && now <= exam.endObj;
+                const isFinishedStr = now > exam.endObj;
+
+                if (isFinishedStr) return; 
+
+                validExamsCount++;
+                secureLinks[exam.id] = exam.link;
+
+                // DESIGN TERBARU KARTU UJIAN (SPLIT CARD)
+                const cardHtml = `
+                    <div class="bg-white rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.06)] relative flex flex-col mb-6 border border-slate-100/50 overflow-hidden transform transition-transform hover:-translate-y-1" id="card-${exam.id}">
+                        
+                        <!-- Top status line -->
+                        <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r ${isActiveStr ? 'from-indigo-500 to-blue-500' : 'from-slate-200 to-slate-200'} z-10"></div>
+                        
+                        <!-- Card Body (Info Area) -->
+                        <div class="p-5 sm:p-6 pb-3 sm:pb-4 relative">
+                            ${isActiveStr ? '<div class="absolute -top-10 -right-10 w-32 h-32 bg-indigo-50 rounded-full blur-2xl z-0 pointer-events-none"></div>' : ''}
+                            
+                            <div class="flex justify-between items-start mb-2 sm:mb-3 relative z-10">
+                                <div class="flex flex-col">
+                                    <div class="flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 ${isActiveStr ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-100 text-slate-500'} rounded-lg inline-flex w-max mb-2.5 sm:mb-3">
+                                        ${isActiveStr ? '<svg class="w-3.5 h-3.5 text-indigo-600 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>' : '<svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'}
+                                        <span class="text-[8px] sm:text-[9px] font-extrabold uppercase tracking-[0.15em]">${isActiveStr ? 'ZONA AKTIF' : 'ZONA TERJADWAL'}</span>
+                                    </div>
+                                    <h3 class="text-[16px] sm:text-[18px] font-extrabold text-slate-800 leading-snug tracking-tight pr-2 sm:pr-4">${exam.nama}</h3>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-2 text-slate-500 relative z-10 mb-1 mt-2 sm:mt-3">
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <p class="text-[11px] sm:text-[12px] font-semibold tracking-wide">
+                                    <span class="text-indigo-600/80 font-bold">${formatDateIndo(exam.startObj)}</span>
+                                    <span class="mx-1 opacity-30">|</span>
+                                    ${exam.start.split(' ')[1]} — ${exam.end.split(' ')[1]}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Card Footer (Action Area) -->
+                        <div class="${isActiveStr ? 'bg-indigo-50/30' : 'bg-slate-50/50'} p-5 sm:p-6 pt-4 sm:pt-5 border-t border-slate-100 mt-auto flex flex-col gap-3 sm:gap-4 relative z-10">
+                            
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-1 sm:gap-1.5">
+                                    ${isActiveStr ? '<svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' : '<svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>'}
+                                    <span class="text-[9px] sm:text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">${isActiveStr ? 'WAKTU TERSISA:' : 'DIBUKA DALAM:'}</span>
+                                </div>
+                                <span class="text-[13px] sm:text-sm font-black ${isActiveStr ? 'text-rose-500' : 'text-slate-500'} font-mono bg-white px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg shadow-sm border border-slate-100/80 tracking-wider" id="${isActiveStr ? 'countdown-'+exam.id : 'countdown-start-'+exam.id}">--:--:--</span>
+                            </div>
+                            
+                            ${isActiveStr ? `
+                                <button onclick="openTokenModal('${exam.id}', '${exam.nama}')" class="w-full py-3.5 sm:py-4 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold text-[13px] sm:text-[14px] rounded-[0.85rem] sm:rounded-xl shadow-[0_6px_20_rgba(79,70,229,0.25)] transition-all flex justify-center items-center gap-2">
+                                    <span>KERJAKAN SEKARANG</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                                </button>
+                            ` : `
+                                <button disabled class="w-full py-3.5 sm:py-4 bg-slate-200/80 text-slate-400 font-bold text-[13px] sm:text-[14px] rounded-[0.85rem] sm:rounded-xl cursor-not-allowed border border-slate-200/50 shadow-inner">
+                                    BELUM DIBUKA
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                `;
+                elList.insertAdjacentHTML('beforeend', cardHtml);
+            });
+
+            // Sembunyikan Skeleton & Tampilkan Konten Asli
+            elLoading.classList.add('hidden');
+            if (validExamsCount === 0) {
+                elEmpty.classList.remove('hidden');
+                elList.classList.add('hidden');
+            } else {
+                elEmpty.classList.add('hidden');
+                elList.classList.remove('hidden');
+                elList.classList.add('flex');
+            }
+        }
+
+        function startCountdowns() {
+            countdownTimer = setInterval(() => {
+                const now = new Date();
+
+                examsBank.forEach(exam => {
+                    const elEnd = document.getElementById(`countdown-${exam.id}`);
+                    const elStart = document.getElementById(`countdown-start-${exam.id}`);
+
+                    if (elEnd && now <= exam.endObj) {
+                        elEnd.innerText = formatCountdown(exam.endObj - now);
+                        if (now >= exam.endObj) fetchData();
+                    }
+
+                    if (elStart && now < exam.startObj) {
+                        elStart.innerText = formatCountdown(exam.startObj - now);
+                        if (now >= exam.startObj) fetchData();
+                    }
+
+                    if (kioskExamId === exam.id) {
+                        const kTimer = document.getElementById('kioskTimer');
+                        if (kTimer) {
+                            if (now <= exam.endObj) {
+                                kTimer.innerText = formatCountdown(exam.endObj - now);
+                            } else {
+                                kTimer.innerText = "WAKTU HABIS";
+                                kTimer.classList.replace('text-emerald-400', 'text-rose-400');
+                                kTimer.classList.replace('border-white/10', 'border-rose-400/30');
+                                kTimer.classList.add('bg-rose-900/40');
+                            }
+                        }
+                    }
+                });
+
+            }, 1000);
+        }
+
+        function openTokenModal(examId, examName) {
+            activeSelectedExamId = examId;
+            document.getElementById('modalExamName').innerText = examName;
+            document.getElementById('tokenInput').value = '';
+            document.getElementById('tokenError').classList.add('hidden');
+
+            const modal = document.getElementById('tokenModal');
+            const modalContent = document.getElementById('tokenModalContent');
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.style.opacity = '1';
+                modalContent.classList.remove('-translate-y-full', 'sm:scale-95');
+                modalContent.classList.add('translate-y-0', 'sm:scale-100');
+                document.getElementById('tokenInput').focus();
+            }, 10);
+        }
+
+        function closeTokenModal() {
+            const modal = document.getElementById('tokenModal');
+            const modalContent = document.getElementById('tokenModalContent');
+
+            modal.style.opacity = '0';
+            modalContent.classList.remove('translate-y-0', 'sm:scale-100');
+            modalContent.classList.add('-translate-y-full', 'sm:scale-95');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                activeSelectedExamId = null;
+            }, 300);
+        }
+
+        function submitToken() {
+            if (!activeSelectedExamId) return;
+
+            const inputVal = document.getElementById('tokenInput').value.trim().toUpperCase();
+            const examInfo = examsBank.find(e => e.id === activeSelectedExamId);
+
+            if (examInfo && examInfo.token) {
+                if (inputVal !== examInfo.token.toUpperCase()) {
+                    document.getElementById('tokenError').classList.remove('hidden');
+                    const modalContent = document.getElementById('tokenModalContent');
+                    modalContent.classList.add('animate-shake');
+                    modalContent.animate([
+                        { transform: 'translateX(0px)' },
+                        { transform: 'translateX(-6px)' },
+                        { transform: 'translateX(6px)' },
+                        { transform: 'translateX(0px)' }
+                    ], { duration: 300 });
+                    return;
+                }
+            } else {
+                if (inputVal === "") {
+                    document.getElementById('tokenError').classList.remove('hidden');
+                    return;
+                }
+            }
+
+            AlarmSystem.init(); // Initialize audio on user interaction
+            executeSecureRedirect(activeSelectedExamId);
+        }
+
+        function requestFullscreenLock() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(e => console.log(e));
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen().catch(e => console.log(e));
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen().catch(e => console.log(e));
+            }
+        }
+
+        function exitFullscreenLock() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(e => console.log(e));
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen().catch(e => console.log(e));
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen().catch(e => console.log(e));
+            }
+        }
+
+        async function exitKioskMode() {
+            try {
+                // Ensure interaction: provide immediate visual feedback if possible
+                const isConfirmed = await CustomModal.confirm(
+                    "YAKIN INGIN KELUAR DARI UJIAN?\n\nJika belum menekan tombol Submit/Kirim di dalam formulir, jawaban Anda mungkin hilang!", 
+                    "Konfirmasi Keluar"
+                );
+
+                if(isConfirmed) {
+                    isLeavingKiosk = true; // Flag to prevent violation modal during exit
+                    stopDeviceMonitoring();
+                    releaseWakeLock();
+                    exitFullscreenLock();
+                    const kiosk = document.getElementById('kioskContainer');
+                    if(kiosk) {
+                        kiosk.style.opacity = '0';
+                        kiosk.style.transition = 'opacity 0.3s ease-out';
+                        setTimeout(() => {
+                            kiosk.remove();
+                            kioskExamId = null;
+                            document.body.style.overflow = "auto";
+                            fetchData();
+                        }, 300);
+                    }
+                }
+            } catch (err) {
+                // Fallback jika modal gagal (jarang terjadi tapi aman)
+                if(confirm("YAKIN INGIN KELUAR DARI UJIAN?")) {
+                    location.reload();
+                }
+            }
+        }
+
+        async function executeSecureRedirect(examId) {
+            const link = secureLinks[examId];
+            const examInfo = examsBank.find(e => e.id === examId);
+            
+            if (!link || !examInfo) {
+                await CustomModal.alert("Link ujian tidak ditemukan atau sesi invalid.", "Gagal");
+                fetchData();
+                return;
+            }
+
+            closeTokenModal();
+            kioskExamId = examId;
+            document.body.style.overflow = "hidden";
+            violationCount = parseInt(localStorage.getItem(`violation_${examId}`)) || 0;
+
+            const kioskHtml = `
+                <div id="kioskContainer" class="fixed inset-0 z-[10000] bg-slate-50 flex flex-col h-[100dvh] w-[100dvw] transition-opacity duration-300">
+                    <div class="bg-slate-900 border-b border-white/10 text-white px-4 py-3 flex justify-between items-center shadow-xl relative z-[10001]">
+                        <div class="flex items-center gap-3 overflow-hidden flex-1">
+                            <div class="flex items-center gap-1.5 bg-black/40 border border-white/5 py-1 px-2.5 rounded-xl">
+                                <div class="flex items-center gap-1.5 pr-2 border-r border-white/10">
+                                    <div class="w-3.5 h-3.5 flex items-center justify-center text-emerald-400" id="kioskBatteryIcon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M20,10V14H22V10H20M18,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H18A1,1 0 0,0 19,17V7A1,1 0 0,0 18,6Z" /></svg>
+                                    </div>
+                                    <span class="text-[10px] font-black font-mono text-white/90" id="kioskBatteryText">--%</span>
+                                </div>
+                                <div class="pl-0.5 flex items-center">
+                                    <div class="flex items-end gap-0.5 h-2.5" id="kioskSignalIcon">
+                                        <div class="w-0.5 h-1 bg-white/20 rounded-full"></div>
+                                        <div class="w-0.5 h-1.5 bg-white/20 rounded-full"></div>
+                                        <div class="w-0.5 h-2 bg-white/20 rounded-full"></div>
+                                        <div class="w-0.5 h-2.5 bg-white/20 rounded-full"></div>
+                                    </div>
+                                </div>
+                                <div class="pl-2 ml-1.5 border-l border-white/10 flex items-center gap-1 ${violationCount > 0 ? '' : 'hidden'}" id="kioskViolationTracker" title="Pelanggaran">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-rose-500 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                    <span class="text-[10px] font-black font-mono text-rose-400" id="kioskViolationCount">${violationCount}</span>
+                                </div>
+                            </div>
+                            <span class="font-bold text-xs sm:text-[14px] text-slate-200 truncate mr-1 tracking-wide opacity-90">${examInfo.nama}</span>
+                            <span class="bg-black/50 border border-white/10 px-2.5 py-1 rounded-xl text-xs font-mono font-black tracking-widest text-emerald-400 whitespace-nowrap shadow-inner" id="kioskTimer">--:--</span>
+                        </div>
+                        <button onclick="exitKioskMode()" class="bg-rose-600 hover:bg-rose-500 active:scale-95 transition-transform duration-200 text-white text-[11px] sm:text-xs font-extrabold px-4 py-2 rounded-xl shadow-md whitespace-nowrap flex-shrink-0 ml-3">
+                            KELUAR
+                        </button>
+                    </div>
+                    <div class="flex-1 w-full bg-slate-50 relative">
+                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
+                             <div class="loader-dots relative w-20 h-5 mb-3"><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div></div>
+                             <p class="text-xs text-slate-500 font-semibold tracking-wide">Menghubungkan Halaman Ujian...</p>
+                        </div>
+                        <iframe src="${link}" class="w-full h-full border-none z-10 relative bg-transparent" allow="fullscreen" sandbox="allow-scripts allow-top-navigation allow-forms allow-same-origin allow-popups allow-modals"></iframe>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', kioskHtml);
+            requestFullscreenLock();
+            
+            // Activate Security & Health Monitoring
+            isLeavingKiosk = false;
+            startDeviceMonitoring();
+            setupAntiCheat();
+            requestWakeLock();
+        }
+
+        /**
+         * ANTI-CHEAT & DEVICE HEALTH LOGIC
+         */
+        async function startDeviceMonitoring() {
+            const updateStats = async () => {
+                if (isLeavingKiosk) return;
+                
+                // Update Battery
+                try {
+                    if (navigator.getBattery) {
+                        const battery = await navigator.getBattery();
+                        const level = Math.round(battery.level * 100);
+                        const elText = document.getElementById('kioskBatteryText');
+                        const elIcon = document.getElementById('kioskBatteryIcon');
+                        if (elText) elText.innerText = level + '%';
+                        if (elIcon) elIcon.style.color = level < 20 ? '#fb7185' : (level < 50 ? '#fbbf24' : '#34d399');
+                    }
+                } catch (e) {}
+
+                // Update Network/Signal
+                const elSignal = document.getElementById('kioskSignalIcon');
+                if (elSignal) {
+                    const bars = elSignal.children;
+                    const isOnline = navigator.onLine;
+                    for (let i = 0; i < bars.length; i++) {
+                        bars[i].className = `w-0.5 rounded-full ${isOnline ? 'bg-emerald-400' : 'bg-white/20'}`;
+                        bars[i].style.height = (1 + i * 0.5) * 4 + 'px';
+                    }
+                }
+            };
+            
+            updateStats();
+            healthTimer = setInterval(updateStats, 10000);
+        }
+
+        function stopDeviceMonitoring() {
+            if (healthTimer) clearInterval(healthTimer);
+        }
+
+        let isViolationModalOpen = false;
+
+        function setupAntiCheat() {
+            const handleViolation = async () => {
+                if (isLeavingKiosk || !kioskExamId) return;
+                
+                // Hanya picu jika aplikasi benar-benar tidak terlihat (keluar tab/app)
+                if (document.visibilityState === 'hidden') {
+                    if (isViolationModalOpen) return; // Mencegah spam peringatan bertumpuk
+                    isViolationModalOpen = true;
+
+                    violationCount++;
+                    
+                    // Simpan histori pelanggaran ke local storage agar persisten di perangkat
+                    localStorage.setItem(`violation_${kioskExamId}`, violationCount);
+                    
+                    // Update tampilan tracker
+                    const elTracker = document.getElementById('kioskViolationTracker');
+                    const elCount = document.getElementById('kioskViolationCount');
+                    if (elTracker && elCount) {
+                        elTracker.classList.remove('hidden');
+                        elCount.innerText = violationCount;
+                        elCount.classList.add('animate-ping');
+                        setTimeout(() => elCount.classList.remove('animate-ping'), 600);
+                    }
+
+                    AlarmSystem.start();
+                    await CustomModal.danger(
+                        `Peringatan Pelanggaran #${violationCount}!\n\nAnda meminimalkan aplikasi atau membuka aplikasi lain selama ujian berlangsung. Pelanggaran Anda dicatat.\n\nKlik mengerti untuk mematikan alarm.`,
+                        "KECURANGAN TERDETEKSI"
+                    );
+                    AlarmSystem.stop();
+                    isViolationModalOpen = false;
+                    
+                    // Re-lock jika memungkinkan
+                    requestFullscreenLock();
+                }
+            };
+
+            // Gunakan visibilitychange sebagai standar deteksi yang paling akurat
+            // 'blur' sengaja dilepas karena memicu alarm palsu saat keyboard muncul atau klik di dalam iframe
+            document.addEventListener('visibilitychange', handleViolation);
+        }
+
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Screen Wake Lock active');
+                }
+            } catch (err) {
+                console.warn(`${err.name}, ${err.message}`);
+            }
+        }
+
+        function releaseWakeLock() {
+            if (wakeLock !== null) {
+                wakeLock.release().then(() => {
+                    wakeLock = null;
+                });
+            }
+        }
+
+        function setupPWAEnforcement() {
+            let deferredPrompt;
+
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('./sw.js').catch(err => console.error('SW Registration Failed:', err));
+                });
+            }
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+            });
+
+            // Multi-layer standalone detection:
+            // 1. CSS media query (most reliable)
+            // 2. iOS Safari native property  
+            // 3. URL param from manifest start_url
+            // 4. Window size heuristic (PWA app windows have no browser chrome overhead)
+            const mediaStandalone = window.matchMedia('(display-mode: standalone)').matches;
+            const iosStandalone = window.navigator.standalone === true;
+            const urlStandalone = new URLSearchParams(window.location.search).get('mode') === 'standalone';
+            const sessionBypass = sessionStorage.getItem('pwa_bypass') === '1';
+            const proctorBypass = localStorage.getItem('pwa_proctor_bypass') === 'true';
+            
+            const isStandalone = mediaStandalone || iosStandalone || urlStandalone || sessionBypass || proctorBypass;
+
+            const gate = document.getElementById('pwaInstallGate');
+            const isPC = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isMacSafari = /Macintosh/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+            const isWebView = /(wv|WhatsApp|Instagram|Line|FBAN|FBAV|BytedanceWebview)/i.test(navigator.userAgent);
+
+            // Helper: show manual install guide panel
+            function showManualPanel(title, step1, step2, titleColor) {
+                document.getElementById('pwaAndroidWrapper').classList.add('hidden');
+                document.getElementById('pwaAndroidWrapper').classList.remove('flex');
+                document.getElementById('pwaManualWrapper').classList.remove('hidden');
+                document.getElementById('pwaManualWrapper').classList.add('flex');
+                const titleEl = document.getElementById('pwaManualTitle');
+                titleEl.innerText = title;
+                if (titleColor) titleEl.style.color = titleColor;
+                document.getElementById('pwaManualStep1').innerHTML = step1;
+                document.getElementById('pwaManualStep2').innerHTML = step2;
+            }
+
+            function showManualFallback() {
+                if (isIos || isMacSafari) {
+                    showManualPanel(
+                        "Panduan Khusus Apple (iOS)",
+                        'Tekan Ikon <strong class="text-blue-600">Share</strong> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg> di menu terbawah Browser Safari.',
+                        'Gulir ke bawah dan pilih <span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold">Add to Home Screen</span>'
+                    );
+                } else if (isWebView) {
+                    showManualPanel(
+                        "Buka di Browser Asli",
+                        'Anda membuka Ujian dari dalam WhatsApp/Sosmed yang memblokir instalasi.',
+                        'Tekan <strong>Tiga Titik ⋮</strong> pojok kanan atas, lalu pilih <span class="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold">Buka di Chrome</span>.',
+                        '#e11d48'
+                    );
+                } else if (isPC) {
+                    showManualPanel(
+                        "Panduan Instalasi PC/Laptop",
+                        'Perhatikan <strong>Bilah Alamat (URL)</strong> di bagian kanan atas peramban Anda.',
+                        'Klik ikon Install <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg> atau pilih <span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold">Install Aplikasi</span>.'
+                    );
+                } else {
+                    showManualPanel(
+                        "Mohon Install Manual",
+                        'Tekan Ikon <strong>Tiga Titik ⋮</strong> di pojok kanan atas browser Anda.',
+                        'Pilih <span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold">Tambahkan ke Layar Utama</span> atau <span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold">Install Aplikasi</span>.'
+                    );
+                }
+            }
+
+            // Chrome Windows bug: display-mode:standalone sometimes returns false even in PWA window
+            const noBrowserChrome = isPC && (window.outerHeight > 0) && (Math.abs(window.outerHeight - window.innerHeight) < 80);
+            const isStandaloneApp = isStandalone || noBrowserChrome;
+
+            if (isStandaloneApp) {
+                // ✅ Running as standalone / PWA - enter app
+                if (gate) gate.remove();
+                initApp();
+            } else {
+                // Not standalone - show install gate
+                document.body.style.overflow = "hidden";
+                
+                // Show bypass button universally after 3 seconds as safety net for all bugged Chrome apps
+                setTimeout(() => {
+                    const bypassBtn = document.getElementById('pwaBypassBtn');
+                    if (bypassBtn) bypassBtn.style.display = 'block';
+                }, 3000);
+
+                if (isIos || isMacSafari || isWebView) {
+                    showManualFallback();
+                }
+
+                document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                        try {
+                            deferredPrompt.prompt();
+                            const { outcome } = await deferredPrompt.userChoice;
+                            deferredPrompt = null;
+                        } catch(e) {
+                            showManualFallback();
+                        }
+                    } else {
+                        showManualFallback();
+                    }
+                });
+
+                // PROCTOR SECRET BYPASS: Tap logo 5x to enter proctor mode
+                let logoTaps = 0;
+                let tapTimer;
+                const gateLogo = document.querySelector('#pwaInstallGate img');
+                if (gateLogo) {
+                    gateLogo.style.cursor = 'pointer';
+                    gateLogo.addEventListener('click', async () => {
+                        logoTaps++;
+                        clearTimeout(tapTimer);
+                        tapTimer = setTimeout(() => { logoTaps = 0; }, 2000); // Reset taps after 2s of inactivity
+
+                        if (logoTaps >= 5) {
+                            logoTaps = 0;
+                            const input = await CustomModal.prompt("MASUKKAN KODE OTORISASI PENGAWAS:", "KODE PENGAWAS");
+                            if (input === PROCTOR_KEY) {
+                                localStorage.setItem('pwa_proctor_bypass', 'true');
+                                await CustomModal.alert("OTORISASI BERHASIL. Mode Pengawas diaktifkan untuk perangkat ini.", "Sukses");
+                                if (gate) gate.remove();
+                                initApp();
+                            } else if (input !== null) {
+                                await CustomModal.alert("KODE SALAH.", "Otorisasi Gagal");
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        function bypassAndEnter() {
+            // User confirms they already installed. Save flag to sessionStorage and bypass gate.
+            sessionStorage.setItem('pwa_bypass', '1');
+            const gate = document.getElementById('pwaInstallGate');
+            if (gate) gate.remove();
+            document.body.style.overflow = '';
+            initApp();
+        }
+
+        function initApp() {
+            fetchData();
+            updateClock();
+            clockTimer = setInterval(updateClock, 1000);
+            function scheduleNextRefresh() {
+                const delayMs = 30000 + Math.floor(Math.random() * 15000);
+                refreshIntervalTimer = setTimeout(() => {
+                    if (!activeSelectedExamId && !kioskExamId) fetchData();
+                    scheduleNextRefresh();
+                }, delayMs);
+            }
+            scheduleNextRefresh();
+            startCountdowns();
+        }
+
+        window.addEventListener('DOMContentLoaded', setupPWAEnforcement);
 
 
-  <!-- Custom Alert Modal -->
-  <div id="custom-alert-modal" class="overlay" style="z-index:200005;">
-    <div class="card" style="width:90%; max-width:400px; padding:24px; text-align:center;">
-      <div id="custom-alert-icon" style="font-size:3.5rem; margin-bottom:16px;">⚠️</div>
-      <h3 id="custom-alert-title" style="margin-bottom:12px; color:var(--text-main); font-size:1.5rem;">Peringatan</h3>
-      <p id="custom-alert-message"
-        style="color:var(--text-muted); line-height:1.6; margin-bottom:24px; font-size:1rem;">Pesan alert di sini.</p>
-      <button class="btn btn-primary" onclick="closeCustomAlert()"
-        style="width:100%; padding:14px; font-weight:600;">Tutup</button>
-    </div>
-  </div>
 
-  <!-- Modern Loading Overlay -->
-  <div id="loading-overlay" class="loading-overlay">
-    <div class="loader-content-card">
-      <div class="spinner-premium"></div>
-      <p id="loading-overlay-text">Memuat data...</p>
-    </div>
-  </div>
-
-  <script defer src="script.js"></script>
+    </script>
 </body>
-
 </html>
