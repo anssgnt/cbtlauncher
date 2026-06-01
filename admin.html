@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2.0/dist/css/adminlte.min.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <link rel="icon" href="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png">
@@ -344,6 +346,7 @@
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2.0/dist/js/adminlte.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 // ==================== CONFIG ====================
@@ -442,13 +445,50 @@ function startClock() {
     }, 1000);
 }
 
-// ==================== TOAST ====================
+// ==================== TOAST / ALERT (SweetAlert2) ====================
 function toastr(type, msg) {
-    const colors = { success: '#28a745', error: '#dc3545', info: '#17a2b8', warning: '#ffc107' };
-    const icons = { success: 'check-circle', error: 'times-circle', info: 'info-circle', warning: 'exclamation-triangle' };
-    const toast = $(`<div style="position:fixed;top:20px;right:20px;z-index:99999;background:${colors[type]||'#333'};color:#fff;padding:12px 20px;border-radius:8px;font-weight:600;font-size:0.9rem;box-shadow:0 4px 15px rgba(0,0,0,0.2);max-width:350px;"><i class="fas fa-${icons[type]||'info-circle'} mr-2"></i>${msg}</div>`);
-    $('body').append(toast);
-    setTimeout(() => toast.fadeOut(300, function(){ $(this).remove(); }), 3500);
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3500,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+        }
+    });
+    Toast.fire({ icon: type === 'error' ? 'error' : type === 'warning' ? 'warning' : type === 'info' ? 'info' : 'success', title: msg });
+}
+
+async function confirmAction(title, text, icon) {
+    const result = await Swal.fire({
+        title: title,
+        text: text,
+        icon: icon || 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#4f46e5',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Lanjutkan',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+    });
+    return result.isConfirmed;
+}
+
+async function confirmDanger(title, text) {
+    const result = await Swal.fire({
+        title: title,
+        text: text,
+        icon: 'error',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Saya Yakin!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+    });
+    return result.isConfirmed;
 }
 
 // ==================== RENDER ====================
@@ -626,7 +666,8 @@ async function saveExam() {
 }
 
 async function deleteExam(id, nama) {
-    if (!confirm('Yakin hapus ujian "' + nama + '"?')) return;
+    const ok = await confirmDanger('Hapus Ujian?', 'Ujian "' + nama + '" akan dihapus permanen.');
+    if (!ok) return;
     try {
         const res = await apiCall({ action: 'deleteExam', id });
         if (res.error) { toastr('error', res.message); return; }
@@ -657,7 +698,8 @@ function copyToken(token) {
 
 // ==================== QUICK ACTIONS ====================
 async function actionClearCache() {
-    if (!confirm('Flush cache server?')) return;
+    const ok = await confirmAction('Flush Cache?', 'Data akan di-refresh dari Spreadsheet pada request berikutnya.', 'question');
+    if (!ok) return;
     try {
         const res = await apiCall({ action: 'clearCache' });
         if (res.error) { toastr('error', res.message); return; }
@@ -666,18 +708,19 @@ async function actionClearCache() {
 }
 
 async function actionKillAll() {
-    if (!confirm('⚠️ DARURAT: Nonaktifkan SEMUA ujian aktif?')) return;
-    if (!confirm('Konfirmasi sekali lagi: NONAKTIFKAN SEMUA?')) return;
+    const ok = await confirmDanger('⚠️ DARURAT', 'Nonaktifkan SEMUA ujian yang sedang aktif? Siswa tidak akan bisa mengakses ujian baru.');
+    if (!ok) return;
     try {
         const res = await apiCall({ action: 'killAll' });
         if (res.error) { toastr('error', res.message); return; }
-        toastr('warning', res.message);
+        Swal.fire({ icon: 'success', title: 'Berhasil', text: res.message, confirmButtonColor: '#4f46e5' });
         refreshAdminData();
     } catch (e) { toastr('error', e.message); }
 }
 
 async function actionClearViolations() {
-    if (!confirm('Hapus semua data pelanggaran?')) return;
+    const ok = await confirmDanger('Hapus Semua Pelanggaran?', 'Semua data pelanggaran akan dihapus permanen.');
+    if (!ok) return;
     try {
         const res = await apiCall({ action: 'clearViolations' });
         if (res.error) { toastr('error', res.message); return; }
@@ -696,7 +739,7 @@ async function saveConfig() {
     try {
         const res = await apiCall({ action: 'updateConfig', config });
         if (res.error) { toastr('error', res.message); return; }
-        toastr('success', 'Pengaturan disimpan');
+        Swal.fire({ icon: 'success', title: 'Tersimpan!', text: 'Pengaturan berhasil disimpan.', confirmButtonColor: '#4f46e5', timer: 2000, showConfirmButton: false });
     } catch (e) { toastr('error', e.message); }
 }
 
