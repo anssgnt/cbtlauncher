@@ -741,6 +741,9 @@
                 PROCTOR_KEY = data.config.proctorKey;
                 localStorage.setItem('last_proctor_key', PROCTOR_KEY);
             }
+            if (data.config && data.config.pwaEnforce !== undefined) {
+                localStorage.setItem('pwa_enforce', data.config.pwaEnforce);
+            }
 
             examsBank = examsArray.map(item => ({
                 ...item,
@@ -1198,8 +1201,9 @@
             const urlStandalone = new URLSearchParams(window.location.search).get('mode') === 'standalone';
             const sessionBypass = sessionStorage.getItem('pwa_bypass') === '1';
             const proctorBypass = localStorage.getItem('pwa_proctor_bypass') === 'true';
+            const pwaDisabled = localStorage.getItem('pwa_enforce') === 'off';
             
-            const isStandalone = mediaStandalone || iosStandalone || urlStandalone || sessionBypass || proctorBypass;
+            const isStandalone = mediaStandalone || iosStandalone || urlStandalone || sessionBypass || proctorBypass || pwaDisabled;
 
             const gate = document.getElementById('pwaInstallGate');
             const isPC = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);

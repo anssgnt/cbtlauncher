@@ -290,6 +290,14 @@
                             <input type="number" id="cfgCacheDuration" class="form-control" placeholder="120" min="30" max="600">
                             <small class="text-muted">Berapa lama data di-cache di server. Semakin besar = semakin ringan.</small>
                         </div>
+                        <div class="col-md-6 form-group">
+                            <label class="font-weight-bold"><i class="fas fa-mobile-alt mr-1 text-success"></i> Wajib Install PWA</label>
+                            <select id="cfgPwaEnforce" class="form-control">
+                                <option value="on">ON — Siswa wajib install aplikasi</option>
+                                <option value="off">OFF — Bisa akses langsung dari browser</option>
+                            </select>
+                            <small class="text-muted">Jika OFF, siswa bisa langsung masuk tanpa install PWA.</small>
+                        </div>
                     </div>
                 </div>
                 <div class="card-footer">
@@ -569,6 +577,7 @@ function renderSettings() {
     $('#cfgProctorKey').val(cfg.PROCTOR_KEY || '2025');
     $('#cfgMaxViolations').val(cfg.MAX_VIOLATIONS || '5');
     $('#cfgCacheDuration').val(cfg.CACHE_DURATION || '120');
+    $('#cfgPwaEnforce').val(cfg.PWA_ENFORCE || 'on');
 }
 
 // ==================== EXAM CRUD ====================
@@ -681,7 +690,8 @@ async function saveConfig() {
     const config = {
         PROCTOR_KEY: $('#cfgProctorKey').val().trim(),
         MAX_VIOLATIONS: $('#cfgMaxViolations').val().trim(),
-        CACHE_DURATION: $('#cfgCacheDuration').val().trim()
+        CACHE_DURATION: $('#cfgCacheDuration').val().trim(),
+        PWA_ENFORCE: $('#cfgPwaEnforce').val()
     };
     try {
         const res = await apiCall({ action: 'updateConfig', config });
