@@ -775,14 +775,21 @@
             let validExamsCount = 0;
             elList.innerHTML = '';
 
-            examsBank.forEach(exam => {
-                if (exam.status?.toLowerCase() !== 'aktif') return;
+            // Sort: aktif (sedang berlangsung) di atas, lalu berdasarkan tanggal mulai terlama dulu
+            const sortedExams = [...examsBank]
+                .filter(exam => exam.status?.toLowerCase() === 'aktif' && now <= exam.endObj)
+                .sort((a, b) => {
+                    const aActive = now >= a.startObj && now <= a.endObj;
+                    const bActive = now >= b.startObj && now <= b.endObj;
+                    // Yang sedang aktif di atas
+                    if (aActive && !bActive) return -1;
+                    if (!aActive && bActive) return 1;
+                    // Lalu urutkan berdasarkan waktu mulai (paling awal di atas)
+                    return a.startObj - b.startObj;
+                });
 
-                const isUpcomingStr = now < exam.startObj;
+            sortedExams.forEach(exam => {
                 const isActiveStr = now >= exam.startObj && now <= exam.endObj;
-                const isFinishedStr = now > exam.endObj;
-
-                if (isFinishedStr) return; 
 
                 validExamsCount++;
 
