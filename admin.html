@@ -139,6 +139,14 @@
                 </div>
             </div>
 
+            <!-- Token Aktif Hari Ini -->
+            <div class="card shadow-sm border-left border-success" style="border-left-width: 4px !important;">
+                <div class="card-header"><h3 class="card-title font-weight-bold"><i class="fas fa-key mr-2 text-success"></i>Token Aktif Hari Ini</h3></div>
+                <div class="card-body" id="dashboardTokens">
+                    <p class="text-muted text-center mb-0">Memuat...</p>
+                </div>
+            </div>
+
             <!-- Quick Actions -->
             <div class="card shadow-sm">
                 <div class="card-header"><h3 class="card-title font-weight-bold"><i class="fas fa-bolt mr-2 text-warning"></i>Aksi Cepat</h3></div>
@@ -496,6 +504,42 @@ function renderDashboard() {
     $('#statTotal').text(adminData.stats.totalExams || 0);
     $('#statActive').text(adminData.stats.activeExams || 0);
     $('#statViolations').text(adminData.stats.totalViolations || 0);
+
+    // Token aktif hari ini
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+    const activeToday = (adminData.exams || []).filter(exam => {
+        if (exam.status !== 'aktif') return false;
+        const startDate = exam.start ? exam.start.split(' ')[0] : '';
+        const endDate = exam.end ? exam.end.split(' ')[0] : '';
+        // Ujian yang start atau end hari ini, atau sedang berlangsung hari ini
+        return startDate === todayStr || endDate === todayStr || (startDate <= todayStr && endDate >= todayStr);
+    });
+
+    if (activeToday.length === 0) {
+        $('#dashboardTokens').html('<p class="text-muted text-center mb-0"><i class="fas fa-moon mr-1"></i>Tidak ada ujian aktif hari ini.</p>');
+    } else {
+        $('#dashboardTokens').html(`
+            <div class="table-responsive">
+                <table class="table table-sm table-borderless mb-0">
+                    <thead><tr><th style="font-size:0.75rem;" class="text-muted">UJIAN</th><th style="font-size:0.75rem;" class="text-muted">WAKTU</th><th style="font-size:0.75rem;" class="text-muted">TOKEN</th><th style="font-size:0.75rem;" class="text-muted"></th></tr></thead>
+                    <tbody>
+                        ${activeToday.map(exam => {
+                            const start = parseDate(exam.start);
+                            const end = parseDate(exam.end);
+                            const isLive = now >= start && now <= end;
+                            return `<tr>
+                                <td><strong>${esc(exam.nama)}</strong> ${isLive ? '<span class="badge badge-success ml-1" style="font-size:0.65rem;">LIVE</span>' : ''}</td>
+                                <td><small>${exam.start ? exam.start.split(' ')[1] : ''} - ${exam.end ? exam.end.split(' ')[1] : ''}</small></td>
+                                <td><span class="badge badge-dark px-3 py-2" style="font-size:1.1rem; letter-spacing:3px; font-family:monospace; font-weight:900;">${esc(exam.token || '-')}</span></td>
+                                <td><button onclick="copyToken('${esc(exam.token)}')" class="btn btn-xs btn-outline-primary"><i class="fas fa-copy"></i></button></td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `);
+    }
 
     const logs = (adminData.logs || []).slice(0, 10);
     if (logs.length === 0) {
