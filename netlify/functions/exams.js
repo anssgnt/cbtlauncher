@@ -54,7 +54,6 @@ export default async (req, context) => {
     "Access-Control-Allow-Methods": "GET, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     "Content-Type": "application/json",
-    // Aggressive caching: browser 30s, CDN 60s, serve stale up to 5min while revalidating
     "Cache-Control": "public, max-age=30, s-maxage=60, stale-while-revalidate=300"
   };
 
@@ -64,6 +63,7 @@ export default async (req, context) => {
 
   const url = new URL(req.url);
   const bustCache = url.searchParams.get('bust') === '1';
+  const fullData = url.searchParams.get('full') === '1'; // Admin/internal use only
   const now = Date.now();
 
   // Admin cache bust
@@ -75,40 +75,39 @@ export default async (req, context) => {
 
   // Serve from cache if fresh
   if (cachedData && (now - cacheTimestamp) < cacheTTL) {
+    const responseData = fullData ? cachedData : stripSensitiveData(cachedData);
     return new Response(JSON.stringify({
-      ...cachedData,
+      ...responseData,
       _cache: "hit",
       _age: Math.round((now - cacheTimestamp) / 1000),
       _ttl: Math.round(cacheTTL / 1000)
     }), { status: 200, headers });
   }
 
-  // REQUEST COALESCING: If another request is already fetching, wait for it
-  // This prevents 100 simultaneous cache-miss requests from all hitting GAS
+  // REQUEST COALESCING
   if (inflightPromise) {
     try {
       await inflightPromise;
-      // After waiting, cache should be fresh
       if (cachedData) {
+        const responseData = fullData ? cachedData : stripSensitiveData(cachedData);
         return new Response(JSON.stringify({
-          ...cachedData,
+          ...responseData,
           _cache: "coalesced",
           _age: Math.round((Date.now() - cacheTimestamp) / 1000)
         }), { status: 200, headers });
       }
-    } catch (e) {
-      // Inflight failed, we'll try ourselves below
-    }
+    } catch (e) {}
   }
 
-  // Fetch from GAS (with coalescing lock)
+  // Fetch from GAS
   try {
     inflightPromise = fetchFromGAS();
     const data = await inflightPromise;
     inflightPromise = null;
 
+    const responseData = fullData ? data : stripSensitiveData(data);
     return new Response(JSON.stringify({
-      ...data,
+      ...responseData,
       _cache: "miss",
       _fetchedAt: new Date().toISOString(),
       _ttl: Math.round(cacheTTL / 1000)
@@ -117,10 +116,10 @@ export default async (req, context) => {
   } catch (err) {
     inflightPromise = null;
 
-    // Serve stale cache if available (better than error)
     if (cachedData) {
+      const responseData = fullData ? cachedData : stripSensitiveData(cachedData);
       return new Response(JSON.stringify({
-        ...cachedData,
+        ...responseData,
         _cache: "stale",
         _error: err.message,
         _age: Math.round((now - cacheTimestamp) / 1000)
@@ -134,6 +133,26 @@ export default async (req, context) => {
     }), { status: 502, headers });
   }
 };
+
+/**
+ * Strip sensitive data (link & token) dari response publik.
+ * Siswa hanya lihat jadwal, bukan link/token.
+ */
+function stripSensitiveData(data) {
+  if (!data || !data.exams) return data;
+  return {
+    ...data,
+    exams: data.exams.map(exam => ({
+      id: exam.id,
+      nama: exam.nama,
+      start: exam.start,
+      end: exam.end,
+      status: exam.status,
+      hasToken: !!(exam.token && exam.token.length > 0)
+      // link dan token TIDAK dikirim ke client
+    }))
+  };
+}
 
 export const config = {
   path: "/api/exams"

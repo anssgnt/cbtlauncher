@@ -551,7 +551,6 @@
 
         // Data Management
         let examsBank = [];
-        let secureLinks = {};
         let activeSelectedExamId = null;
         let kioskExamId = null;
 
@@ -786,7 +785,6 @@
         function processAndRenderExams() {
             const now = new Date();
             let validExamsCount = 0;
-            secureLinks = {}; 
             elList.innerHTML = '';
 
             examsBank.forEach(exam => {
@@ -799,7 +797,6 @@
                 if (isFinishedStr) return; 
 
                 validExamsCount++;
-                secureLinks[exam.id] = exam.link;
 
                 // DESIGN TERBARU KARTU UJIAN (SPLIT CARD)
                 const cardHtml = `
@@ -943,11 +940,26 @@
             if (!activeSelectedExamId) return;
 
             const inputVal = document.getElementById('tokenInput').value.trim().toUpperCase();
-            const examInfo = examsBank.find(e => e.id === activeSelectedExamId);
 
-            if (examInfo && examInfo.token) {
-                if (inputVal !== examInfo.token.toUpperCase()) {
-                    document.getElementById('tokenErrorMsg').innerText = 'Kode salah, silakan cek ulang.';
+            if (!inputVal) {
+                document.getElementById('tokenErrorMsg').innerText = 'Kode akses wajib diisi.';
+                document.getElementById('tokenError').classList.remove('hidden');
+                return;
+            }
+
+            // Verifikasi token di server (link tidak pernah ada di client)
+            const btn = document.querySelector('#tokenModal button[onclick="submitToken()"]');
+            if (btn) { btn.innerText = 'Memverifikasi...'; btn.disabled = true; }
+
+            fetch('/api/verify-token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ examId: activeSelectedExamId, token: inputVal })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.error) {
+                    document.getElementById('tokenErrorMsg').innerText = res.message || 'Token salah.';
                     document.getElementById('tokenError').classList.remove('hidden');
                     const modalContent = document.getElementById('tokenModalContent');
                     modalContent.animate([
@@ -956,18 +968,19 @@
                         { transform: 'translateX(6px)' },
                         { transform: 'translateX(0px)' }
                     ], { duration: 300 });
-                    return;
+                } else {
+                    // Token benar — server kasih link
+                    AlarmSystem.init();
+                    executeSecureRedirect(activeSelectedExamId, res.link, res.examName);
                 }
-            } else {
-                if (inputVal === "") {
-                    document.getElementById('tokenErrorMsg').innerText = 'Kode akses wajib diisi.';
-                    document.getElementById('tokenError').classList.remove('hidden');
-                    return;
-                }
-            }
-
-            AlarmSystem.init();
-            executeSecureRedirect(activeSelectedExamId);
+            })
+            .catch(err => {
+                document.getElementById('tokenErrorMsg').innerText = 'Gagal verifikasi. Coba lagi.';
+                document.getElementById('tokenError').classList.remove('hidden');
+            })
+            .finally(() => {
+                if (btn) { btn.innerText = 'Mulai'; btn.disabled = false; }
+            });
         }
 
         function requestFullscreenLock() {
@@ -1024,11 +1037,10 @@
             }
         }
 
-        async function executeSecureRedirect(examId) {
-            const link = secureLinks[examId];
-            const examInfo = examsBank.find(e => e.id === examId);
+        async function executeSecureRedirect(examId, link, examName) {
+            const examInfo = examsBank.find(e => e.id === examId) || { nama: examName || 'Ujian' };
             
-            if (!link || !examInfo) {
+            if (!link) {
                 await CustomModal.alert("Link ujian tidak ditemukan atau sesi invalid.", "Gagal");
                 fetchData();
                 return;
