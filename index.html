@@ -748,6 +748,9 @@
             if (data.config && data.config.pwaEnforce !== undefined) {
                 localStorage.setItem('pwa_enforce', data.config.pwaEnforce);
             }
+            if (data.config && data.config.violationReport !== undefined) {
+                localStorage.setItem('violation_report', data.config.violationReport);
+            }
 
             examsBank = examsArray.map(item => ({
                 ...item,
@@ -1135,19 +1138,22 @@
                     localStorage.setItem(`violation_${kioskExamId}`, violationCount);
 
                     // Kirim laporan pelanggaran ke server via Netlify queue (fire-and-forget)
-                    const examInfo = examsBank.find(e => e.id === kioskExamId);
-                    fetch('/api/violation', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            examId: kioskExamId,
-                            examName: examInfo ? examInfo.nama : '',
-                            studentName: localStorage.getItem('student_name') || '',
-                            deviceId: localStorage.getItem('device_id') || generateDeviceId(),
-                            violationCount: violationCount,
-                            userAgent: navigator.userAgent
-                        })
-                    }).catch(() => {});
+                    // Hanya kirim jika setting VIOLATION_REPORT = on
+                    if (localStorage.getItem('violation_report') !== 'off') {
+                        const examInfo = examsBank.find(e => e.id === kioskExamId);
+                        fetch('/api/violation', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                examId: kioskExamId,
+                                examName: examInfo ? examInfo.nama : '',
+                                studentName: localStorage.getItem('student_name') || '',
+                                deviceId: localStorage.getItem('device_id') || generateDeviceId(),
+                                violationCount: violationCount,
+                                userAgent: navigator.userAgent
+                            })
+                        }).catch(() => {});
+                    }
                     
                     // Update tampilan tracker
                     const elTracker = document.getElementById('kioskViolationTracker');

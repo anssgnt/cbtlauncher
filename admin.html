@@ -309,6 +309,14 @@
                             </select>
                             <small class="text-muted">Jika OFF, siswa bisa langsung masuk tanpa install PWA.</small>
                         </div>
+                        <div class="col-md-6 form-group">
+                            <label class="font-weight-bold"><i class="fas fa-exclamation-triangle mr-1 text-danger"></i> Laporan Pelanggaran</label>
+                            <select id="cfgViolationReport" class="form-control">
+                                <option value="on">ON — Kirim laporan pelanggaran ke server</option>
+                                <option value="off">OFF — Tidak kirim (hemat resource)</option>
+                            </select>
+                            <small class="text-muted">Jika OFF, pelanggaran tetap tercatat lokal di HP siswa tapi tidak dikirim ke server.</small>
+                        </div>
                     </div>
                 </div>
                 <div class="card-footer">
@@ -683,6 +691,7 @@ function renderSettings() {
     $('#cfgMaxViolations').val(cfg.MAX_VIOLATIONS || '5');
     $('#cfgCacheDuration').val(cfg.CACHE_DURATION || '120');
     $('#cfgPwaEnforce').val(cfg.PWA_ENFORCE || 'on');
+    $('#cfgViolationReport').val(cfg.VIOLATION_REPORT || 'on');
 }
 
 // ==================== EXAM CRUD ====================
@@ -811,7 +820,8 @@ async function saveConfig() {
         PROCTOR_KEY: $('#cfgProctorKey').val().trim(),
         MAX_VIOLATIONS: $('#cfgMaxViolations').val().trim(),
         CACHE_DURATION: $('#cfgCacheDuration').val().trim(),
-        PWA_ENFORCE: $('#cfgPwaEnforce').val()
+        PWA_ENFORCE: $('#cfgPwaEnforce').val(),
+        VIOLATION_REPORT: $('#cfgViolationReport').val()
     };
     try {
         const res = await apiCall({ action: 'updateConfig', config });
