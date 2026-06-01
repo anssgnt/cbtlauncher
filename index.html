@@ -261,6 +261,14 @@
             </div>
 
             <div class="px-6 pb-5">
+                <!-- Input Nama Siswa -->
+                <div class="relative group mb-3">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-slate-300 group-focus-within:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                    </div>
+                    <input type="text" id="studentNameInput" class="w-full bg-slate-50 border-2 border-slate-200/80 rounded-xl pl-10 pr-3 py-3 text-[14px] font-bold text-slate-700 focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 transition-all placeholder:font-semibold placeholder:text-slate-300 placeholder:text-[13px]" placeholder="Nama Lengkap / NIS" autocomplete="off" spellcheck="false">
+                </div>
+                <!-- Input Token -->
                 <div class="relative group">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="h-5 w-5 text-indigo-300 group-focus-within:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
@@ -269,7 +277,7 @@
                 </div>
                 <div id="tokenError" class="mt-2 hidden animate-pulse">
                     <div class="flex items-center justify-center gap-1 bg-rose-50 text-rose-600 px-3 py-1.5 rounded-lg border border-rose-100 shadow-sm">
-                        <p class="text-[11px] font-bold">Kode salah, silakan cek ulang.</p>
+                        <p class="text-[11px] font-bold" id="tokenErrorMsg">Kode salah, silakan cek ulang.</p>
                     </div>
                 </div>
             </div>
@@ -882,6 +890,7 @@
             activeSelectedExamId = examId;
             document.getElementById('modalExamName').innerText = examName;
             document.getElementById('tokenInput').value = '';
+            document.getElementById('studentNameInput').value = localStorage.getItem('student_name') || '';
             document.getElementById('tokenError').classList.add('hidden');
 
             const modal = document.getElementById('tokenModal');
@@ -892,7 +901,8 @@
                 modal.style.opacity = '1';
                 modalContent.classList.remove('-translate-y-full', 'sm:scale-95');
                 modalContent.classList.add('translate-y-0', 'sm:scale-100');
-                document.getElementById('tokenInput').focus();
+                const nameInput = document.getElementById('studentNameInput');
+                if (!nameInput.value) { nameInput.focus(); } else { document.getElementById('tokenInput').focus(); }
             }, 10);
         }
 
@@ -913,14 +923,26 @@
         function submitToken() {
             if (!activeSelectedExamId) return;
 
+            const studentName = document.getElementById('studentNameInput').value.trim();
             const inputVal = document.getElementById('tokenInput').value.trim().toUpperCase();
             const examInfo = examsBank.find(e => e.id === activeSelectedExamId);
 
+            // Validasi nama siswa
+            if (!studentName) {
+                document.getElementById('tokenErrorMsg').innerText = 'Nama / NIS wajib diisi.';
+                document.getElementById('tokenError').classList.remove('hidden');
+                document.getElementById('studentNameInput').focus();
+                return;
+            }
+
+            // Simpan nama siswa untuk sesi berikutnya
+            localStorage.setItem('student_name', studentName);
+
             if (examInfo && examInfo.token) {
                 if (inputVal !== examInfo.token.toUpperCase()) {
+                    document.getElementById('tokenErrorMsg').innerText = 'Kode salah, silakan cek ulang.';
                     document.getElementById('tokenError').classList.remove('hidden');
                     const modalContent = document.getElementById('tokenModalContent');
-                    modalContent.classList.add('animate-shake');
                     modalContent.animate([
                         { transform: 'translateX(0px)' },
                         { transform: 'translateX(-6px)' },
@@ -931,6 +953,7 @@
                 }
             } else {
                 if (inputVal === "") {
+                    document.getElementById('tokenErrorMsg').innerText = 'Kode akses wajib diisi.';
                     document.getElementById('tokenError').classList.remove('hidden');
                     return;
                 }
@@ -1124,6 +1147,7 @@
                             action: 'reportViolation',
                             examId: kioskExamId,
                             examName: examInfo ? examInfo.nama : '',
+                            studentName: localStorage.getItem('student_name') || '',
                             deviceId: localStorage.getItem('device_id') || generateDeviceId(),
                             violationCount: violationCount,
                             userAgent: navigator.userAgent

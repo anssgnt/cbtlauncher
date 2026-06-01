@@ -52,7 +52,7 @@ function setupSpreadsheet() {
   var vSheet = ss.getSheetByName(VIOLATIONS_SHEET_NAME);
   if (!vSheet) {
     vSheet = ss.insertSheet(VIOLATIONS_SHEET_NAME);
-    vSheet.getRange(1,1,1,6).setValues([["Timestamp","ExamID","ExamName","DeviceID","ViolationCount","UserAgent"]]).setBackground("#dc2626").setFontColor("#fff").setFontWeight("bold");
+    vSheet.getRange(1,1,1,7).setValues([["Timestamp","ExamID","ExamName","StudentName","DeviceID","ViolationCount","UserAgent"]]).setBackground("#dc2626").setFontColor("#fff").setFontWeight("bold");
     vSheet.setFrozenRows(1);
   }
 
@@ -282,7 +282,7 @@ function handleGetAdminData(adminUser) {
   if (vSheet && vSheet.getLastRow() > 1) {
     var vData = vSheet.getDataRange().getValues();
     for (var j = 1; j < vData.length; j++) {
-      violations.push({ timestamp:vData[j][0], examId:vData[j][1], examName:vData[j][2], deviceId:vData[j][3], count:vData[j][4], userAgent:vData[j][5] });
+      violations.push({ timestamp:vData[j][0], examId:vData[j][1], examName:vData[j][2], studentName:vData[j][3], deviceId:vData[j][4], count:vData[j][5], userAgent:vData[j][6] });
     }
   }
 
@@ -420,7 +420,7 @@ function handleReportViolation(payload) {
     var ss = getSpreadsheet();
     var vSheet = ss.getSheetByName(VIOLATIONS_SHEET_NAME);
     if (vSheet) {
-      vSheet.appendRow([new Date().toISOString(), payload.examId||"", payload.examName||"", payload.deviceId||"", payload.violationCount||0, payload.userAgent||""]);
+      vSheet.appendRow([new Date().toISOString(), payload.examId||"", payload.examName||"", payload.studentName||"", payload.deviceId||"", payload.violationCount||0, payload.userAgent||""]);
     }
     return responseJSON({ success: true });
   } catch(e) {
@@ -436,7 +436,7 @@ function handleGetViolations(adminUser) {
   if (vSheet && vSheet.getLastRow() > 1) {
     var data = vSheet.getDataRange().getValues();
     for (var i = data.length-1; i >= 1; i--) {
-      violations.push({ timestamp:data[i][0], examId:data[i][1], examName:data[i][2], deviceId:data[i][3], count:data[i][4], userAgent:data[i][5] });
+      violations.push({ timestamp:data[i][0], examId:data[i][1], examName:data[i][2], studentName:data[i][3], deviceId:data[i][4], count:data[i][5], userAgent:data[i][6] });
     }
   }
   return responseJSON({ success: true, violations: violations });

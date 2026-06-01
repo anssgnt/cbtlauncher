@@ -266,10 +266,10 @@
                         <thead class="bg-light">
                             <tr>
                                 <th>Waktu</th>
+                                <th>Siswa</th>
                                 <th>Ujian</th>
-                                <th>Device ID</th>
                                 <th>Jumlah</th>
-                                <th>User Agent</th>
+                                <th>Device</th>
                             </tr>
                         </thead>
                         <tbody id="violationTableBody">
@@ -653,10 +653,10 @@ function renderViolationTable() {
     $('#violationTableBody').html(violations.map(v => `
         <tr>
             <td><small>${fmtTime(v.timestamp)}</small></td>
-            <td><strong>${esc(v.examName || v.examId)}</strong></td>
-            <td><code style="font-size:0.75rem;">${esc(v.deviceId || '-')}</code></td>
+            <td><strong class="text-danger">${esc(v.studentName || '-')}</strong></td>
+            <td>${esc(v.examName || v.examId)}</td>
             <td><span class="badge badge-danger">${v.count}x</span></td>
-            <td><small class="text-muted" style="max-width:200px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(v.userAgent || '-')}</small></td>
+            <td><code style="font-size:0.7rem;">${esc(v.deviceId || '-')}</code></td>
         </tr>
     `).join(''));
 }
