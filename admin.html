@@ -357,7 +357,7 @@ function doLogin() {
         .then(res => {
             if (res.success) {
                 credentials = { username: user, password: pass };
-                $('#loginPage').hide();
+                $('#loginPage').remove();
                 $('#adminWrapper').removeClass('d-none');
                 $('#sidebarUser').text(user);
                 $('body').removeClass('login-page').addClass('sidebar-mini layout-fixed');
@@ -379,10 +379,7 @@ function doLogin() {
 
 function doLogout() {
     credentials = { username: '', password: '' };
-    $('#adminWrapper').addClass('d-none');
-    $('#loginPage').show();
-    $('body').removeClass('sidebar-mini layout-fixed').addClass('login-page');
-    $('#loginPass').val('');
+    location.reload();
 }
 
 $('#loginPass').on('keydown', e => { if (e.key === 'Enter') doLogin(); });
