@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spensada-cbt-v2';
+const CACHE_NAME = 'spensada-cbt-v3';
 const urlsToCache = [
   './index.html',
   './manifest.json'
@@ -8,16 +8,12 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        // Cache files, but don't fail if some requests fail (like tailwind cdn)
         return Promise.allSettled(
-            urlsToCache.map(url => {
-                return fetch(url).then(response => {
-                    if (response.ok) {
-                        return cache.put(url, response);
-                    }
-                    throw new Error('Failed to fetch: ' + url);
-                });
-            })
+          urlsToCache.map(url => {
+            return fetch(url).then(response => {
+              if (response.ok) return cache.put(url, response);
+            });
+          })
         );
       })
   );
@@ -29,9 +25,7 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
+          if (cacheName !== CACHE_NAME) return caches.delete(cacheName);
         })
       );
     })
@@ -40,30 +34,30 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Hanya intercept GET requests, lewati POST (kalau ada API submission di masa depan)
   if (event.request.method !== 'GET') return;
-  
-  // Biarkan request ke API Script Google dan Netlify Function tetap langsung network-first
-  if (event.request.url.includes('script.google.com') || event.request.url.includes('/api/')) {
-      return; 
+
+  // API requests: always network, never cache
+  if (event.request.url.includes('/api/') || event.request.url.includes('script.google.com')) {
+    return;
   }
 
-  // Stale-while-revalidate pattern sederhana untuk statis
+  // Static assets: cache-first with network fallback
   event.respondWith(
     caches.match(event.request).then(response => {
-      // Return cached version if found
-      if (response) {
-         return response;
-      }
+      if (response) return response;
       return fetch(event.request).then(networkResponse => {
-         // Optionally cache new requests, tp jangan cache sembarangan
-         return networkResponse;
+        // Cache successful responses for static assets
+        if (networkResponse.ok && event.request.url.startsWith(self.location.origin)) {
+          const clone = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        }
+        return networkResponse;
       }).catch(() => {
-          // Fallback offline murni agar lulus PWA validation Chrome PC
-          return new Response(
-            "<!DOCTYPE html><html><body><h1>Sistem Ujian Offline</h1><p>Penyimpanan lokal diaktifkan. Silakan periksa koneksi internet Anda.</p></body></html>",
-            { headers: { 'Content-Type': 'text/html' } }
-          );
+        // Offline fallback
+        if (event.request.destination === 'document') {
+          return caches.match('./index.html');
+        }
+        return new Response('Offline', { status: 503 });
       });
     })
   );

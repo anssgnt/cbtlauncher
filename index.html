@@ -525,8 +525,7 @@
          */
         const URL_API = "/api/exams";
         const URL_API_FALLBACK = "https://script.google.com/macros/s/AKfycbyE9kxtudmZZv9FSj60yBlFVsH_j6f26lcKg3wVtOK2FLdkQ-UaZRFX5mHUDWNEHwJGOg/exec";
-        const USE_DUMMY_DATA = false;
-        let PROCTOR_KEY = localStorage.getItem('last_proctor_key') || "2025"; // Sinkron via Spreadsheet
+        let PROCTOR_KEY = localStorage.getItem('last_proctor_key') || "2025";
 
         // Data Management
         let examsBank = [];
@@ -648,7 +647,7 @@
             const now = Date.now();
             const lastSync = parseInt(localStorage.getItem('last_sync_timestamp') || 0);
             const cachedData = localStorage.getItem('cached_exams_data');
-            const COOLDOWN_MS = 60000; // 60 Detik Throttling (Netlify CDN sudah cache, tidak perlu sering)
+            const COOLDOWN_MS = 60000; // 60 Detik Throttling
 
             const btn = document.getElementById('manualRefreshBtn');
             const btnText = document.getElementById('refreshBtnText');
@@ -662,10 +661,8 @@
             
             // ANTI-SPAM LOGIC: Jika baru saja sync, jangan tembak server lagi
             if (!force && cachedData && (now - lastSync < COOLDOWN_MS)) {
-                console.info("Anti-Spam: Menggunakan cache lokal (Data masih segar).");
                 setAppStatus('online');
-                const data = JSON.parse(cachedData);
-                processFetchedData(data);
+                processFetchedData(JSON.parse(cachedData));
                 return;
             }
 
@@ -677,36 +674,37 @@
             setAppStatus('sync');
 
             try {
-                let data = [];
-                if (USE_DUMMY_DATA) {
-                    await new Promise(r => setTimeout(r, 800)); 
-                    const todayCurrent = new Date();
-                    const formatForJSON = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-                    data = {
-                        exams: [
-                            { "id": "1", "nama": "Matematika X - Semester 1", "link": "https://forms.gle/demo1", "start": formatForJSON(new Date(todayCurrent.getTime() - 1800000)), "end": formatForJSON(new Date(todayCurrent.getTime() + 5400000)), "status": "aktif", "token": "MATH10" },
-                            { "id": "2", "nama": "Bahasa Indonesia X", "link": "https://forms.gle/demo2", "start": formatForJSON(new Date(todayCurrent.getTime() + 7200000)), "end": formatForJSON(new Date(todayCurrent.getTime() + 14400000)), "status": "aktif", "token": "INDO10" }
-                        ],
-                        config: { proctorKey: PROCTOR_KEY }
-                    };
-                } else {
-                    const response = await fetch(URL_API);
-                    
-                    // Jika Netlify function gagal, fallback langsung ke GAS
-                    if (!response.ok) {
-                        console.warn("Netlify proxy gagal, mencoba fallback ke GAS langsung...");
-                        const fallbackResponse = await fetch(URL_API_FALLBACK);
-                        if (!fallbackResponse.ok) throw new Error("Gagal terhubung ke server.");
-                        data = await fallbackResponse.json();
-                    } else {
-                        data = await response.json();
-                    }
+                let data;
 
-                    if (data.retryAlert) {
-                        setAppStatus('sync');
-                        setTimeout(() => fetchData(true), 3000);
-                        return;
+                // Fetch dengan timeout 10 detik (jangan gantung selamanya)
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 10000);
+
+                try {
+                    const response = await fetch(URL_API, { signal: controller.signal });
+                    clearTimeout(timeout);
+                    if (!response.ok) throw new Error("Proxy gagal");
+                    data = await response.json();
+                } catch (proxyErr) {
+                    clearTimeout(timeout);
+                    // Fallback ke GAS langsung (dengan timeout sendiri)
+                    const controller2 = new AbortController();
+                    const timeout2 = setTimeout(() => controller2.abort(), 12000);
+                    try {
+                        const fallbackResponse = await fetch(URL_API_FALLBACK, { signal: controller2.signal });
+                        clearTimeout(timeout2);
+                        if (!fallbackResponse.ok) throw new Error("Server tidak merespons.");
+                        data = await fallbackResponse.json();
+                    } catch (fallbackErr) {
+                        clearTimeout(timeout2);
+                        throw new Error("Tidak dapat terhubung ke server.");
                     }
+                }
+
+                if (data.retryAlert) {
+                    setAppStatus('sync');
+                    setTimeout(() => fetchData(true), 3000 + Math.random() * 2000);
+                    return;
                 }
 
                 if (data.error) throw new Error(data.message);
@@ -719,12 +717,10 @@
                 setAppStatus('online');
 
             } catch (err) {
-                console.error(err);
                 setAppStatus('error');
                 
                 // Jika error tapi ada cache, gunakan cache sebagai fallback darurat
                 if (cachedData) {
-                    console.warn("Server Error: Menggunakan data cache sebagai fallback.");
                     processFetchedData(JSON.parse(cachedData));
                 } else {
                     elLoading.classList.add('hidden');
@@ -1392,16 +1388,17 @@
         }
 
         function initApp() {
-            // Staggered initial load: random delay 0-3 detik
-            // Mencegah 400 siswa menghantam server di detik yang sama saat buka app
-            const staggerDelay = Math.floor(Math.random() * 3000);
+            // Staggered initial load: random delay 0-5 detik
+            // Mencegah 1000 siswa menghantam server di detik yang sama saat buka app
+            const staggerDelay = Math.floor(Math.random() * 5000);
             setTimeout(() => fetchData(), staggerDelay);
             
             updateClock();
             clockTimer = setInterval(updateClock, 1000);
             function scheduleNextRefresh() {
-                // 120-180 detik (2-3 menit) — data jadwal tidak berubah tiap detik
-                const delayMs = 120000 + Math.floor(Math.random() * 60000);
+                // 180-300 detik (3-5 menit) — data jadwal tidak berubah tiap detik
+                // Jitter besar agar 1000 siswa tersebar merata
+                const delayMs = 180000 + Math.floor(Math.random() * 120000);
                 refreshIntervalTimer = setTimeout(() => {
                     if (!activeSelectedExamId && !kioskExamId) fetchData();
                     scheduleNextRefresh();
