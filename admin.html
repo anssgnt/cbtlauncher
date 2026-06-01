@@ -592,10 +592,34 @@ function renderExamTable() {
         $('#examTableBody').html('<tr><td colspan="5" class="text-center text-muted py-4">Belum ada ujian.</td></tr>');
         return;
     }
-    $('#examTableBody').html(exams.map(exam => `
-        <tr>
+
+    // Sort: sedang berlangsung > paling dekat waktu mulai > aktif > nonaktif
+    const now = new Date();
+    const sorted = [...exams].sort((a, b) => {
+        const aStart = parseDate(a.start), bStart = parseDate(b.start);
+        const aEnd = parseDate(a.end), bEnd = parseDate(b.end);
+        const aLive = now >= aStart && now <= aEnd && a.status === 'aktif';
+        const bLive = now >= bStart && now <= bEnd && b.status === 'aktif';
+        const aAktif = a.status === 'aktif';
+        const bAktif = b.status === 'aktif';
+
+        // Sedang berlangsung paling atas
+        if (aLive && !bLive) return -1;
+        if (!aLive && bLive) return 1;
+        // Aktif di atas nonaktif
+        if (aAktif && !bAktif) return -1;
+        if (!aAktif && bAktif) return 1;
+        // Urutkan berdasarkan waktu mulai terdekat
+        return aStart - bStart;
+    });
+
+    $('#examTableBody').html(sorted.map(exam => {
+        const start = parseDate(exam.start), end = parseDate(exam.end);
+        const isLive = now >= start && now <= end && exam.status === 'aktif';
+        return `
+        <tr class="${isLive ? 'table-primary' : ''}">
             <td>
-                <strong>${esc(exam.nama)}</strong><br>
+                <strong>${esc(exam.nama)}</strong>${isLive ? ' <span class="badge badge-success ml-1" style="font-size:0.6rem;">LIVE</span>' : ''}<br>
                 <small class="text-muted">${esc(exam.link).substring(0,40)}...</small>
             </td>
             <td>
@@ -612,8 +636,8 @@ function renderExamTable() {
                 <button onclick="editExam('${exam.id}')" class="btn btn-xs btn-info mr-1"><i class="fas fa-edit"></i></button>
                 <button onclick="deleteExam('${exam.id}','${esc(exam.nama)}')" class="btn btn-xs btn-danger"><i class="fas fa-trash"></i></button>
             </td>
-        </tr>
-    `).join(''));
+        </tr>`;
+    }).join(''));
 }
 
 function renderTokenCards() {
