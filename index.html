@@ -1138,13 +1138,12 @@
                     // Simpan histori pelanggaran ke local storage agar persisten di perangkat
                     localStorage.setItem(`violation_${kioskExamId}`, violationCount);
 
-                    // Kirim laporan pelanggaran ke server (fire-and-forget)
+                    // Kirim laporan pelanggaran ke server via Netlify queue (fire-and-forget)
                     const examInfo = examsBank.find(e => e.id === kioskExamId);
-                    fetch(URL_API_FALLBACK, {
+                    fetch('/api/violation', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'text/plain' },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            action: 'reportViolation',
                             examId: kioskExamId,
                             examName: examInfo ? examInfo.nama : '',
                             studentName: localStorage.getItem('student_name') || '',
