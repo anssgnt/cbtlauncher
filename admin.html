@@ -376,6 +376,7 @@ function doLogin() {
         .then(res => {
             if (res.success) {
                 credentials = { username: user, password: pass };
+                sessionStorage.setItem('admin_cred', JSON.stringify(credentials));
                 $('#loginPage').remove();
                 $('#adminWrapper').removeClass('d-none');
                 $('#sidebarUser').text(user);
@@ -398,11 +399,30 @@ function doLogin() {
 
 function doLogout() {
     credentials = { username: '', password: '' };
+    sessionStorage.removeItem('admin_cred');
     location.reload();
 }
 
 $('#loginPass').on('keydown', e => { if (e.key === 'Enter') doLogin(); });
 $('#loginUser').on('keydown', e => { if (e.key === 'Enter') $('#loginPass').focus(); });
+
+// Auto-login jika session masih ada (refresh halaman)
+(function autoLogin() {
+    const saved = sessionStorage.getItem('admin_cred');
+    if (saved) {
+        try {
+            credentials = JSON.parse(saved);
+            $('#loginPage').remove();
+            $('#adminWrapper').removeClass('d-none');
+            $('#sidebarUser').text(credentials.username);
+            $('body').removeClass('login-page').addClass('sidebar-mini layout-fixed');
+            refreshAdminData();
+            startClock();
+        } catch(e) {
+            sessionStorage.removeItem('admin_cred');
+        }
+    }
+})();
 
 // ==================== API ====================
 async function apiCall(payload) {
