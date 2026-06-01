@@ -1177,8 +1177,9 @@
             }
         }
 
+        let pwa_deferredPrompt = null;
+
         function setupPWAEnforcement() {
-            let deferredPrompt;
 
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
@@ -1188,8 +1189,49 @@
 
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
-                deferredPrompt = e;
+                pwa_deferredPrompt = e;
             });
+
+            // Cek config PWA dari server (quick fetch) sebelum tampilkan gate
+            // Jika sudah ada di localStorage, langsung pakai. Jika belum, fetch dulu.
+            const cachedEnforce = localStorage.getItem('pwa_enforce');
+            
+            if (cachedEnforce === 'off') {
+                // Sudah pasti OFF — langsung masuk tanpa gate
+                const gate = document.getElementById('pwaInstallGate');
+                if (gate) gate.remove();
+                initApp();
+                return;
+            }
+
+            if (cachedEnforce === null) {
+                // Belum pernah fetch config — cek ke server dulu sebelum tampilkan gate
+                fetch(URL_API_FALLBACK)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data && data.config && data.config.pwaEnforce) {
+                            localStorage.setItem('pwa_enforce', data.config.pwaEnforce);
+                        }
+                        if (data && data.config && data.config.pwaEnforce === 'off') {
+                            const gate = document.getElementById('pwaInstallGate');
+                            if (gate) gate.remove();
+                            initApp();
+                        } else {
+                            proceedPWACheck();
+                        }
+                    })
+                    .catch(() => {
+                        // Gagal fetch — fallback ke default (ON)
+                        proceedPWACheck();
+                    });
+                return;
+            }
+
+            // cachedEnforce === 'on' atau value lain — lanjut pengecekan PWA normal
+            proceedPWACheck();
+        }
+
+        function proceedPWACheck() {
 
             // Multi-layer standalone detection:
             // 1. CSS media query (most reliable)
@@ -1276,11 +1318,11 @@
                 }
 
                 document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
-                    if (deferredPrompt) {
+                    if (pwa_deferredPrompt) {
                         try {
-                            deferredPrompt.prompt();
-                            const { outcome } = await deferredPrompt.userChoice;
-                            deferredPrompt = null;
+                            pwa_deferredPrompt.prompt();
+                            const { outcome } = await pwa_deferredPrompt.userChoice;
+                            pwa_deferredPrompt = null;
                         } catch(e) {
                             showManualFallback();
                         }
