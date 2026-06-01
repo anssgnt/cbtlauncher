@@ -151,7 +151,8 @@
             <div class="card shadow-sm">
                 <div class="card-header"><h3 class="card-title font-weight-bold"><i class="fas fa-bolt mr-2 text-warning"></i>Aksi Cepat</h3></div>
                 <div class="card-body">
-                    <button onclick="actionClearCache()" class="btn btn-outline-info mr-2 mb-2"><i class="fas fa-sync-alt mr-1"></i>Flush Cache</button>
+                    <button onclick="actionSyncToStudents()" class="btn btn-outline-success mr-2 mb-2"><i class="fas fa-broadcast-tower mr-1"></i>Sync ke Siswa</button>
+                    <button onclick="actionClearCache()" class="btn btn-outline-info mr-2 mb-2"><i class="fas fa-sync-alt mr-1"></i>Flush Cache GAS</button>
                     <button onclick="actionKillAll()" class="btn btn-outline-danger mr-2 mb-2"><i class="fas fa-power-off mr-1"></i>Nonaktifkan Semua</button>
                     <button onclick="refreshAdminData()" class="btn btn-outline-secondary mb-2"><i class="fas fa-redo mr-1"></i>Refresh Data</button>
                 </div>
@@ -762,13 +763,25 @@ function copyToken(token) {
 
 // ==================== QUICK ACTIONS ====================
 async function actionClearCache() {
-    const ok = await confirmAction('Flush Cache?', 'Data akan di-refresh dari Spreadsheet pada request berikutnya.', 'question');
+    const ok = await confirmAction('Flush Cache GAS?', 'Cache di server GAS akan dihapus.', 'question');
     if (!ok) return;
     try {
         const res = await apiCall({ action: 'clearCache' });
         if (res.error) { toastr('error', res.message); return; }
-        toastr('success', 'Cache berhasil di-flush');
+        toastr('success', 'Cache GAS berhasil di-flush');
     } catch (e) { toastr('error', e.message); }
+}
+
+async function actionSyncToStudents() {
+    const ok = await confirmAction('Sync Data ke Siswa?', 'Cache Netlify akan di-bust dan data terbaru dari Spreadsheet akan langsung tersedia untuk siswa.', 'question');
+    if (!ok) return;
+    try {
+        // 1. Flush cache GAS dulu
+        await apiCall({ action: 'clearCache' });
+        // 2. Bust Netlify function cache
+        await fetch('/api/exams?bust=1');
+        Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Data terbaru sudah tersedia untuk siswa.', confirmButtonColor: '#4f46e5', timer: 2500, showConfirmButton: false });
+    } catch (e) { toastr('error', 'Sync gagal: ' + e.message); }
 }
 
 async function actionKillAll() {

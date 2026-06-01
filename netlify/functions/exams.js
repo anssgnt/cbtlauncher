@@ -1,53 +1,57 @@
 /**
  * NETLIFY SERVERLESS FUNCTION: Proxy Cache untuk GAS API
  * 
- * Fungsi ini bertindak sebagai perantara antara 400+ siswa dan Google Apps Script.
  * - Siswa fetch dari sini (Netlify CDN edge, super cepat)
  * - Fungsi ini fetch dari GAS hanya jika cache expired
- * - GAS hanya kena ~1 request per CACHE_TTL detik
- * 
- * Deploy: otomatis saat push ke Netlify (file harus di /netlify/functions/)
+ * - Admin bisa force refresh via ?bust=1
+ * - Cache TTL mengikuti config CACHE_DURATION dari Spreadsheet
  */
 
-// In-memory cache (bertahan selama function instance hidup di Netlify edge)
+// In-memory cache
 let cachedData = null;
 let cacheTimestamp = 0;
-const CACHE_TTL = 120 * 1000; // 120 detik (2 menit) — sesuaikan kebutuhan
+let cacheTTL = 60 * 1000; // Default 60 detik, akan diupdate dari config
 
-// URL Google Apps Script Web App kamu
+// URL Google Apps Script Web App
 const GAS_URL = "https://script.google.com/macros/s/AKfycbyE9kxtudmZZv9FSj60yBlFVsH_j6f26lcKg3wVtOK2FLdkQ-UaZRFX5mHUDWNEHwJGOg/exec";
 
 export default async (req, context) => {
-  // CORS Headers — agar frontend bisa fetch dari domain berbeda jika perlu
   const headers = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     "Content-Type": "application/json",
-    // Cache-Control: browser boleh cache 60 detik, CDN edge cache 120 detik
-    "Cache-Control": "public, max-age=60, s-maxage=120, stale-while-revalidate=300"
+    "Cache-Control": "public, max-age=30, s-maxage=60, stale-while-revalidate=120"
   };
 
-  // Handle preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers });
   }
 
+  const url = new URL(req.url);
+  const bustCache = url.searchParams.get('bust') === '1';
   const now = Date.now();
 
-  // Cek apakah in-memory cache masih valid
-  if (cachedData && (now - cacheTimestamp) < CACHE_TTL) {
+  // Force bust: admin minta refresh paksa
+  if (bustCache) {
+    cachedData = null;
+    cacheTimestamp = 0;
+  }
+
+  // Cek in-memory cache
+  if (cachedData && (now - cacheTimestamp) < cacheTTL) {
     return new Response(JSON.stringify({
       ...cachedData,
       _cache: "hit",
-      _cacheAge: Math.round((now - cacheTimestamp) / 1000)
+      _cacheAge: Math.round((now - cacheTimestamp) / 1000),
+      _ttl: Math.round(cacheTTL / 1000)
     }), { status: 200, headers });
   }
 
-  // Cache expired atau belum ada — fetch dari GAS
+  // Fetch dari GAS
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000); // 15 detik timeout
+    const timeout = setTimeout(() => controller.abort(), 15000);
 
     const response = await fetch(GAS_URL, {
       method: "GET",
@@ -57,29 +61,27 @@ export default async (req, context) => {
 
     clearTimeout(timeout);
 
-    if (!response.ok) {
-      throw new Error(`GAS responded with status ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`GAS status ${response.status}`);
 
     const data = await response.json();
+    if (data.error) throw new Error(data.message || "GAS error");
 
-    // Validasi response — pastikan bukan error dari GAS
-    if (data.error) {
-      throw new Error(data.message || "GAS returned error");
+    // Update TTL dari config server (jika ada)
+    if (data.config && data.config.cacheDuration) {
+      cacheTTL = parseInt(data.config.cacheDuration) * 1000;
     }
 
-    // Update in-memory cache
     cachedData = data;
     cacheTimestamp = now;
 
     return new Response(JSON.stringify({
       ...data,
       _cache: "miss",
-      _fetchedAt: new Date().toISOString()
+      _fetchedAt: new Date().toISOString(),
+      _ttl: Math.round(cacheTTL / 1000)
     }), { status: 200, headers });
 
   } catch (err) {
-    // Jika fetch gagal TAPI ada stale cache, kembalikan stale data (lebih baik daripada error)
     if (cachedData) {
       return new Response(JSON.stringify({
         ...cachedData,
@@ -89,16 +91,14 @@ export default async (req, context) => {
       }), { status: 200, headers });
     }
 
-    // Tidak ada cache sama sekali — kembalikan error
     return new Response(JSON.stringify({
       error: true,
-      message: "Gagal menghubungi server ujian. Silakan coba lagi dalam beberapa detik.",
+      message: "Gagal menghubungi server ujian.",
       _detail: err.message
     }), { status: 502, headers });
   }
 };
 
-// Netlify Function config
 export const config = {
   path: "/api/exams"
 };

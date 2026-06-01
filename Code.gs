@@ -192,7 +192,7 @@ function doGet(e) {
     var config = getConfig(ss);
     var result = {
       exams: exams,
-      config: { proctorKey: config.PROCTOR_KEY || "2025", maxViolations: parseInt(config.MAX_VIOLATIONS) || 5, pwaEnforce: config.PWA_ENFORCE || "on" }
+      config: { proctorKey: config.PROCTOR_KEY || "2025", maxViolations: parseInt(config.MAX_VIOLATIONS) || 5, pwaEnforce: config.PWA_ENFORCE || "on", cacheDuration: config.CACHE_DURATION || "60" }
     };
 
     cache.put("CBT_EXAM_DATA", JSON.stringify(result), parseInt(config.CACHE_DURATION) || 120);
