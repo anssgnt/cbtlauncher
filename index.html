@@ -546,7 +546,6 @@
          * 400+ siswa fetch dari sini (CDN edge), GAS hanya kena ~1 req/2 menit.
          */
         const URL_API = "/api/exams";
-        const URL_API_FALLBACK = "https://script.google.com/macros/s/AKfycbyE9kxtudmZZv9FSj60yBlFVsH_j6f26lcKg3wVtOK2FLdkQ-UaZRFX5mHUDWNEHwJGOg/exec";
         let PROCTOR_KEY = localStorage.getItem('last_proctor_key') || "2025";
 
         // Data Management
@@ -697,29 +696,18 @@
             try {
                 let data;
 
-                // Fetch dengan timeout 10 detik (jangan gantung selamanya)
+                // Fetch dengan timeout 10 detik
                 const controller = new AbortController();
                 const timeout = setTimeout(() => controller.abort(), 10000);
 
                 try {
                     const response = await fetch(URL_API, { signal: controller.signal });
                     clearTimeout(timeout);
-                    if (!response.ok) throw new Error("Proxy gagal");
+                    if (!response.ok) throw new Error("Server tidak merespons.");
                     data = await response.json();
-                } catch (proxyErr) {
+                } catch (fetchErr) {
                     clearTimeout(timeout);
-                    // Fallback ke GAS langsung (dengan timeout sendiri)
-                    const controller2 = new AbortController();
-                    const timeout2 = setTimeout(() => controller2.abort(), 12000);
-                    try {
-                        const fallbackResponse = await fetch(URL_API_FALLBACK, { signal: controller2.signal });
-                        clearTimeout(timeout2);
-                        if (!fallbackResponse.ok) throw new Error("Server tidak merespons.");
-                        data = await fallbackResponse.json();
-                    } catch (fallbackErr) {
-                        clearTimeout(timeout2);
-                        throw new Error("Tidak dapat terhubung ke server.");
-                    }
+                    throw new Error("Tidak dapat terhubung ke server.");
                 }
 
                 if (data.retryAlert) {
@@ -1251,7 +1239,7 @@
 
             if (cachedEnforce === null) {
                 // Belum pernah fetch config — cek ke server dulu sebelum tampilkan gate
-                fetch(URL_API_FALLBACK)
+                fetch(URL_API)
                     .then(r => r.json())
                     .then(data => {
                         if (data && data.config && data.config.pwaEnforce) {
