@@ -331,12 +331,9 @@ document.getElementById('loginUser').addEventListener('keydown', e => { if (e.ke
 // ==================== API HELPER ====================
 
 async function apiCall(payload) {
-    const body = { ...payload, ...credentials };
+    // Merge credentials ke payload (credentials menang jika sudah login, payload menang saat login)
+    const body = { ...credentials, ...payload };
     
-    // GAS Web App POST workaround:
-    // GAS redirects POST requests (302). fetch() won't resend body after redirect.
-    // Solution: Send as GET with payload encoded in URL parameter.
-    // This avoids CORS preflight AND handles GAS redirect properly.
     const encoded = encodeURIComponent(JSON.stringify(body));
     const url = API_URL + '?payload=' + encoded;
     

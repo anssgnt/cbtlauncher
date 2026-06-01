@@ -137,7 +137,19 @@ function doGet(e) {
   try {
     // Admin action via GET ?payload=...
     if (e && e.parameter && e.parameter.payload) {
-      var payload = JSON.parse(decodeURIComponent(e.parameter.payload));
+      var rawPayload = e.parameter.payload;
+      var payload;
+      try {
+        // GAS sudah auto-decode URL parameters, jadi coba parse langsung
+        payload = JSON.parse(rawPayload);
+      } catch(pe) {
+        // Fallback: mungkin masih encoded
+        try {
+          payload = JSON.parse(decodeURIComponent(rawPayload));
+        } catch(pe2) {
+          return responseJSON({ error: true, message: "Payload parse error: " + pe2.toString(), raw: rawPayload.substring(0,100) });
+        }
+      }
       return handleAdminAction(payload);
     }
 
