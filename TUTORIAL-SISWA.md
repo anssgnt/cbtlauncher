@@ -2,11 +2,9 @@
 
 ## Cara Mengerjakan Ujian (5 Langkah Mudah)
 
-### Langkah 1: Install Aplikasi
+### Langkah 1: Buka Aplikasi
 - Buka link yang diberikan guru di **Chrome**
-- Tekan tombol **"Install Aplikasi Sekarang"**
-- Tunggu sampai aplikasi terpasang di HP kamu
-- Buka aplikasi dari layar utama HP (seperti buka WhatsApp)
+- Aplikasi langsung terbuka tanpa perlu install
 
 ### Langkah 2: Isi Nama
 - Saat pertama kali buka, ketik **nama lengkap** kamu
