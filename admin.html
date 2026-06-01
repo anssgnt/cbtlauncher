@@ -21,7 +21,7 @@
         .badge-token { font-size: 0.85rem; padding: 5px 10px; letter-spacing: 1.5px; font-weight: 700; }
     </style>
 </head>
-<body class="hold-transition sidebar-mini layout-fixed">
+<body class="hold-transition login-page">
 
 <!-- LOGIN PAGE -->
 <div id="loginPage" class="login-page d-flex align-items-center justify-content-center">
@@ -357,10 +357,10 @@ function doLogin() {
         .then(res => {
             if (res.success) {
                 credentials = { username: user, password: pass };
-                $('#loginPage').addClass('d-none');
+                $('#loginPage').hide();
                 $('#adminWrapper').removeClass('d-none');
                 $('#sidebarUser').text(user);
-                $('body').removeClass('login-page').addClass('hold-transition sidebar-mini layout-fixed');
+                $('body').removeClass('login-page').addClass('sidebar-mini layout-fixed');
                 refreshAdminData();
                 startClock();
             } else {
@@ -380,8 +380,8 @@ function doLogin() {
 function doLogout() {
     credentials = { username: '', password: '' };
     $('#adminWrapper').addClass('d-none');
-    $('#loginPage').removeClass('d-none');
-    $('body').addClass('login-page');
+    $('#loginPage').show();
+    $('body').removeClass('sidebar-mini layout-fixed').addClass('login-page');
     $('#loginPass').val('');
 }
 
