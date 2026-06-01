@@ -332,11 +332,20 @@ document.getElementById('loginUser').addEventListener('keydown', e => { if (e.ke
 
 async function apiCall(payload) {
     const body = { ...payload, ...credentials };
-    const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' }, // GAS quirk: text/plain avoids CORS preflight
-        body: JSON.stringify(body)
+    
+    // GAS Web App POST workaround:
+    // GAS redirects POST requests (302). fetch() won't resend body after redirect.
+    // Solution: Send as GET with payload encoded in URL parameter.
+    // This avoids CORS preflight AND handles GAS redirect properly.
+    const encoded = encodeURIComponent(JSON.stringify(body));
+    const url = API_URL + '?payload=' + encoded;
+    
+    const response = await fetch(url, {
+        method: 'GET',
+        redirect: 'follow'
     });
+    
+    if (!response.ok) throw new Error('HTTP ' + response.status);
     return await response.json();
 }
 
