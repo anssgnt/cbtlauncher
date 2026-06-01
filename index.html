@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Spensada Exam</title>
+
+    <!-- PWA Setup -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#1E40AF">
+    <link rel="apple-touch-icon" href="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <!-- Tailwind CSS (Pinned version for production) -->
+    <script src="https://cdn.tailwindcss.com/3.4.1"></script>
+    
+    <!-- Favicon Fix 404 -->
+    <link rel="icon" type="image/x-icon" href="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png">
+
+    <!-- Google Fonts: Plus Jakarta Sans for premium feel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* Base Styles & Typography */
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            background-color: #f1f5f9; /* Soft slate background */
+            -webkit-font-smoothing: antialiased;
+            overscroll-behavior-y: none; /* Mencegah pull-to-refresh di Chrome Mobile */
+        }
+
+        /* Input rules */
+        input {
+            -webkit-user-select: auto;
+            user-select: auto;
+        }
+        input[type="text"] {
+            font-size: 16px; /* Prevent iOS zoom */
+        }
+
+        /* Skeleton Loading Animation */
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
+        }
+        .skeleton {
+            position: relative;
+            overflow: hidden;
+            background-color: #e2e8f0;
+            border-radius: 0.5rem;
+        }
+        .skeleton::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            transform: translateX(-100%);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 0px; } /* Clean, no scrollbar like mobile apps */
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Loader Animation */
+        .loader-dots div { animation-timing-function: cubic-bezier(0, 1, 1, 0); }
+        .loader-dots div:nth-child(1) { left: 8px; animation: loader-dots1 0.6s infinite; }
+        .loader-dots div:nth-child(2) { left: 8px; animation: loader-dots2 0.6s infinite; }
+        .loader-dots div:nth-child(3) { left: 32px; animation: loader-dots2 0.6s infinite; }
+        .loader-dots div:nth-child(4) { left: 56px; animation: loader-dots3 0.6s infinite; }
+        @keyframes loader-dots1 { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        @keyframes loader-dots3 { 0% { transform: scale(1); } 100% { transform: scale(0); } }
+        @keyframes loader-dots2 { 0% { transform: translate(0, 0); } 100% { transform: translate(24px, 0); } }
+    </style>
+</head>
+
+<body class="text-slate-800 min-h-screen relative overflow-x-hidden">
+
+    <!-- PWA Install Gatecade -->
+    <div id="pwaInstallGate" class="fixed inset-0 z-[99999] bg-slate-50 flex flex-col items-center justify-center p-6 text-center transform transition-all duration-300">
+        <div class="w-20 h-20 sm:w-24 sm:h-24 bg-white border border-slate-200 rounded-[1.5rem] sm:rounded-[2rem] shadow-xl flex items-center justify-center mb-6 sm:mb-8 relative overflow-hidden transform hover:scale-105 transition-all">
+            <div class="absolute inset-0 bg-blue-100/30 blur-xl"></div>
+            <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" alt="Logo" class="w-12 h-12 sm:w-16 sm:h-16 object-contain relative z-10 drop-shadow-sm">
+        </div>
+        <h2 class="text-[20px] sm:text-[22px] font-extrabold text-slate-800 mb-1.5 tracking-tight">Pasang Aplikasi Ujian</h2>
+        <p class="text-[12px] sm:text-[13px] text-slate-500 font-medium mb-6 sm:mb-8 max-w-xs leading-relaxed px-2 sm:px-4">Sistem ujian dilindungi. Akses dari browser langsung telah diblokir. Wajib menginstall Aplikasi CBT Spensada di Perangkat Anda.</p>
+        
+        <div id="pwaAndroidWrapper" class="w-full max-w-xs flex flex-col gap-3">
+            <button id="pwaInstallBtn" class="w-full py-3.5 sm:py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[14px] sm:text-[15px] font-bold rounded-[1.25rem] shadow-[0_8px_20px_rgba(79,70,229,0.25)] active:scale-95 transition-transform flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                Install Aplikasi Sekarang
+            </button>
+            <p class="text-[11px] text-slate-400 mt-2 font-semibold">Instalasi Otomatis (Android/Windows)</p>
+        </div>
+
+        <div id="pwaManualWrapper" class="hidden w-full max-w-sm flex-col items-center bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mt-4 fade-in">
+            <p id="pwaManualTitle" class="text-[12px] font-extrabold text-indigo-500 mb-5 uppercase tracking-[0.1em] text-center w-full">Panduan Instalasi Manual</p>
+            <div class="flex items-start gap-4 mb-4 text-left w-full">
+                <div class="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0 mt-0.5">1</div>
+                <p id="pwaManualStep1" class="text-[13px] text-slate-600 font-medium leading-normal">Tekan Ikon navigasi browser Anda (Misal: <strong class="text-slate-800">Tiga Titik ⋮</strong> di pojok kanan atas).</p>
+            </div>
+            <div class="flex items-start gap-4 text-left w-full">
+                <div class="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0 mt-0.5">2</div>
+                <p id="pwaManualStep2" class="text-[13px] text-slate-600 font-medium leading-normal">Pilih menu <span class="text-slate-800 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold whitespace-nowrap mt-2 inline-block">Tambahkan ke Layar Utama</span> atau <span class="text-slate-800 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold whitespace-nowrap mt-2 inline-block">Install Aplikasi</span>.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Top App Background (Curved Header Background) -->
+    <div class="fixed top-0 left-0 w-full h-[240px] sm:h-[280px] bg-gradient-to-br from-[#1E40AF] via-[#3730A3] to-[#312E81] rounded-b-[2.5rem] shadow-xl z-[-1] overflow-hidden">
+        <!-- Abstract Decorations behind header -->
+        <div class="absolute -top-10 -right-10 w-48 h-48 bg-white opacity-[0.07] rounded-full blur-2xl"></div>
+        <div class="absolute top-20 -left-10 w-32 h-32 bg-white opacity-[0.05] rounded-full blur-xl"></div>
+        <div class="absolute bottom-10 right-20 w-40 h-40 bg-indigo-400 opacity-20 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="w-full max-w-md mx-auto pt-6 sm:pt-8 px-5 sm:px-6 pb-2 flex items-center justify-between">
+        <div class="flex items-center gap-3 sm:gap-3.5">
+            <div class="bg-white/10 p-1.5 rounded-[0.9rem] backdrop-blur-md border border-white/20 shadow-[0_4px_15px_rgba(0,0,0,0.1)] flex-shrink-0 relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent"></div>
+                <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" alt="Logo" class="w-9 h-9 sm:w-10 sm:h-10 object-contain drop-shadow-md relative z-10 transition-transform duration-300 hover:scale-105" onerror="this.style.display='none'">
+            </div>
+            <div class="flex flex-col">
+                <h1 class="text-[20px] sm:text-[22px] font-extrabold text-white tracking-tight leading-tight">Spensada Exam</h1>
+                <p class="text-[10px] sm:text-[11px] text-indigo-100 font-medium opacity-90 mt-0.5 tracking-wide">Sistem Ujian Mobile</p>
+            </div>
+        </div>
+        
+        <div id="statusBadge" class="flex flex-col items-end opacity-90 transition-all duration-300">
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-sm" id="statusContainer">
+                <div class="w-2 h-2 rounded-full bg-slate-300" id="statusDot"></div>
+                <span class="text-[9px] font-bold text-white uppercase tracking-wider" id="statusText">Offline</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-md w-full mx-auto px-4 sm:px-5 pt-5 sm:pt-6 pb-12 flex flex-col relative z-10">
+
+        <!-- Info Card (Overlapping header) -->
+        <div class="bg-white rounded-[1.25rem] p-3.5 sm:p-4 shadow-[0_8px_30px_rgb(0,0,0,0.06)] mb-6 sm:mb-8 flex flex-col items-center justify-center border border-slate-100 transform transition-transform hover:scale-[1.01]">
+            <div class="flex items-center gap-1.5 mb-1 sm:mb-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                <p class="text-[10px] font-extrabold text-indigo-600 uppercase tracking-[0.15em]">ASAS/ASAT T.A 2025/2026</p>
+            </div>
+            <div class="flex items-center gap-2 mt-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p class="text-[15px] font-bold text-slate-700" id="serverTimeText">--:--:--</p>
+            </div>
+        </div>
+
+        <!-- State: Loading (Skeleton) -->
+        <div id="loadingState" class="flex flex-col gap-6 fade-in">
+            <!-- Skeleton Card 1 -->
+            <div class="bg-white rounded-[1.5rem] shadow-sm border border-slate-100 overflow-hidden">
+                <div class="h-1.5 w-full bg-slate-100"></div>
+                <div class="p-6">
+                    <div class="w-24 h-5 skeleton mb-4"></div>
+                    <div class="w-full h-7 skeleton mb-3"></div>
+                    <div class="w-3/4 h-4 skeleton"></div>
+                </div>
+                <div class="p-6 pt-0 border-t border-slate-50 mt-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="w-20 h-3 skeleton"></div>
+                        <div class="w-24 h-8 skeleton"></div>
+                    </div>
+                    <div class="w-full h-12 skeleton rounded-xl"></div>
+                </div>
+            </div>
+            <!-- Skeleton Card 2 -->
+            <div class="bg-white rounded-[1.5rem] shadow-sm border border-slate-100 overflow-hidden opacity-60">
+                <div class="h-1.5 w-full bg-slate-100"></div>
+                <div class="p-6">
+                    <div class="w-24 h-5 skeleton mb-4"></div>
+                    <div class="w-full h-7 skeleton mb-3"></div>
+                </div>
+                <div class="p-6 pt-0 border-t border-slate-50 mt-4">
+                    <div class="w-full h-12 skeleton rounded-xl"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- State: Error -->
+        <div id="errorState" class="hidden flex-col items-center justify-center py-12 px-6 bg-white rounded-[2rem] text-center fade-in border border-rose-100 shadow-[0_8px_30px_rgba(225,29,72,0.06)]">
+            <div class="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 mb-4 shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <h3 class="text-xl font-extrabold text-slate-800 mb-1">Jaringan Terputus</h3>
+            <p class="text-sm text-slate-500 mb-6 px-2" id="errorMessage">Gagal menghubungi peladen sekolah.</p>
+            <button onclick="fetchData(true)" class="w-full py-3.5 bg-slate-800 hover:bg-slate-900 active:scale-[0.98] text-white font-bold rounded-[1rem] transition-all shadow-md focus:outline-none flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                Coba Sinkronisasi Ulang
+            </button>
+        </div>
+
+        <!-- State: Empty -->
+        <div id="emptyState" class="hidden flex-col items-center justify-center py-16 px-6 bg-white rounded-[2rem] text-center fade-in shadow-sm border border-slate-100">
+            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-5 shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+            </div>
+            <h3 class="text-[18px] font-extrabold text-slate-800 mb-1">Belum Tersedia</h3>
+            <p class="text-sm text-slate-500 mb-5 px-1 leading-relaxed">Tidak ada jadwal aktif saat ini. Menunggu intruksi proktor.</p>
+            <button onclick="fetchData(true)" id="manualRefreshBtn" class="flex items-center justify-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-600 font-bold text-xs rounded-full hover:bg-indigo-100 transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span id="refreshBtnText">Perbarui Data</span>
+            </button>
+        </div>
+
+        <!-- State: Data List -->
+        <!-- Penggunaan gap-6 dan flex-col untuk memberi jarak absolut antar kotak -->
+        <div id="examList" class="hidden flex-col gap-6 pb-10">
+            <!-- Exam cards will be injected here -->
+        </div>
+
+    </main>
+
+    <!-- Token Modal (Bottom Sheet style) -->
+    <div id="tokenModal" class="hidden fixed inset-0 z-[2147483646] flex items-start sm:items-center justify-center p-4 pt-10 sm:pt-4 transition-all duration-300" style="opacity: 0;">
+        <!-- Backdrop Blur -->
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeTokenModal()"></div>
+        
+        <!-- Modal Content -->
+        <div class="bg-white relative rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl w-full max-w-[320px] sm:max-w-sm mx-auto overflow-hidden transform -translate-y-full sm:scale-95 transition-transform duration-300" id="tokenModalContent">
+
+            <!-- Drag Handle (Mobile) -->
+            <div class="w-full flex justify-center pt-3 pb-2 sm:hidden absolute top-0 z-10 pointer-events-none">
+                <div class="w-10 h-1.5 bg-slate-200 rounded-full"></div>
+            </div>
+
+            <div class="p-5 pt-8 sm:p-6 pb-4 flex flex-col items-center text-center">
+                <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-[1.1rem] flex items-center justify-center mb-3 border border-indigo-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </div>
+                <h3 class="text-[17px] sm:text-lg font-extrabold text-slate-800 tracking-tight">KODE UJIAN</h3>
+                <p class="text-[12px] sm:text-[13px] text-slate-500 font-semibold mt-1 truncate w-full px-2" id="modalExamName">Nama Ujian</p>
+            </div>
+
+            <div class="px-6 pb-5">
+                <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-indigo-300 group-focus-within:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    </div>
+                    <input type="text" id="tokenInput" class="w-full bg-slate-50 border-2 border-slate-200/80 rounded-xl pl-10 pr-3 py-3 font-mono text-center text-xl font-black text-indigo-700 tracking-[0.2em] focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 transition-all uppercase placeholder:tracking-normal placeholder:font-bold placeholder:text-slate-300 placeholder:text-[13px]" placeholder="KODE AKSES" autocomplete="off" spellcheck="false" maxlength="10">
+                </div>
+                <div id="tokenError" class="mt-2 hidden animate-pulse">
+                    <div class="flex items-center justify-center gap-1 bg-rose-50 text-rose-600 px-3 py-1.5 rounded-lg border border-rose-100 shadow-sm">
+                        <p class="text-[11px] font-bold">Kode salah, silakan cek ulang.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 sm:p-5 bg-slate-50 border-t border-slate-100 flex gap-2.5 pb-6 sm:pb-5">
+                <button onclick="closeTokenModal()" class="flex-[0.8] px-3 py-3 text-slate-500 bg-white border border-slate-300 rounded-[0.85rem] text-[13px] font-bold hover:bg-slate-50 active:scale-[0.98] transition-all focus:outline-none shadow-sm">
+                    Kembali
+                </button>
+                <button onclick="submitToken()" class="flex-[1.2] px-3 py-3 text-white bg-indigo-600 border border-transparent rounded-[0.85rem] text-[13px] font-bold hover:bg-indigo-700 shadow-[0_4px_10px_rgba(79,70,229,0.2)] active:scale-[0.98] transition-all focus:outline-none">
+                    Mulai
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Universal Modal (Alert/Confirm/Prompt) -->
+    <div id="customModal" class="hidden fixed inset-0 z-[2147483647] flex items-start sm:items-center justify-center p-4 pt-10 sm:pt-4 transition-all duration-300" style="opacity: 0;">
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" id="customModalBackdrop"></div>
+        <div class="bg-white relative rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl w-full max-w-[320px] sm:max-w-sm mx-auto overflow-hidden transform -translate-y-full sm:scale-95 transition-transform duration-300" id="customModalContent">
+            <div class="w-full flex justify-center pt-3 pb-2 sm:hidden absolute top-0 z-10 pointer-events-none">
+                <div class="w-10 h-1.5 bg-slate-200 rounded-full"></div>
+            </div>
+            <div class="p-5 pt-8 sm:p-6 sm:pt-6 pb-4 flex flex-col items-center text-center">
+                <div id="customModalIcon" class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-[1.1rem] flex items-center justify-center mb-3 border border-indigo-100">
+                </div>
+                <h3 id="customModalTitle" class="text-[17px] sm:text-lg font-extrabold text-slate-800 tracking-tight">TITLE</h3>
+                <p id="customModalMessage" class="text-[12px] sm:text-[13px] text-slate-500 font-medium mt-1.5 px-2 leading-relaxed">Message goes here.</p>
+            </div>
+            <div id="customModalInputWrapper" class="px-6 pb-5 hidden">
+                <input type="text" id="customModalInput" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-3 py-3 font-bold text-slate-700 focus:outline-none focus:border-indigo-500 transition-all text-center uppercase text-[13px]" placeholder="...">
+            </div>
+            <div class="p-4 sm:p-5 bg-slate-50 border-t border-slate-100 flex gap-2.5 pb-6 sm:pb-5">
+                <button id="customModalCancelBtn" class="hidden flex-1 px-3 py-3 text-slate-500 bg-white border border-slate-300 rounded-[0.85rem] text-[13px] font-bold hover:bg-slate-50 active:scale-[0.98] transition-all focus:outline-none shadow-sm">
+                    Batal
+                </button>
+                <button id="customModalConfirmBtn" class="flex-1 px-3 py-3 text-white bg-indigo-600 border border-transparent rounded-[0.85rem] text-[13px] font-bold hover:bg-indigo-700 shadow-[0_4px_10px_rgba(79,70,229,0.25)] active:scale-[0.98] transition-all focus:outline-none">
+                    OKE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        /**
+         * CUSTOM MODAL SYSTEM (Bypassing GAS Sandbox)
+         */
+        const CustomModal = {
+            get el() { return document.getElementById('customModal'); },
+            get content() { return document.getElementById('customModalContent'); },
+            get title() { return document.getElementById('customModalTitle'); },
+            get message() { return document.getElementById('customModalMessage'); },
+            get inputWrapper() { return document.getElementById('customModalInputWrapper'); },
+            get input() { return document.getElementById('customModalInput'); },
+            get confirmBtn() { return document.getElementById('customModalConfirmBtn'); },
+            get cancelBtn() { return document.getElementById('customModalCancelBtn'); },
+            get icon() { return document.getElementById('customModalIcon'); },
+            
+            show(options) {
+                return new Promise((resolve) => {
+                    this.title.innerText = options.title || 'Informasi';
+                    this.message.innerText = options.message || '';
+                    this.confirmBtn.innerText = options.confirmText || 'OKE';
+                    this.cancelBtn.innerText = options.cancelText || 'Batal';
+                    this.input.value = '';
+                    
+                    if (options.showInput) {
+                        this.inputWrapper.classList.remove('hidden');
+                        if (options.placeholder) this.input.placeholder = options.placeholder;
+                    } else {
+                        this.inputWrapper.classList.add('hidden');
+                    }
+                    
+                    if (options.showCancel) {
+                        this.cancelBtn.classList.remove('hidden');
+                    } else {
+                        this.cancelBtn.classList.add('hidden');
+                    }
+
+                    // Icon setup
+                    let iconHtml = '';
+                    if (options.type === 'danger') {
+                        iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 animate-pulse shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>';
+                        this.icon.className = "w-16 h-16 bg-rose-100 text-rose-600 rounded-[1.1rem] flex items-center justify-center mb-3 border border-rose-200 shadow-[0_0_20px_rgba(225,29,72,0.4)]";
+                        document.getElementById('customModalTitle').className = "text-[17px] sm:text-lg font-black text-rose-600 tracking-tight uppercase";
+                        this.confirmBtn.className = "flex-1 px-3 py-3 text-white bg-rose-600 border border-transparent rounded-[0.85rem] text-[13px] font-bold hover:bg-rose-700 shadow-[0_4px_15px_rgba(225,29,72,0.4)] active:scale-[0.98] transition-all focus:outline-none";
+                    } else {
+                        document.getElementById('customModalTitle').className = "text-[17px] sm:text-lg font-extrabold text-slate-800 tracking-tight";
+                        this.confirmBtn.className = "flex-1 px-3 py-3 text-white bg-indigo-600 border border-transparent rounded-[0.85rem] text-[13px] font-bold hover:bg-indigo-700 shadow-[0_4px_10px_rgba(79,70,229,0.25)] active:scale-[0.98] transition-all focus:outline-none";
+                        
+                        if (options.type === 'confirm') {
+                            iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+                            this.icon.className = "w-12 h-12 bg-amber-50 text-amber-600 rounded-[1.1rem] flex items-center justify-center mb-3 border border-amber-100";
+                        } else if (options.type === 'prompt') {
+                            iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>';
+                            this.icon.className = "w-12 h-12 bg-indigo-50 text-indigo-600 rounded-[1.1rem] flex items-center justify-center mb-3 border border-indigo-100";
+                        } else {
+                            iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+                            this.icon.className = "w-12 h-12 bg-blue-50 text-blue-600 rounded-[1.1rem] flex items-center justify-center mb-3 border border-blue-100";
+                        }
+                    }
+                    this.icon.innerHTML = iconHtml;
+
+                    this.el.classList.remove('hidden');
+                    // Force a small delay to ensure 'hidden' removal is processed by the browser
+                    // especially important on lower-end mobile devices inside expensive layouts
+                    setTimeout(() => {
+                        this.el.style.opacity = '1';
+                        this.content.classList.remove('-translate-y-full', 'sm:scale-95');
+                        this.content.classList.add('translate-y-0', 'sm:scale-100');
+                        if (options.showInput) this.input.focus();
+                    }, 50);
+
+                    const handleConfirm = () => {
+                        cleanup();
+                        resolve(options.showInput ? this.input.value : true);
+                    };
+                    const handleCancel = () => {
+                        cleanup();
+                        resolve(options.showInput ? null : false);
+                    };
+                    const cleanup = () => {
+                        this.confirmBtn.removeEventListener('click', handleConfirm);
+                        this.cancelBtn.removeEventListener('click', handleCancel);
+                        this.hide();
+                    };
+
+                    this.confirmBtn.addEventListener('click', handleConfirm);
+                    this.cancelBtn.addEventListener('click', handleCancel);
+                });
+            },
+            
+            hide() {
+                this.el.style.opacity = '0';
+                this.content.classList.remove('translate-y-0', 'sm:scale-100');
+                this.content.classList.add('-translate-y-full', 'sm:scale-95');
+                setTimeout(() => {
+                    this.el.classList.add('hidden');
+                }, 300);
+            },
+
+            alert(message, title = 'Informasi') {
+                return this.show({ type: 'alert', title, message, showCancel: false, confirmText: 'OKE' });
+            },
+
+            danger(message, title = 'Peringatan') {
+                return this.show({ type: 'danger', title, message, showCancel: false, confirmText: 'SAYA MENGERTI' });
+            },
+
+            confirm(message, title = 'Konfirmasi') {
+                return this.show({ type: 'confirm', title, message, showCancel: true, confirmText: 'YA', cancelText: 'TIDAK' });
+            },
+
+            prompt(message, placeholder = '', title = 'Input') {
+                return this.show({ type: 'prompt', title, message, showInput: true, showCancel: true, placeholder, confirmText: 'LANJUT', cancelText: 'BATAL' });
+            }
+        };
+
+        /**
+         * ALARM SYSTEM (Web Audio API Siren)
+         */
+        const AlarmSystem = {
+            audioCtx: null,
+            oscillator: null,
+            lfo: null,
+            gainNode: null,
+            isPlaying: false,
+
+            init() {
+                if (this.audioCtx) return;
+                try {
+                    this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // UNLOCK AUDIO CONTEXT: Mainkan suara hening sesaat untuk membuka blokir autoplay di iOS/Safari
+                    if (this.audioCtx.state === 'suspended') {
+                        this.audioCtx.resume();
+                    }
+                    const dummyOsc = this.audioCtx.createOscillator();
+                    dummyOsc.connect(this.audioCtx.destination);
+                    dummyOsc.start(0);
+                    dummyOsc.stop(0.001);
+                } catch (e) {
+                    console.error("Web Audio API not supported", e);
+                }
+            },
+
+            start() {
+                this.init();
+                if (!this.audioCtx || this.isPlaying) return;
+                
+                if (this.audioCtx.state === 'suspended') {
+                    this.audioCtx.resume();
+                }
+
+                this.isPlaying = true;
+                this.oscillator = this.audioCtx.createOscillator();
+                this.gainNode = this.audioCtx.createGain();
+                this.lfo = this.audioCtx.createOscillator();
+
+                this.oscillator.type = 'triangle';
+                
+                // Siren effect using LFO (Low Frequency Oscillator)
+                const lfoGain = this.audioCtx.createGain();
+
+                this.lfo.type = 'sine';
+                this.lfo.frequency.value = 1; // 1Hz siren cycle
+                lfoGain.gain.value = 300; // Frequency variation range (Hz)
+
+                this.lfo.connect(lfoGain);
+                lfoGain.connect(this.oscillator.frequency);
+
+                this.oscillator.frequency.value = 600; // Base frequency
+                this.gainNode.gain.setValueAtTime(0.5, this.audioCtx.currentTime);
+
+                this.oscillator.connect(this.gainNode);
+                this.gainNode.connect(this.audioCtx.destination);
+
+                this.lfo.start();
+                this.oscillator.start();
+            },
+
+            stop() {
+                if (!this.isPlaying) return;
+                try {
+                    if (this.oscillator) {
+                        this.oscillator.stop();
+                        this.oscillator.disconnect();
+                    }
+                    if (this.lfo) {
+                        this.lfo.stop();
+                        this.lfo.disconnect();
+                    }
+                    if (this.gainNode) {
+                        this.gainNode.disconnect();
+                    }
+                } catch (e) {}
+                this.isPlaying = false;
+            }
+        };
+
+        /**
+         * KONFIGURASI API
+         * Menggunakan Netlify Function sebagai proxy cache.
+         * 400+ siswa fetch dari sini (CDN edge), GAS hanya kena ~1 req/2 menit.
+         */
+        const URL_API = "/api/exams";
+        const URL_API_FALLBACK = "https://script.google.com/macros/s/AKfycbwalO-HqOZpSYlOjBXl9stx3PzZUWrTadTJeojZ_AuMWFNrJk44vlozgXXEUiNO5Fugog/exec";
+        const USE_DUMMY_DATA = false;
+        let PROCTOR_KEY = localStorage.getItem('last_proctor_key') || "2025"; // Sinkron via Spreadsheet
+
+        // Data Management
+        let examsBank = [];
+        let secureLinks = {};
+        let activeSelectedExamId = null;
+        let kioskExamId = null;
+
+        // Interval Management
+        let refreshIntervalTimer = null;
+        let countdownTimer = null;
+        let clockTimer = null;
+        let healthTimer = null; // Timer for device stats
+        let wakeLock = null;
+        let violationCount = 0;
+        let isLeavingKiosk = false;
+
+        // DOM Elements
+        const elLoading = document.getElementById('loadingState');
+        const elError = document.getElementById('errorState');
+        const elEmpty = document.getElementById('emptyState');
+        const elList = document.getElementById('examList');
+        const statusContainer = document.getElementById('statusContainer');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const timeText = document.getElementById('serverTimeText');
+
+        /**
+         * SECURITY FEATURES
+         */
+        // Generate unique device ID (persisten per perangkat)
+        function generateDeviceId() {
+            const id = 'dev_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 8);
+            localStorage.setItem('device_id', id);
+            return id;
+        }
+        if (!localStorage.getItem('device_id')) generateDeviceId();
+
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.keyCode == 123) e.preventDefault(); // F12
+            if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) e.preventDefault();
+            if (e.ctrlKey && e.keyCode === 85) e.preventDefault();
+            if (e.ctrlKey && e.keyCode === 83) e.preventDefault();
+        });
+        window.addEventListener('beforeunload', function (e) {
+            const msg = 'Apakah Anda yakin ingin keluar? Ujian mungkin sedang berlangsung.';
+            e.preventDefault();
+            e.returnValue = msg;
+            return msg;
+        });
+
+        function parseDate(dateStr) {
+            if (!dateStr) return new Date(0);
+            try {
+                if (dateStr.includes('T')) return new Date(dateStr);
+                const parts = dateStr.split(' ');
+                if (parts.length !== 2) return new Date(dateStr);
+                const dateParts = parts[0].split('-');
+                const timeParts = parts[1].split(':');
+                return new Date(dateParts[0], dateParts[1] - 1, dateParts[2], timeParts[0], timeParts[1]);
+            } catch (e) {
+                return new Date(0);
+            }
+        }
+
+        function formatDateIndo(date) {
+            if (!date || isNaN(date.getTime())) return "";
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+            const day = days[date.getDay()];
+            const dd = date.getDate();
+            const mm = months[date.getMonth()];
+            return `${day}, ${dd} ${mm}`;
+        }
+
+        function formatCountdown(diffMs) {
+            if (diffMs <= 0) return "Selesai";
+            const h = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
+            const m = Math.floor((diffMs / 1000 / 60) % 60);
+            const s = Math.floor((diffMs / 1000) % 60);
+            if (h > 0) return `${h}j ${m}m ${s}d`;
+            return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const day = days[now.getDay()];
+            const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            timeText.innerText = `${day}, ${timeStr}`;
+        }
+
+        function setAppStatus(state) {
+            statusContainer.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-sm transition-all duration-300';
+            switch (state) {
+                case 'online':
+                    statusContainer.classList.add('bg-white/20', 'backdrop-blur-md', 'border-white/20');
+                    statusDot.className = 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)] animate-pulse';
+                    statusText.innerText = 'ONLINE';
+                    statusText.className = 'text-[9px] font-bold text-white uppercase tracking-widest';
+                    break;
+                case 'offline':
+                case 'error':
+                    statusContainer.classList.add('bg-rose-500/80', 'backdrop-blur-md', 'border-rose-400/50');
+                    statusDot.className = 'w-2 h-2 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.6)]';
+                    statusText.innerText = 'TERPUTUS';
+                    statusText.className = 'text-[9px] font-bold text-white uppercase tracking-widest';
+                    break;
+                case 'sync':
+                    statusContainer.classList.add('bg-white/10', 'backdrop-blur-md', 'border-white/10');
+                    statusDot.className = 'w-2 h-2 rounded-full bg-blue-300 animate-ping';
+                    statusText.innerText = 'SYNC';
+                    statusText.className = 'text-[9px] font-bold text-white/80 uppercase tracking-widest';
+                    break;
+            }
+        }
+
+        async function fetchData(force = false) {
+            const now = Date.now();
+            const lastSync = parseInt(localStorage.getItem('last_sync_timestamp') || 0);
+            const cachedData = localStorage.getItem('cached_exams_data');
+            const COOLDOWN_MS = 60000; // 60 Detik Throttling (Netlify CDN sudah cache, tidak perlu sering)
+
+            const btn = document.getElementById('manualRefreshBtn');
+            const btnText = document.getElementById('refreshBtnText');
+
+            // Tampilkan Skeleton Loading awal (hanya jika tidak ada cache)
+            if (!cachedData) {
+                elLoading.classList.remove('hidden');
+            }
+            elError.classList.add('hidden');
+            elEmpty.classList.add('hidden');
+            
+            // ANTI-SPAM LOGIC: Jika baru saja sync, jangan tembak server lagi
+            if (!force && cachedData && (now - lastSync < COOLDOWN_MS)) {
+                console.info("Anti-Spam: Menggunakan cache lokal (Data masih segar).");
+                setAppStatus('online');
+                const data = JSON.parse(cachedData);
+                processFetchedData(data);
+                return;
+            }
+
+            if (force && btn) {
+                btn.disabled = true;
+                if (btnText) btnText.innerText = "Memperbarui...";
+            }
+
+            setAppStatus('sync');
+
+            try {
+                let data = [];
+                if (USE_DUMMY_DATA) {
+                    await new Promise(r => setTimeout(r, 800)); 
+                    const todayCurrent = new Date();
+                    const formatForJSON = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                    data = {
+                        exams: [
+                            { "id": "1", "nama": "Matematika X - Semester 1", "link": "https://forms.gle/demo1", "start": formatForJSON(new Date(todayCurrent.getTime() - 1800000)), "end": formatForJSON(new Date(todayCurrent.getTime() + 5400000)), "status": "aktif", "token": "MATH10" },
+                            { "id": "2", "nama": "Bahasa Indonesia X", "link": "https://forms.gle/demo2", "start": formatForJSON(new Date(todayCurrent.getTime() + 7200000)), "end": formatForJSON(new Date(todayCurrent.getTime() + 14400000)), "status": "aktif", "token": "INDO10" }
+                        ],
+                        config: { proctorKey: PROCTOR_KEY }
+                    };
+                } else {
+                    const response = await fetch(URL_API);
+                    
+                    // Jika Netlify function gagal, fallback langsung ke GAS
+                    if (!response.ok) {
+                        console.warn("Netlify proxy gagal, mencoba fallback ke GAS langsung...");
+                        const fallbackResponse = await fetch(URL_API_FALLBACK);
+                        if (!fallbackResponse.ok) throw new Error("Gagal terhubung ke server.");
+                        data = await fallbackResponse.json();
+                    } else {
+                        data = await response.json();
+                    }
+
+                    if (data.retryAlert) {
+                        setAppStatus('sync');
+                        setTimeout(() => fetchData(true), 3000);
+                        return;
+                    }
+                }
+
+                if (data.error) throw new Error(data.message);
+
+                // Update Cache
+                localStorage.setItem('cached_exams_data', JSON.stringify(data));
+                localStorage.setItem('last_sync_timestamp', now.toString());
+
+                processFetchedData(data);
+                setAppStatus('online');
+
+            } catch (err) {
+                console.error(err);
+                setAppStatus('error');
+                
+                // Jika error tapi ada cache, gunakan cache sebagai fallback darurat
+                if (cachedData) {
+                    console.warn("Server Error: Menggunakan data cache sebagai fallback.");
+                    processFetchedData(JSON.parse(cachedData));
+                } else {
+                    elLoading.classList.add('hidden');
+                    elError.classList.remove('hidden');
+                    document.getElementById('errorMessage').innerText = err.message || "Gagal menghubungi peladen sekolah.";
+                }
+            } finally {
+                if (btn) {
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        if (btnText) btnText.innerText = "Perbarui Data";
+                    }, 2000);
+                }
+            }
+        }
+
+        // Fungsi Helper untuk memproses data hasil fetch/cache
+        function processFetchedData(data) {
+            let examsArray = Array.isArray(data) ? data : (data.exams || []);
+            
+            if (data.config && data.config.proctorKey) {
+                PROCTOR_KEY = data.config.proctorKey;
+                localStorage.setItem('last_proctor_key', PROCTOR_KEY);
+            }
+
+            examsBank = examsArray.map(item => ({
+                ...item,
+                startObj: parseDate(item.start),
+                endObj: parseDate(item.end)
+            }));
+
+            processAndRenderExams();
+        }
+
+        function processAndRenderExams() {
+            const now = new Date();
+            let validExamsCount = 0;
+            secureLinks = {}; 
+            elList.innerHTML = '';
+
+            examsBank.forEach(exam => {
+                if (exam.status?.toLowerCase() !== 'aktif') return;
+
+                const isUpcomingStr = now < exam.startObj;
+                const isActiveStr = now >= exam.startObj && now <= exam.endObj;
+                const isFinishedStr = now > exam.endObj;
+
+                if (isFinishedStr) return; 
+
+                validExamsCount++;
+                secureLinks[exam.id] = exam.link;
+
+                // DESIGN TERBARU KARTU UJIAN (SPLIT CARD)
+                const cardHtml = `
+                    <div class="bg-white rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.06)] relative flex flex-col mb-6 border border-slate-100/50 overflow-hidden transform transition-transform hover:-translate-y-1" id="card-${exam.id}">
+                        
+                        <!-- Top status line -->
+                        <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r ${isActiveStr ? 'from-indigo-500 to-blue-500' : 'from-slate-200 to-slate-200'} z-10"></div>
+                        
+                        <!-- Card Body (Info Area) -->
+                        <div class="p-5 sm:p-6 pb-3 sm:pb-4 relative">
+                            ${isActiveStr ? '<div class="absolute -top-10 -right-10 w-32 h-32 bg-indigo-50 rounded-full blur-2xl z-0 pointer-events-none"></div>' : ''}
+                            
+                            <div class="flex justify-between items-start mb-2 sm:mb-3 relative z-10">
+                                <div class="flex flex-col">
+                                    <div class="flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 ${isActiveStr ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-100 text-slate-500'} rounded-lg inline-flex w-max mb-2.5 sm:mb-3">
+                                        ${isActiveStr ? '<svg class="w-3.5 h-3.5 text-indigo-600 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>' : '<svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'}
+                                        <span class="text-[8px] sm:text-[9px] font-extrabold uppercase tracking-[0.15em]">${isActiveStr ? 'ZONA AKTIF' : 'ZONA TERJADWAL'}</span>
+                                    </div>
+                                    <h3 class="text-[16px] sm:text-[18px] font-extrabold text-slate-800 leading-snug tracking-tight pr-2 sm:pr-4">${exam.nama}</h3>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-2 text-slate-500 relative z-10 mb-1 mt-2 sm:mt-3">
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <p class="text-[11px] sm:text-[12px] font-semibold tracking-wide">
+                                    <span class="text-indigo-600/80 font-bold">${formatDateIndo(exam.startObj)}</span>
+                                    <span class="mx-1 opacity-30">|</span>
+                                    ${exam.start.split(' ')[1]} — ${exam.end.split(' ')[1]}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Card Footer (Action Area) -->
+                        <div class="${isActiveStr ? 'bg-indigo-50/30' : 'bg-slate-50/50'} p-5 sm:p-6 pt-4 sm:pt-5 border-t border-slate-100 mt-auto flex flex-col gap-3 sm:gap-4 relative z-10">
+                            
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-1 sm:gap-1.5">
+                                    ${isActiveStr ? '<svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' : '<svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>'}
+                                    <span class="text-[9px] sm:text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">${isActiveStr ? 'WAKTU TERSISA:' : 'DIBUKA DALAM:'}</span>
+                                </div>
+                                <span class="text-[13px] sm:text-sm font-black ${isActiveStr ? 'text-rose-500' : 'text-slate-500'} font-mono bg-white px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg shadow-sm border border-slate-100/80 tracking-wider" id="${isActiveStr ? 'countdown-'+exam.id : 'countdown-start-'+exam.id}">--:--:--</span>
+                            </div>
+                            
+                            ${isActiveStr ? `
+                                <button onclick="openTokenModal('${exam.id}', '${exam.nama}')" class="w-full py-3.5 sm:py-4 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold text-[13px] sm:text-[14px] rounded-[0.85rem] sm:rounded-xl shadow-[0_6px_20_rgba(79,70,229,0.25)] transition-all flex justify-center items-center gap-2">
+                                    <span>KERJAKAN SEKARANG</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                                </button>
+                            ` : `
+                                <button disabled class="w-full py-3.5 sm:py-4 bg-slate-200/80 text-slate-400 font-bold text-[13px] sm:text-[14px] rounded-[0.85rem] sm:rounded-xl cursor-not-allowed border border-slate-200/50 shadow-inner">
+                                    BELUM DIBUKA
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                `;
+                elList.insertAdjacentHTML('beforeend', cardHtml);
+            });
+
+            // Sembunyikan Skeleton & Tampilkan Konten Asli
+            elLoading.classList.add('hidden');
+            if (validExamsCount === 0) {
+                elEmpty.classList.remove('hidden');
+                elList.classList.add('hidden');
+            } else {
+                elEmpty.classList.add('hidden');
+                elList.classList.remove('hidden');
+                elList.classList.add('flex');
+            }
+        }
+
+        function startCountdowns() {
+            countdownTimer = setInterval(() => {
+                const now = new Date();
+
+                examsBank.forEach(exam => {
+                    const elEnd = document.getElementById(`countdown-${exam.id}`);
+                    const elStart = document.getElementById(`countdown-start-${exam.id}`);
+
+                    if (elEnd && now <= exam.endObj) {
+                        elEnd.innerText = formatCountdown(exam.endObj - now);
+                        if (now >= exam.endObj) fetchData();
+                    }
+
+                    if (elStart && now < exam.startObj) {
+                        elStart.innerText = formatCountdown(exam.startObj - now);
+                        if (now >= exam.startObj) fetchData();
+                    }
+
+                    if (kioskExamId === exam.id) {
+                        const kTimer = document.getElementById('kioskTimer');
+                        if (kTimer) {
+                            if (now <= exam.endObj) {
+                                kTimer.innerText = formatCountdown(exam.endObj - now);
+                            } else {
+                                kTimer.innerText = "WAKTU HABIS";
+                                kTimer.classList.replace('text-emerald-400', 'text-rose-400');
+                                kTimer.classList.replace('border-white/10', 'border-rose-400/30');
+                                kTimer.classList.add('bg-rose-900/40');
+                            }
+                        }
+                    }
+                });
+
+            }, 1000);
+        }
+
+        function openTokenModal(examId, examName) {
+            activeSelectedExamId = examId;
+            document.getElementById('modalExamName').innerText = examName;
+            document.getElementById('tokenInput').value = '';
+            document.getElementById('tokenError').classList.add('hidden');
+
+            const modal = document.getElementById('tokenModal');
+            const modalContent = document.getElementById('tokenModalContent');
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.style.opacity = '1';
+                modalContent.classList.remove('-translate-y-full', 'sm:scale-95');
+                modalContent.classList.add('translate-y-0', 'sm:scale-100');
+                document.getElementById('tokenInput').focus();
+            }, 10);
+        }
+
+        function closeTokenModal() {
+            const modal = document.getElementById('tokenModal');
+            const modalContent = document.getElementById('tokenModalContent');
+
+            modal.style.opacity = '0';
+            modalContent.classList.remove('translate-y-0', 'sm:scale-100');
+            modalContent.classList.add('-translate-y-full', 'sm:scale-95');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                activeSelectedExamId = null;
+            }, 300);
+        }
+
+        function submitToken() {
+            if (!activeSelectedExamId) return;
+
+            const inputVal = document.getElementById('tokenInput').value.trim().toUpperCase();
+            const examInfo = examsBank.find(e => e.id === activeSelectedExamId);
+
+            if (examInfo && examInfo.token) {
+                if (inputVal !== examInfo.token.toUpperCase()) {
+                    document.getElementById('tokenError').classList.remove('hidden');
+                    const modalContent = document.getElementById('tokenModalContent');
+                    modalContent.classList.add('animate-shake');
+                    modalContent.animate([
+                        { transform: 'translateX(0px)' },
+                        { transform: 'translateX(-6px)' },
+                        { transform: 'translateX(6px)' },
+                        { transform: 'translateX(0px)' }
+                    ], { duration: 300 });
+                    return;
+                }
+            } else {
+                if (inputVal === "") {
+                    document.getElementById('tokenError').classList.remove('hidden');
+                    return;
+                }
+            }
+
+            AlarmSystem.init(); // Initialize audio on user interaction
+            executeSecureRedirect(activeSelectedExamId);
+        }
+
+        function requestFullscreenLock() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(e => console.log(e));
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen().catch(e => console.log(e));
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen().catch(e => console.log(e));
+            }
+        }
+
+        function exitFullscreenLock() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(e => console.log(e));
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen().catch(e => console.log(e));
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen().catch(e => console.log(e));
+            }
+        }
+
+        async function exitKioskMode() {
+            try {
+                // Ensure interaction: provide immediate visual feedback if possible
+                const isConfirmed = await CustomModal.confirm(
+                    "YAKIN INGIN KELUAR DARI UJIAN?\n\nJika belum menekan tombol Submit/Kirim di dalam formulir, jawaban Anda mungkin hilang!", 
+                    "Konfirmasi Keluar"
+                );
+
+                if(isConfirmed) {
+                    isLeavingKiosk = true; // Flag to prevent violation modal during exit
+                    stopDeviceMonitoring();
+                    releaseWakeLock();
+                    exitFullscreenLock();
+                    const kiosk = document.getElementById('kioskContainer');
+                    if(kiosk) {
+                        kiosk.style.opacity = '0';
+                        kiosk.style.transition = 'opacity 0.3s ease-out';
+                        setTimeout(() => {
+                            kiosk.remove();
+                            kioskExamId = null;
+                            document.body.style.overflow = "auto";
+                            fetchData();
+                        }, 300);
+                    }
+                }
+            } catch (err) {
+                // Fallback jika modal gagal (jarang terjadi tapi aman)
+                if(confirm("YAKIN INGIN KELUAR DARI UJIAN?")) {
+                    location.reload();
+                }
+            }
+        }
+
+        async function executeSecureRedirect(examId) {
+            const link = secureLinks[examId];
+            const examInfo = examsBank.find(e => e.id === examId);
+            
+            if (!link || !examInfo) {
+                await CustomModal.alert("Link ujian tidak ditemukan atau sesi invalid.", "Gagal");
+                fetchData();
+                return;
+            }
+
+            closeTokenModal();
+            kioskExamId = examId;
+            document.body.style.overflow = "hidden";
+            violationCount = parseInt(localStorage.getItem(`violation_${examId}`)) || 0;
+
+            const kioskHtml = `
+                <div id="kioskContainer" class="fixed inset-0 z-[10000] bg-slate-50 flex flex-col h-[100dvh] w-[100dvw] transition-opacity duration-300">
+                    <div class="bg-slate-900 border-b border-white/10 text-white px-4 py-3 flex justify-between items-center shadow-xl relative z-[10001]">
+                        <div class="flex items-center gap-3 overflow-hidden flex-1">
+                            <div class="flex items-center gap-1.5 bg-black/40 border border-white/5 py-1 px-2.5 rounded-xl">
+                                <div class="flex items-center gap-1.5 pr-2 border-r border-white/10">
+                                    <div class="w-3.5 h-3.5 flex items-center justify-center text-emerald-400" id="kioskBatteryIcon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M20,10V14H22V10H20M18,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H18A1,1 0 0,0 19,17V7A1,1 0 0,0 18,6Z" /></svg>
+                                    </div>
+                                    <span class="text-[10px] font-black font-mono text-white/90" id="kioskBatteryText">--%</span>
+                                </div>
+                                <div class="pl-0.5 flex items-center">
+                                    <div class="flex items-end gap-0.5 h-2.5" id="kioskSignalIcon">
+                                        <div class="w-0.5 h-1 bg-white/20 rounded-full"></div>
+                                        <div class="w-0.5 h-1.5 bg-white/20 rounded-full"></div>
+                                        <div class="w-0.5 h-2 bg-white/20 rounded-full"></div>
+                                        <div class="w-0.5 h-2.5 bg-white/20 rounded-full"></div>
+                                    </div>
+                                </div>
+                                <div class="pl-2 ml-1.5 border-l border-white/10 flex items-center gap-1 ${violationCount > 0 ? '' : 'hidden'}" id="kioskViolationTracker" title="Pelanggaran">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-rose-500 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                    <span class="text-[10px] font-black font-mono text-rose-400" id="kioskViolationCount">${violationCount}</span>
+                                </div>
+                            </div>
+                            <span class="font-bold text-xs sm:text-[14px] text-slate-200 truncate mr-1 tracking-wide opacity-90">${examInfo.nama}</span>
+                            <span class="bg-black/50 border border-white/10 px-2.5 py-1 rounded-xl text-xs font-mono font-black tracking-widest text-emerald-400 whitespace-nowrap shadow-inner" id="kioskTimer">--:--</span>
+                        </div>
+                        <button onclick="exitKioskMode()" class="bg-rose-600 hover:bg-rose-500 active:scale-95 transition-transform duration-200 text-white text-[11px] sm:text-xs font-extrabold px-4 py-2 rounded-xl shadow-md whitespace-nowrap flex-shrink-0 ml-3">
+                            KELUAR
+                        </button>
+                    </div>
+                    <div class="flex-1 w-full bg-slate-50 relative">
+                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
+                             <div class="loader-dots relative w-20 h-5 mb-3"><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div></div>
+                             <p class="text-xs text-slate-500 font-semibold tracking-wide">Menghubungkan Halaman Ujian...</p>
+                        </div>
+                        <iframe src="${link}" class="w-full h-full border-none z-10 relative bg-transparent" allow="fullscreen" sandbox="allow-scripts allow-top-navigation allow-forms allow-same-origin allow-popups allow-modals"></iframe>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', kioskHtml);
+            requestFullscreenLock();
+            
+            // Activate Security & Health Monitoring
+            isLeavingKiosk = false;
+            startDeviceMonitoring();
+            setupAntiCheat();
+            requestWakeLock();
+        }
+
+        /**
+         * ANTI-CHEAT & DEVICE HEALTH LOGIC
+         */
+        async function startDeviceMonitoring() {
+            const updateStats = async () => {
+                if (isLeavingKiosk) return;
+                
+                // Update Battery
+                try {
+                    if (navigator.getBattery) {
+                        const battery = await navigator.getBattery();
+                        const level = Math.round(battery.level * 100);
+                        const elText = document.getElementById('kioskBatteryText');
+                        const elIcon = document.getElementById('kioskBatteryIcon');
+                        if (elText) elText.innerText = level + '%';
+                        if (elIcon) elIcon.style.color = level < 20 ? '#fb7185' : (level < 50 ? '#fbbf24' : '#34d399');
+                    }
+                } catch (e) {}
+
+                // Update Network/Signal
+                const elSignal = document.getElementById('kioskSignalIcon');
+                if (elSignal) {
+                    const bars = elSignal.children;
+                    const isOnline = navigator.onLine;
+                    for (let i = 0; i < bars.length; i++) {
+                        bars[i].className = `w-0.5 rounded-full ${isOnline ? 'bg-emerald-400' : 'bg-white/20'}`;
+                        bars[i].style.height = (1 + i * 0.5) * 4 + 'px';
+                    }
+                }
+            };
+            
+            updateStats();
+            healthTimer = setInterval(updateStats, 10000);
+        }
+
+        function stopDeviceMonitoring() {
+            if (healthTimer) clearInterval(healthTimer);
+        }
+
+        let isViolationModalOpen = false;
+
+        function setupAntiCheat() {
+            const handleViolation = async () => {
+                if (isLeavingKiosk || !kioskExamId) return;
+                
+                // Hanya picu jika aplikasi benar-benar tidak terlihat (keluar tab/app)
+                if (document.visibilityState === 'hidden') {
+                    if (isViolationModalOpen) return; // Mencegah spam peringatan bertumpuk
+                    isViolationModalOpen = true;
+
+                    violationCount++;
+                    
+                    // Simpan histori pelanggaran ke local storage agar persisten di perangkat
+                    localStorage.setItem(`violation_${kioskExamId}`, violationCount);
+
+                    // Kirim laporan pelanggaran ke server (fire-and-forget)
+                    const examInfo = examsBank.find(e => e.id === kioskExamId);
+                    fetch(URL_API_FALLBACK, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: JSON.stringify({
+                            action: 'reportViolation',
+                            examId: kioskExamId,
+                            examName: examInfo ? examInfo.nama : '',
+                            deviceId: localStorage.getItem('device_id') || generateDeviceId(),
+                            violationCount: violationCount,
+                            userAgent: navigator.userAgent
+                        })
+                    }).catch(() => {});
+                    
+                    // Update tampilan tracker
+                    const elTracker = document.getElementById('kioskViolationTracker');
+                    const elCount = document.getElementById('kioskViolationCount');
+                    if (elTracker && elCount) {
+                        elTracker.classList.remove('hidden');
+                        elCount.innerText = violationCount;
+                        elCount.classList.add('animate-ping');
+                        setTimeout(() => elCount.classList.remove('animate-ping'), 600);
+                    }
+
+                    AlarmSystem.start();
+                    await CustomModal.danger(
+                        `Peringatan Pelanggaran #${violationCount}!\n\nAnda meminimalkan aplikasi atau membuka aplikasi lain selama ujian berlangsung. Pelanggaran Anda dicatat.\n\nKlik mengerti untuk mematikan alarm.`,
+                        "KECURANGAN TERDETEKSI"
+                    );
+                    AlarmSystem.stop();
+                    isViolationModalOpen = false;
+                    
+                    // Re-lock jika memungkinkan
+                    requestFullscreenLock();
+                }
+            };
+
+            // Gunakan visibilitychange sebagai standar deteksi yang paling akurat
+            // 'blur' sengaja dilepas karena memicu alarm palsu saat keyboard muncul atau klik di dalam iframe
+            document.addEventListener('visibilitychange', handleViolation);
+        }
+
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Screen Wake Lock active');
+                }
+            } catch (err) {
+                console.warn(`${err.name}, ${err.message}`);
+            }
+        }
+
+        function releaseWakeLock() {
+            if (wakeLock !== null) {
+                wakeLock.release().then(() => {
+                    wakeLock = null;
+                });
+            }
+        }
+
+        function setupPWAEnforcement() {
+            let deferredPrompt;
+
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('./sw.js').catch(err => console.error('SW Registration Failed:', err));
+                });
+            }
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+            });
+
+            // Multi-layer standalone detection:
+            // 1. CSS media query (most reliable)
+            // 2. iOS Safari native property  
+            // 3. URL param from manifest start_url
+            // 4. Window size heuristic (PWA app windows have no browser chrome overhead)
+            const mediaStandalone = window.matchMedia('(display-mode: standalone)').matches;
+            const iosStandalone = window.navigator.standalone === true;
+            const urlStandalone = new URLSearchParams(window.location.search).get('mode') === 'standalone';
+            const sessionBypass = sessionStorage.getItem('pwa_bypass') === '1';
+            const proctorBypass = localStorage.getItem('pwa_proctor_bypass') === 'true';
+            
+            const isStandalone = mediaStandalone || iosStandalone || urlStandalone || sessionBypass || proctorBypass;
+
+            const gate = document.getElementById('pwaInstallGate');
+            const isPC = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isMacSafari = /Macintosh/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+            const isWebView = /(wv|WhatsApp|Instagram|Line|FBAN|FBAV|BytedanceWebview)/i.test(navigator.userAgent);
+
+            // Helper: show manual install guide panel
+            function showManualPanel(title, step1, step2, titleColor) {
+                document.getElementById('pwaAndroidWrapper').classList.add('hidden');
+                document.getElementById('pwaAndroidWrapper').classList.remove('flex');
+                document.getElementById('pwaManualWrapper').classList.remove('hidden');
+                document.getElementById('pwaManualWrapper').classList.add('flex');
+                const titleEl = document.getElementById('pwaManualTitle');
+                titleEl.innerText = title;
+                if (titleColor) titleEl.style.color = titleColor;
+                document.getElementById('pwaManualStep1').innerHTML = step1;
+                document.getElementById('pwaManualStep2').innerHTML = step2;
+            }
+
+            function showManualFallback() {
+                if (isIos || isMacSafari) {
+                    showManualPanel(
+                        "Panduan Khusus Apple (iOS)",
+                        'Tekan Ikon <strong class="text-blue-600">Share</strong> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg> di menu terbawah Browser Safari.',
+                        'Gulir ke bawah dan pilih <span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold">Add to Home Screen</span>'
+                    );
+                } else if (isWebView) {
+                    showManualPanel(
+                        "Buka di Browser Asli",
+                        'Anda membuka Ujian dari dalam WhatsApp/Sosmed yang memblokir instalasi.',
+                        'Tekan <strong>Tiga Titik ⋮</strong> pojok kanan atas, lalu pilih <span class="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold">Buka di Chrome</span>.',
+                        '#e11d48'
+                    );
+                } else if (isPC) {
+                    showManualPanel(
+                        "Panduan Instalasi PC/Laptop",
+                        'Perhatikan <strong>Bilah Alamat (URL)</strong> di bagian kanan atas peramban Anda.',
+                        'Klik ikon Install <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg> atau pilih <span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold">Install Aplikasi</span>.'
+                    );
+                } else {
+                    showManualPanel(
+                        "Mohon Install Manual",
+                        'Tekan Ikon <strong>Tiga Titik ⋮</strong> di pojok kanan atas browser Anda.',
+                        'Pilih <span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold">Tambahkan ke Layar Utama</span> atau <span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold">Install Aplikasi</span>.'
+                    );
+                }
+            }
+
+            // Chrome Windows bug: display-mode:standalone sometimes returns false even in PWA window
+            const noBrowserChrome = isPC && (window.outerHeight > 0) && (Math.abs(window.outerHeight - window.innerHeight) < 80);
+            const isStandaloneApp = isStandalone || noBrowserChrome;
+
+            if (isStandaloneApp) {
+                // ✅ Running as standalone / PWA - enter app
+                if (gate) gate.remove();
+                initApp();
+            } else {
+                // Not standalone - show install gate
+                document.body.style.overflow = "hidden";
+                
+                // Show bypass button universally after 3 seconds as safety net for all bugged Chrome apps
+                setTimeout(() => {
+                    const bypassBtn = document.getElementById('pwaBypassBtn');
+                    if (bypassBtn) bypassBtn.style.display = 'block';
+                }, 3000);
+
+                if (isIos || isMacSafari || isWebView) {
+                    showManualFallback();
+                }
+
+                document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                        try {
+                            deferredPrompt.prompt();
+                            const { outcome } = await deferredPrompt.userChoice;
+                            deferredPrompt = null;
+                        } catch(e) {
+                            showManualFallback();
+                        }
+                    } else {
+                        showManualFallback();
+                    }
+                });
+
+                // PROCTOR SECRET BYPASS: Tap logo 5x to enter proctor mode
+                let logoTaps = 0;
+                let tapTimer;
+                const gateLogo = document.querySelector('#pwaInstallGate img');
+                if (gateLogo) {
+                    gateLogo.style.cursor = 'pointer';
+                    gateLogo.addEventListener('click', async () => {
+                        logoTaps++;
+                        clearTimeout(tapTimer);
+                        tapTimer = setTimeout(() => { logoTaps = 0; }, 2000); // Reset taps after 2s of inactivity
+
+                        if (logoTaps >= 5) {
+                            logoTaps = 0;
+                            const input = await CustomModal.prompt("MASUKKAN KODE OTORISASI PENGAWAS:", "KODE PENGAWAS");
+                            if (input === PROCTOR_KEY) {
+                                localStorage.setItem('pwa_proctor_bypass', 'true');
+                                await CustomModal.alert("OTORISASI BERHASIL. Mode Pengawas diaktifkan untuk perangkat ini.", "Sukses");
+                                if (gate) gate.remove();
+                                initApp();
+                            } else if (input !== null) {
+                                await CustomModal.alert("KODE SALAH.", "Otorisasi Gagal");
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        function bypassAndEnter() {
+            // User confirms they already installed. Save flag to sessionStorage and bypass gate.
+            sessionStorage.setItem('pwa_bypass', '1');
+            const gate = document.getElementById('pwaInstallGate');
+            if (gate) gate.remove();
+            document.body.style.overflow = '';
+            initApp();
+        }
+
+        function initApp() {
+            // Staggered initial load: random delay 0-3 detik
+            // Mencegah 400 siswa menghantam server di detik yang sama saat buka app
+            const staggerDelay = Math.floor(Math.random() * 3000);
+            setTimeout(() => fetchData(), staggerDelay);
+            
+            updateClock();
+            clockTimer = setInterval(updateClock, 1000);
+            function scheduleNextRefresh() {
+                // 120-180 detik (2-3 menit) — data jadwal tidak berubah tiap detik
+                const delayMs = 120000 + Math.floor(Math.random() * 60000);
+                refreshIntervalTimer = setTimeout(() => {
+                    if (!activeSelectedExamId && !kioskExamId) fetchData();
+                    scheduleNextRefresh();
+                }, delayMs);
+            }
+            scheduleNextRefresh();
+            startCountdowns();
+        }
+
+        window.addEventListener('DOMContentLoaded', setupPWAEnforcement);
+
+
+
+    </script>
+</body>
+</html>

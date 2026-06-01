@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel — Spensada CBT</title>
+    <script src="https://cdn.tailwindcss.com/3.4.1"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .fade-in { animation: fadeIn 0.3s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-active { border-bottom: 3px solid #4f46e5; color: #4f46e5; font-weight: 700; }
+        .stat-card { transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-sm border border-slate-100">
+        <div class="flex flex-col items-center mb-6">
+            <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" class="w-16 h-16 mb-3" alt="Logo">
+            <h1 class="text-xl font-extrabold text-slate-800">Admin Panel</h1>
+            <p class="text-xs text-slate-500 mt-1">Spensada CBT Management</p>
+        </div>
+        <div class="space-y-4">
+            <div>
+                <label class="text-xs font-bold text-slate-600 mb-1 block">Username</label>
+                <input type="text" id="loginUser" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:border-indigo-500 transition-colors" placeholder="admin">
+            </div>
+            <div>
+                <label class="text-xs font-bold text-slate-600 mb-1 block">Password</label>
+                <input type="password" id="loginPass" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:border-indigo-500 transition-colors" placeholder="••••••••">
+            </div>
+            <p id="loginError" class="text-xs text-rose-500 font-bold hidden">Username atau password salah.</p>
+            <button onclick="doLogin()" id="loginBtn" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow-lg active:scale-[0.98] transition-all">
+                Masuk
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN ADMIN PANEL (Hidden until login) -->
+<div id="adminPanel" class="hidden">
+    <!-- Top Bar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" class="w-8 h-8" alt="Logo">
+                <div>
+                    <h1 class="text-sm font-extrabold text-slate-800 leading-tight">Spensada CBT</h1>
+                    <p class="text-[10px] text-slate-400 font-semibold">Admin Panel</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-xs font-bold text-slate-500" id="adminUsername">admin</span>
+                <button onclick="doLogout()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold rounded-lg transition-colors">Logout</button>
+            </div>
+        </div>
+        <!-- Tabs -->
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 flex gap-1 overflow-x-auto">
+            <button onclick="switchTab('dashboard')" class="tab-btn px-4 py-2.5 text-xs font-semibold text-slate-500 whitespace-nowrap border-b-3 border-transparent hover:text-indigo-600 transition-colors tab-active" data-tab="dashboard">Dashboard</button>
+            <button onclick="switchTab('exams')" class="tab-btn px-4 py-2.5 text-xs font-semibold text-slate-500 whitespace-nowrap border-b-3 border-transparent hover:text-indigo-600 transition-colors" data-tab="exams">Jadwal Ujian</button>
+            <button onclick="switchTab('violations')" class="tab-btn px-4 py-2.5 text-xs font-semibold text-slate-500 whitespace-nowrap border-b-3 border-transparent hover:text-indigo-600 transition-colors" data-tab="violations">Pelanggaran</button>
+            <button onclick="switchTab('settings')" class="tab-btn px-4 py-2.5 text-xs font-semibold text-slate-500 whitespace-nowrap border-b-3 border-transparent hover:text-indigo-600 transition-colors" data-tab="settings">Pengaturan</button>
+            <button onclick="switchTab('logs')" class="tab-btn px-4 py-2.5 text-xs font-semibold text-slate-500 whitespace-nowrap border-b-3 border-transparent hover:text-indigo-600 transition-colors" data-tab="logs">Log Aktivitas</button>
+        </div>
+    </header>
+
+    <!-- Content Area -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+
+        <!-- TAB: Dashboard -->
+        <section id="tab-dashboard" class="tab-content fade-in">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <div class="stat-card bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Ujian</p>
+                    <p class="text-2xl font-black text-slate-800 mt-1" id="statTotal">0</p>
+                </div>
+                <div class="stat-card bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+                    <p class="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Aktif</p>
+                    <p class="text-2xl font-black text-emerald-600 mt-1" id="statActive">0</p>
+                </div>
+                <div class="stat-card bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+                    <p class="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Pelanggaran</p>
+                    <p class="text-2xl font-black text-rose-600 mt-1" id="statViolations">0</p>
+                </div>
+                <div class="stat-card bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Waktu Server</p>
+                    <p class="text-lg font-black text-slate-700 mt-1" id="statTime">--:--</p>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-5 mb-6">
+                <h3 class="text-sm font-extrabold text-slate-700 mb-3">Aksi Cepat</h3>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="actionClearCache()" class="px-4 py-2 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg hover:bg-blue-100 transition-colors">🔄 Flush Cache Server</button>
+                    <button onclick="actionKillAll()" class="px-4 py-2 bg-rose-50 text-rose-700 text-xs font-bold rounded-lg hover:bg-rose-100 transition-colors">🚨 Nonaktifkan Semua Ujian</button>
+                    <button onclick="refreshAdminData()" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-200 transition-colors">↻ Refresh Data</button>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
+                <h3 class="text-sm font-extrabold text-slate-700 mb-3">Aktivitas Terakhir</h3>
+                <div id="dashboardLogs" class="space-y-2 max-h-64 overflow-y-auto">
+                    <p class="text-xs text-slate-400">Memuat...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: Jadwal Ujian -->
+        <section id="tab-exams" class="tab-content hidden fade-in">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-extrabold text-slate-800">Jadwal Ujian</h2>
+                <button onclick="showExamForm()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-md active:scale-[0.98] transition-all">+ Tambah Ujian</button>
+            </div>
+
+            <!-- Exam Form (Hidden by default) -->
+            <div id="examForm" class="hidden bg-white rounded-xl border border-indigo-100 shadow-sm p-5 mb-5 fade-in">
+                <h3 class="text-sm font-extrabold text-indigo-700 mb-4" id="examFormTitle">Tambah Ujian Baru</h3>
+                <input type="hidden" id="formExamId">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-500 mb-1 block">Nama Ujian</label>
+                        <input type="text" id="formNama" class="w-full px-3 py-2.5 border-2 border-slate-200 rounded-lg text-sm font-semibold focus:outline-none focus:border-indigo-500" placeholder="Matematika Kelas X">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-500 mb-1 block">Link Ujian (Google Form/dll)</label>
+                        <input type="url" id="formLink" class="w-full px-3 py-2.5 border-2 border-slate-200 rounded-lg text-sm font-semibold focus:outline-none focus:border-indigo-500" placeholder="https://forms.gle/...">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-500 mb-1 block">Waktu Mulai</label>
+                        <input type="datetime-local" id="formStart" class="w-full px-3 py-2.5 border-2 border-slate-200 rounded-lg text-sm font-semibold focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-500 mb-1 block">Waktu Selesai</label>
+                        <input type="datetime-local" id="formEnd" class="w-full px-3 py-2.5 border-2 border-slate-200 rounded-lg text-sm font-semibold focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-500 mb-1 block">Token/Kode Akses</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="formToken" class="flex-1 px-3 py-2.5 border-2 border-slate-200 rounded-lg text-sm font-bold uppercase focus:outline-none focus:border-indigo-500" placeholder="AUTO">
+                            <button onclick="autoGenerateToken()" class="px-3 py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-200">🎲</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-500 mb-1 block">Status</label>
+                        <select id="formStatus" class="w-full px-3 py-2.5 border-2 border-slate-200 rounded-lg text-sm font-semibold focus:outline-none focus:border-indigo-500">
+                            <option value="aktif">Aktif</option>
+                            <option value="nonaktif">Nonaktif</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="saveExam()" id="saveExamBtn" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow active:scale-[0.98] transition-all">Simpan</button>
+                    <button onclick="hideExamForm()" class="px-5 py-2.5 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-200 transition-colors">Batal</button>
+                </div>
+            </div>
+
+            <!-- Exam Table -->
+            <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                                <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nama</th>
+                                <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Waktu</th>
+                                <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Token</th>
+                                <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                                <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="examTableBody" class="divide-y divide-slate-50">
+                            <tr><td colspan="5" class="px-4 py-8 text-center text-xs text-slate-400">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: Pelanggaran -->
+        <section id="tab-violations" class="tab-content hidden fade-in">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-extrabold text-slate-800">Monitor Pelanggaran</h2>
+                <button onclick="actionClearViolations()" class="px-4 py-2 bg-rose-50 text-rose-600 text-xs font-bold rounded-lg hover:bg-rose-100 transition-colors">🗑 Hapus Semua</button>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                                <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Waktu</th>
+                                <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Ujian</th>
+                                <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Device ID</th>
+                                <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Jumlah</th>
+                                <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">User Agent</th>
+                            </tr>
+                        </thead>
+                        <tbody id="violationTableBody" class="divide-y divide-slate-50">
+                            <tr><td colspan="5" class="px-4 py-8 text-center text-xs text-slate-400">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: Pengaturan -->
+        <section id="tab-settings" class="tab-content hidden fade-in">
+            <h2 class="text-lg font-extrabold text-slate-800 mb-4">Pengaturan Sistem</h2>
+            <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-5 space-y-5">
+                <div>
+                    <label class="text-xs font-bold text-slate-600 mb-1 block">Kode Proktor (Bypass PWA Gate)</label>
+                    <input type="text" id="cfgProctorKey" class="w-full max-w-xs px-3 py-2.5 border-2 border-slate-200 rounded-lg text-sm font-bold focus:outline-none focus:border-indigo-500" placeholder="2025">
+                    <p class="text-[10px] text-slate-400 mt-1">Kode rahasia yang digunakan pengawas untuk bypass instalasi PWA.</p>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-600 mb-1 block">Batas Maksimal Pelanggaran</label>
+                    <input type="number" id="cfgMaxViolations" class="w-full max-w-xs px-3 py-2.5 border-2 border-slate-200 rounded-lg text-sm font-bold focus:outline-none focus:border-indigo-500" placeholder="5" min="1" max="99">
+                    <p class="text-[10px] text-slate-400 mt-1">Jumlah pelanggaran sebelum siswa mendapat peringatan keras.</p>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-600 mb-1 block">Durasi Cache Server (detik)</label>
+                    <input type="number" id="cfgCacheDuration" class="w-full max-w-xs px-3 py-2.5 border-2 border-slate-200 rounded-lg text-sm font-bold focus:outline-none focus:border-indigo-500" placeholder="120" min="30" max="600">
+                    <p class="text-[10px] text-slate-400 mt-1">Berapa lama data di-cache di server GAS (dalam detik). Semakin besar = semakin ringan server.</p>
+                </div>
+                <button onclick="saveConfig()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow active:scale-[0.98] transition-all">Simpan Pengaturan</button>
+            </div>
+        </section>
+
+        <!-- TAB: Log Aktivitas -->
+        <section id="tab-logs" class="tab-content hidden fade-in">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-extrabold text-slate-800">Log Aktivitas</h2>
+                <button onclick="refreshAdminData()" class="px-4 py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-200 transition-colors">↻ Refresh</button>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 border-b border-slate-100 sticky top-0">
+                            <tr>
+                                <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Waktu</th>
+                                <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Aksi</th>
+                                <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">User</th>
+                                <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Detail</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logTableBody" class="divide-y divide-slate-50">
+                            <tr><td colspan="4" class="px-4 py-8 text-center text-xs text-slate-400">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="fixed bottom-6 right-6 z-[9999] hidden">
+    <div class="bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl text-xs font-bold flex items-center gap-2 max-w-sm">
+        <span id="toastIcon">✓</span>
+        <span id="toastMsg">Berhasil</span>
+    </div>
+</div>
+
+<script>
+/**
+ * ADMIN PANEL JAVASCRIPT
+ */
+
+// Config — sesuaikan URL GAS Web App kamu
+const API_URL = "https://script.google.com/macros/s/AKfycbwalO-HqOZpSYlOjBXl9stx3PzZUWrTadTJeojZ_AuMWFNrJk44vlozgXXEUiNO5Fugog/exec";
+
+let credentials = { username: '', password: '' };
+let adminData = { exams: [], violations: [], logs: [], config: {}, stats: {} };
+
+// ==================== AUTH ====================
+
+function doLogin() {
+    const user = document.getElementById('loginUser').value.trim();
+    const pass = document.getElementById('loginPass').value.trim();
+    if (!user || !pass) return;
+
+    const btn = document.getElementById('loginBtn');
+    btn.innerText = 'Memverifikasi...';
+    btn.disabled = true;
+
+    apiCall({ action: 'login', username: user, password: pass })
+        .then(res => {
+            if (res.success) {
+                credentials = { username: user, password: pass };
+                localStorage.setItem('admin_user', user);
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('adminPanel').classList.remove('hidden');
+                document.getElementById('adminUsername').innerText = user;
+                refreshAdminData();
+                startClock();
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        })
+        .catch(() => {
+            document.getElementById('loginError').classList.remove('hidden');
+            document.getElementById('loginError').innerText = 'Gagal terhubung ke server.';
+        })
+        .finally(() => {
+            btn.innerText = 'Masuk';
+            btn.disabled = false;
+        });
+}
+
+function doLogout() {
+    credentials = { username: '', password: '' };
+    localStorage.removeItem('admin_user');
+    document.getElementById('adminPanel').classList.add('hidden');
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('loginPass').value = '';
+}
+
+// Enter key on login
+document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('loginUser').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginPass').focus(); });
+
+// ==================== API HELPER ====================
+
+async function apiCall(payload) {
+    const body = { ...payload, ...credentials };
+    const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' }, // GAS quirk: text/plain avoids CORS preflight
+        body: JSON.stringify(body)
+    });
+    return await response.json();
+}
+
+// ==================== DATA REFRESH ====================
+
+async function refreshAdminData() {
+    try {
+        const res = await apiCall({ action: 'getAdminData' });
+        if (res.error) { toast('❌', res.message); return; }
+        adminData = res;
+        renderDashboard();
+        renderExamTable();
+        renderViolationTable();
+        renderLogTable();
+        renderSettings();
+    } catch (e) {
+        toast('❌', 'Gagal memuat data: ' + e.message);
+    }
+}
+
+// ==================== TABS ====================
+
+function switchTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.tab-btn').forEach(el => {
+        el.classList.remove('tab-active');
+    });
+    const target = document.getElementById('tab-' + tabName);
+    if (target) {
+        target.classList.remove('hidden');
+        target.classList.add('fade-in');
+    }
+    const btn = document.querySelector(`[data-tab="${tabName}"]`);
+    if (btn) btn.classList.add('tab-active');
+}
+
+// ==================== CLOCK ====================
+
+function startClock() {
+    const update = () => {
+        const now = new Date();
+        const el = document.getElementById('statTime');
+        if (el) el.innerText = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    };
+    update();
+    setInterval(update, 1000);
+}
+
+// ==================== TOAST ====================
+
+function toast(icon, msg) {
+    const el = document.getElementById('toast');
+    document.getElementById('toastIcon').innerText = icon;
+    document.getElementById('toastMsg').innerText = msg;
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 3500);
+}
+
+// ==================== RENDER FUNCTIONS ====================
+
+function renderDashboard() {
+    document.getElementById('statTotal').innerText = adminData.stats.totalExams || 0;
+    document.getElementById('statActive').innerText = adminData.stats.activeExams || 0;
+    document.getElementById('statViolations').innerText = adminData.stats.totalViolations || 0;
+
+    // Recent logs on dashboard
+    const container = document.getElementById('dashboardLogs');
+    const logs = (adminData.logs || []).slice(0, 10);
+    if (logs.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-400">Belum ada aktivitas.</p>';
+        return;
+    }
+    container.innerHTML = logs.map(log => `
+        <div class="flex items-start gap-3 py-2 border-b border-slate-50 last:border-0">
+            <div class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${getLogColor(log.action)}"></div>
+            <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-slate-700 truncate">${escHtml(log.detail || log.action)}</p>
+                <p class="text-[10px] text-slate-400">${formatLogTime(log.timestamp)} · ${escHtml(log.user)}</p>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderExamTable() {
+    const tbody = document.getElementById('examTableBody');
+    const exams = adminData.exams || [];
+    if (exams.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-xs text-slate-400">Belum ada ujian.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = exams.map(exam => `
+        <tr class="hover:bg-slate-50 transition-colors">
+            <td class="px-4 py-3">
+                <p class="text-sm font-bold text-slate-800 truncate max-w-[200px]">${escHtml(exam.nama)}</p>
+                <p class="text-[10px] text-slate-400 truncate max-w-[200px]">${escHtml(exam.link)}</p>
+            </td>
+            <td class="px-4 py-3">
+                <p class="text-xs font-semibold text-slate-600">${escHtml(exam.start)}</p>
+                <p class="text-[10px] text-slate-400">s/d ${escHtml(exam.end)}</p>
+            </td>
+            <td class="px-4 py-3">
+                <span class="font-mono text-xs font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded">${escHtml(exam.token || '-')}</span>
+            </td>
+            <td class="px-4 py-3">
+                <button onclick="toggleExamStatus('${exam.id}')" class="px-2.5 py-1 rounded-full text-[10px] font-bold cursor-pointer transition-colors ${exam.status === 'aktif' ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}">
+                    ${exam.status === 'aktif' ? '● Aktif' : '○ Nonaktif'}
+                </button>
+            </td>
+            <td class="px-4 py-3">
+                <div class="flex gap-1">
+                    <button onclick="editExam('${exam.id}')" class="px-2 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold rounded hover:bg-blue-100">Edit</button>
+                    <button onclick="deleteExam('${exam.id}', '${escHtml(exam.nama)}')" class="px-2 py-1 bg-rose-50 text-rose-600 text-[10px] font-bold rounded hover:bg-rose-100">Hapus</button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function renderViolationTable() {
+    const tbody = document.getElementById('violationTableBody');
+    const violations = adminData.violations || [];
+    if (violations.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-xs text-slate-400">Tidak ada pelanggaran tercatat. 🎉</td></tr>';
+        return;
+    }
+    tbody.innerHTML = violations.map(v => `
+        <tr class="hover:bg-slate-50 transition-colors">
+            <td class="px-4 py-3 text-xs text-slate-600 whitespace-nowrap">${formatLogTime(v.timestamp)}</td>
+            <td class="px-4 py-3 text-xs font-semibold text-slate-700">${escHtml(v.examName || v.examId)}</td>
+            <td class="px-4 py-3 text-[10px] font-mono text-slate-500 truncate max-w-[120px]">${escHtml(v.deviceId || '-')}</td>
+            <td class="px-4 py-3"><span class="text-xs font-black text-rose-600 bg-rose-50 px-2 py-0.5 rounded">${v.count}</span></td>
+            <td class="px-4 py-3 text-[10px] text-slate-400 truncate max-w-[200px]">${escHtml(v.userAgent || '-')}</td>
+        </tr>
+    `).join('');
+}
+
+function renderLogTable() {
+    const tbody = document.getElementById('logTableBody');
+    const logs = adminData.logs || [];
+    if (logs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-xs text-slate-400">Belum ada log.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = logs.map(log => `
+        <tr class="hover:bg-slate-50 transition-colors">
+            <td class="px-4 py-3 text-xs text-slate-600 whitespace-nowrap">${formatLogTime(log.timestamp)}</td>
+            <td class="px-4 py-3"><span class="text-[10px] font-bold px-2 py-0.5 rounded ${getLogBadgeClass(log.action)}">${escHtml(log.action)}</span></td>
+            <td class="px-4 py-3 text-xs font-semibold text-slate-700">${escHtml(log.user)}</td>
+            <td class="px-4 py-3 text-xs text-slate-600 truncate max-w-[300px]">${escHtml(log.detail)}</td>
+        </tr>
+    `).join('');
+}
+
+function renderSettings() {
+    const cfg = adminData.config || {};
+    document.getElementById('cfgProctorKey').value = cfg.PROCTOR_KEY || '2025';
+    document.getElementById('cfgMaxViolations').value = cfg.MAX_VIOLATIONS || '5';
+    document.getElementById('cfgCacheDuration').value = cfg.CACHE_DURATION || '120';
+}
+
+// ==================== EXAM CRUD ====================
+
+function showExamForm(editData) {
+    document.getElementById('examForm').classList.remove('hidden');
+    document.getElementById('examFormTitle').innerText = editData ? 'Edit Ujian' : 'Tambah Ujian Baru';
+    document.getElementById('formExamId').value = editData ? editData.id : '';
+    document.getElementById('formNama').value = editData ? editData.nama : '';
+    document.getElementById('formLink').value = editData ? editData.link : '';
+    document.getElementById('formToken').value = editData ? editData.token : '';
+    document.getElementById('formStatus').value = editData ? editData.status : 'aktif';
+
+    // Convert datetime format for input
+    if (editData && editData.start) {
+        document.getElementById('formStart').value = editData.start.replace(' ', 'T');
+    } else {
+        document.getElementById('formStart').value = '';
+    }
+    if (editData && editData.end) {
+        document.getElementById('formEnd').value = editData.end.replace(' ', 'T');
+    } else {
+        document.getElementById('formEnd').value = '';
+    }
+
+    document.getElementById('formNama').focus();
+}
+
+function hideExamForm() {
+    document.getElementById('examForm').classList.add('hidden');
+}
+
+function editExam(id) {
+    const exam = adminData.exams.find(e => e.id === id);
+    if (exam) showExamForm(exam);
+}
+
+async function saveExam() {
+    const id = document.getElementById('formExamId').value;
+    const nama = document.getElementById('formNama').value.trim();
+    const link = document.getElementById('formLink').value.trim();
+    const start = document.getElementById('formStart').value.replace('T', ' ');
+    const end = document.getElementById('formEnd').value.replace('T', ' ');
+    const token = document.getElementById('formToken').value.trim().toUpperCase();
+    const status = document.getElementById('formStatus').value;
+
+    if (!nama) { toast('⚠️', 'Nama ujian wajib diisi'); return; }
+    if (!link) { toast('⚠️', 'Link ujian wajib diisi'); return; }
+
+    const btn = document.getElementById('saveExamBtn');
+    btn.innerText = 'Menyimpan...';
+    btn.disabled = true;
+
+    try {
+        const action = id ? 'editExam' : 'addExam';
+        const res = await apiCall({ action, id, nama, link, start, end, token, status });
+        if (res.error) { toast('❌', res.message); return; }
+        toast('✓', id ? 'Ujian berhasil diperbarui' : 'Ujian berhasil ditambahkan');
+        hideExamForm();
+        refreshAdminData();
+    } catch (e) {
+        toast('❌', 'Gagal menyimpan: ' + e.message);
+    } finally {
+        btn.innerText = 'Simpan';
+        btn.disabled = false;
+    }
+}
+
+async function deleteExam(id, nama) {
+    if (!confirm(`Yakin ingin menghapus ujian "${nama}"?`)) return;
+    try {
+        const res = await apiCall({ action: 'deleteExam', id });
+        if (res.error) { toast('❌', res.message); return; }
+        toast('✓', 'Ujian berhasil dihapus');
+        refreshAdminData();
+    } catch (e) {
+        toast('❌', 'Gagal menghapus: ' + e.message);
+    }
+}
+
+async function toggleExamStatus(id) {
+    try {
+        const res = await apiCall({ action: 'toggleStatus', id });
+        if (res.error) { toast('❌', res.message); return; }
+        toast('✓', `Status diubah ke "${res.newStatus}"`);
+        refreshAdminData();
+    } catch (e) {
+        toast('❌', 'Gagal mengubah status');
+    }
+}
+
+function autoGenerateToken() {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let result = "";
+    for (let i = 0; i < 6; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+    document.getElementById('formToken').value = result;
+}
+
+// ==================== QUICK ACTIONS ====================
+
+async function actionClearCache() {
+    if (!confirm('Flush cache server? Data akan di-refresh dari Spreadsheet pada request berikutnya.')) return;
+    try {
+        const res = await apiCall({ action: 'clearCache' });
+        if (res.error) { toast('❌', res.message); return; }
+        toast('✓', 'Cache berhasil di-flush');
+    } catch (e) {
+        toast('❌', 'Gagal: ' + e.message);
+    }
+}
+
+async function actionKillAll() {
+    if (!confirm('⚠️ DARURAT: Nonaktifkan SEMUA ujian yang sedang aktif? Siswa tidak akan bisa mengakses ujian baru.')) return;
+    if (!confirm('Konfirmasi sekali lagi: NONAKTIFKAN SEMUA?')) return;
+    try {
+        const res = await apiCall({ action: 'killAll' });
+        if (res.error) { toast('❌', res.message); return; }
+        toast('🚨', res.message);
+        refreshAdminData();
+    } catch (e) {
+        toast('❌', 'Gagal: ' + e.message);
+    }
+}
+
+async function actionClearViolations() {
+    if (!confirm('Hapus semua data pelanggaran? Aksi ini tidak bisa dibatalkan.')) return;
+    try {
+        const res = await apiCall({ action: 'clearViolations' });
+        if (res.error) { toast('❌', res.message); return; }
+        toast('✓', 'Data pelanggaran dihapus');
+        refreshAdminData();
+    } catch (e) {
+        toast('❌', 'Gagal: ' + e.message);
+    }
+}
+
+async function saveConfig() {
+    const config = {
+        PROCTOR_KEY: document.getElementById('cfgProctorKey').value.trim(),
+        MAX_VIOLATIONS: document.getElementById('cfgMaxViolations').value.trim(),
+        CACHE_DURATION: document.getElementById('cfgCacheDuration').value.trim()
+    };
+    try {
+        const res = await apiCall({ action: 'updateConfig', config });
+        if (res.error) { toast('❌', res.message); return; }
+        toast('✓', 'Pengaturan berhasil disimpan');
+    } catch (e) {
+        toast('❌', 'Gagal menyimpan: ' + e.message);
+    }
+}
+
+// ==================== UTILITIES ====================
+
+function escHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function formatLogTime(ts) {
+    if (!ts) return '-';
+    try {
+        const d = new Date(ts);
+        if (isNaN(d.getTime())) return ts;
+        return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }) + ' ' + d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    } catch (e) { return ts; }
+}
+
+function getLogColor(action) {
+    if (!action) return 'bg-slate-300';
+    if (action.includes('DELETE') || action.includes('KILL')) return 'bg-rose-400';
+    if (action.includes('ADD') || action.includes('LOGIN')) return 'bg-emerald-400';
+    if (action.includes('EDIT') || action.includes('UPDATE') || action.includes('TOGGLE')) return 'bg-blue-400';
+    if (action.includes('CLEAR') || action.includes('CACHE')) return 'bg-amber-400';
+    return 'bg-slate-300';
+}
+
+function getLogBadgeClass(action) {
+    if (!action) return 'bg-slate-100 text-slate-600';
+    if (action.includes('DELETE') || action.includes('KILL')) return 'bg-rose-50 text-rose-600';
+    if (action.includes('ADD') || action.includes('LOGIN')) return 'bg-emerald-50 text-emerald-600';
+    if (action.includes('EDIT') || action.includes('UPDATE') || action.includes('TOGGLE')) return 'bg-blue-50 text-blue-600';
+    if (action.includes('CLEAR') || action.includes('CACHE')) return 'bg-amber-50 text-amber-600';
+    return 'bg-slate-100 text-slate-600';
+}
+</script>
+</body>
+</html>

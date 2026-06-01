@@ -1,0 +1,25 @@
+[build]
+  publish = "."
+  # Tidak perlu build command karena ini static site
+
+[functions]
+  directory = "netlify/functions"
+
+# Headers untuk performa dan keamanan
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/api/exams"
+  [headers.values]
+    Cache-Control = "public, max-age=60, s-maxage=120, stale-while-revalidate=300"
+
+# Redirect /api/exams ke function (sudah di-handle oleh config.path, ini backup)
+[[redirects]]
+  from = "/api/exams"
+  to = "/.netlify/functions/exams"
+  status = 200

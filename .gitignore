@@ -1,0 +1,6 @@
+cbtlauncher-main.zip
+.vscode/
+.qoder/
+node_modules/
+.DS_Store
+Thumbs.db
