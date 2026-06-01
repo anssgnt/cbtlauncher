@@ -1042,6 +1042,14 @@
             }
 
             closeTokenModal();
+
+            // Peringatan: pastikan sudah login Google sebelum masuk kiosk
+            const loginConfirmed = await CustomModal.confirm(
+                "Pastikan kamu sudah LOGIN AKUN GOOGLE di browser ini sebelum melanjutkan.\n\nJika belum login, tekan TIDAK lalu login dulu di browser.",
+                "Sudah Login Google?"
+            );
+            if (!loginConfirmed) return;
+
             kioskExamId = examId;
             document.body.style.overflow = "hidden";
             violationCount = parseInt(localStorage.getItem(`violation_${examId}`)) || 0;
@@ -1082,7 +1090,7 @@
                              <div class="loader-dots relative w-20 h-5 mb-3"><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div></div>
                              <p class="text-xs text-slate-500 font-semibold tracking-wide">Menghubungkan Halaman Ujian...</p>
                         </div>
-                        <iframe src="${link}" class="w-full h-full border-none z-10 relative bg-transparent" allow="fullscreen" sandbox="allow-scripts allow-top-navigation allow-forms allow-same-origin allow-popups allow-modals"></iframe>
+                        <iframe src="${link}" class="w-full h-full border-none z-10 relative bg-transparent" allow="fullscreen" sandbox="allow-scripts allow-top-navigation allow-forms allow-same-origin allow-modals" id="kioskIframe"></iframe>
                     </div>
                 </div>
             `;
