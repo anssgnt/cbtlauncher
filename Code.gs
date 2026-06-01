@@ -6,7 +6,7 @@
  */
 
 // --- KONFIGURASI UTAMA ---
-const SPREADSHEET_ID = "ISI_ID_SPREADSHEET_DI_SINI";
+const SPREADSHEET_ID = "1WmISd-Raij-eNftAiJkHg9Rc694v8UTMpkYs-eU7DXo";
 const SHEET_NAME = "Jadwal";
 const CONFIG_SHEET_NAME = "Config";
 const VIOLATIONS_SHEET_NAME = "Violations";

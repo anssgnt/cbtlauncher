@@ -15,7 +15,7 @@ let cacheTimestamp = 0;
 const CACHE_TTL = 120 * 1000; // 120 detik (2 menit) — sesuaikan kebutuhan
 
 // URL Google Apps Script Web App kamu
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwalO-HqOZpSYlOjBXl9stx3PzZUWrTadTJeojZ_AuMWFNrJk44vlozgXXEUiNO5Fugog/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyE9kxtudmZZv9FSj60yBlFVsH_j6f26lcKg3wVtOK2FLdkQ-UaZRFX5mHUDWNEHwJGOg/exec";
 
 export default async (req, context) => {
   // CORS Headers — agar frontend bisa fetch dari domain berbeda jika perlu
