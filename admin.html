@@ -172,7 +172,9 @@
             <div class="card shadow-sm border-left border-danger" style="border-left-width: 4px !important;">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h3 class="card-title font-weight-bold mb-0"><i class="fas fa-exclamation-triangle mr-2 text-danger"></i>Pelanggaran Terbanyak</h3>
-                    <small class="text-muted">Top 10</small>
+                    <select id="violatorExamFilter" class="form-control form-control-sm" style="width:auto; max-width:200px;" onchange="renderTopViolators()">
+                        <option value="">Semua Ujian</option>
+                    </select>
                 </div>
                 <div class="card-body p-0">
                     <div id="dashboardTopViolators">
@@ -559,26 +561,40 @@ function renderDashboard() {
     });
 
     if (activeToday.length === 0) {
-        $('#dashboardTokens').html('<p class="text-muted text-center mb-0"><i class="fas fa-moon mr-1"></i>Tidak ada ujian aktif hari ini.</p>');
+        $('#dashboardTokens').html('<p class="text-muted text-center mb-0 py-2"><i class="fas fa-moon mr-1"></i>Tidak ada ujian aktif hari ini.</p>');
     } else {
+        const dateLabel = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
         $('#dashboardTokens').html(`
-            <div class="table-responsive">
-                <table class="table table-sm table-borderless mb-0">
-                    <thead><tr><th style="font-size:0.75rem;" class="text-muted">UJIAN</th><th style="font-size:0.75rem;" class="text-muted">WAKTU</th><th style="font-size:0.75rem;" class="text-muted">TOKEN</th><th style="font-size:0.75rem;" class="text-muted"></th></tr></thead>
-                    <tbody>
-                        ${activeToday.map(exam => {
-                            const start = parseDate(exam.start);
-                            const end = parseDate(exam.end);
-                            const isLive = now >= start && now <= end;
-                            return `<tr>
-                                <td><strong>${esc(exam.nama)}</strong> ${isLive ? '<span class="badge badge-success ml-1" style="font-size:0.65rem;">LIVE</span>' : ''}</td>
-                                <td><small>${exam.start ? exam.start.split(' ')[1] : ''} - ${exam.end ? exam.end.split(' ')[1] : ''}</small></td>
-                                <td><span class="badge badge-dark px-3 py-2" style="font-size:1.1rem; letter-spacing:3px; font-family:monospace; font-weight:900;">${esc(exam.token || '-')}</span></td>
-                                <td><button onclick="copyToken('${esc(exam.token)}')" class="btn btn-xs btn-outline-primary"><i class="fas fa-copy"></i></button></td>
-                            </tr>`;
-                        }).join('')}
-                    </tbody>
-                </table>
+            <div id="tokenShareBox" style="background: linear-gradient(135deg, #1e3a5f 0%, #1a1a2e 100%); border-radius: 16px; padding: 20px 24px; color: white; font-family: 'Source Sans 3', sans-serif;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" style="width:32px; height:32px; border-radius:8px;" onerror="this.style.display='none'">
+                        <div>
+                            <div style="font-weight:800; font-size:1rem; line-height:1.1;">Spensada CBT</div>
+                            <div style="font-size:0.7rem; opacity:0.6; letter-spacing:0.05em;">${dateLabel}</div>
+                        </div>
+                    </div>
+                    <span style="font-size:0.65rem; background:rgba(255,255,255,0.1); padding:4px 10px; border-radius:20px; letter-spacing:0.08em; font-weight:700;">KODE UJIAN</span>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    ${activeToday.map(exam => {
+                        const start = parseDate(exam.start);
+                        const end = parseDate(exam.end);
+                        const isLive = now >= start && now <= end;
+                        return `
+                        <div style="background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; gap:12px;">
+                            <div style="flex:1; min-width:0;">
+                                <div style="font-weight:700; font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(exam.nama)}</div>
+                                <div style="font-size:0.7rem; opacity:0.55; margin-top:2px;">${exam.start ? exam.start.split(' ')[1] : ''} — ${exam.end ? exam.end.split(' ')[1] : ''} ${isLive ? '&nbsp;<span style="background:#22c55e; color:white; font-size:0.6rem; padding:1px 6px; border-radius:20px; font-weight:800;">LIVE</span>' : ''}</div>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:8px 14px; font-family:monospace; font-size:1.4rem; font-weight:900; letter-spacing:4px; color:#fbbf24; flex-shrink:0;">${esc(exam.token || '-')}</div>
+                        </div>`;
+                    }).join('')}
+                </div>
+                <div style="margin-top:12px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1); font-size:0.65rem; opacity:0.4; text-align:center; letter-spacing:0.05em;">DISAMPAIKAN OLEH PENGAWAS · JANGAN DISEBARKAN</div>
+            </div>
+            <div class="mt-2 d-flex gap-2">
+                <button onclick="copyAllTokens()" class="btn btn-sm btn-outline-success"><i class="fas fa-copy mr-1"></i>Salin Semua Token</button>
             </div>
         `);
     }
@@ -599,43 +615,71 @@ function renderDashboard() {
     `).join(''));
 
     // Top 10 pelanggar terbanyak
-    const violations = adminData.violations || [];
-    if (violations.length === 0) {
-        $('#dashboardTopViolators').html('<p class="text-muted text-center p-3 mb-0"><i class="fas fa-check-circle text-success mr-1"></i>Tidak ada pelanggaran.</p>');
-    } else {
-        // Agregasi per nama siswa — ambil count tertinggi per siswa
-        const aggMap = {};
-        violations.forEach(v => {
-            const key = v.studentName || v.deviceId || 'Tidak Dikenal';
-            const count = parseInt(v.count) || 0;
-            if (!aggMap[key] || aggMap[key].count < count) {
-                aggMap[key] = { name: key, count: count, examName: v.examName || '-' };
-            }
-        });
-        const top10 = Object.values(aggMap)
-            .sort((a, b) => b.count - a.count)
-            .slice(0, 10);
+    renderTopViolators();
+}
 
-        $('#dashboardTopViolators').html(`
-            <table class="table table-sm table-hover mb-0">
-                <thead class="bg-light"><tr>
-                    <th style="width:30px;" class="text-center">#</th>
-                    <th>Nama Siswa</th>
-                    <th>Ujian</th>
-                    <th class="text-center">Pelanggaran</th>
-                </tr></thead>
-                <tbody>
-                    ${top10.map((v, i) => `
-                    <tr class="${v.count >= 5 ? 'table-danger' : v.count >= 3 ? 'table-warning' : ''}">
-                        <td class="text-center font-weight-bold text-muted">${i + 1}</td>
-                        <td><strong>${esc(v.name)}</strong></td>
-                        <td><small class="text-muted">${esc(v.examName)}</small></td>
-                        <td class="text-center"><span class="badge badge-${v.count >= 5 ? 'danger' : v.count >= 3 ? 'warning' : 'secondary'}">${v.count}x</span></td>
-                    </tr>`).join('')}
-                </tbody>
-            </table>
-        `);
+function renderTopViolators() {
+    const violations = adminData.violations || [];
+    const filterExam = $('#violatorExamFilter').val();
+
+    // Update filter options
+    const examNames = [...new Set(violations.map(v => v.examName).filter(Boolean))];
+    const currentVal = $('#violatorExamFilter').val();
+    $('#violatorExamFilter').html(`<option value="">Semua Ujian</option>${examNames.map(n => `<option value="${esc(n)}" ${currentVal === n ? 'selected' : ''}>${esc(n)}</option>`).join('')}`);
+    if (filterExam) $('#violatorExamFilter').val(filterExam);
+
+    const filtered = filterExam ? violations.filter(v => v.examName === filterExam) : violations;
+
+    if (filtered.length === 0) {
+        $('#dashboardTopViolators').html('<p class="text-muted text-center p-3 mb-0"><i class="fas fa-check-circle text-success mr-1"></i>Tidak ada pelanggaran.</p>');
+        return;
     }
+
+    // Agregasi per nama siswa — ambil count tertinggi per siswa
+    const aggMap = {};
+    filtered.forEach(v => {
+        const key = v.studentName || v.deviceId || 'Tidak Dikenal';
+        const count = parseInt(v.count) || 0;
+        if (!aggMap[key] || aggMap[key].count < count) {
+            aggMap[key] = { name: key, count: count, examName: v.examName || '-' };
+        }
+    });
+    const top10 = Object.values(aggMap)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10);
+
+    $('#dashboardTopViolators').html(`
+        <table class="table table-sm table-hover mb-0">
+            <thead class="bg-light"><tr>
+                <th style="width:30px;" class="text-center">#</th>
+                <th>Nama Siswa</th>
+                <th>Ujian</th>
+                <th class="text-center">Pelanggaran</th>
+            </tr></thead>
+            <tbody>
+                ${top10.map((v, i) => `
+                <tr class="${v.count >= 5 ? 'table-danger' : v.count >= 3 ? 'table-warning' : ''}">
+                    <td class="text-center font-weight-bold text-muted">${i + 1}</td>
+                    <td><strong>${esc(v.name)}</strong></td>
+                    <td><small class="text-muted">${esc(v.examName)}</small></td>
+                    <td class="text-center"><span class="badge badge-${v.count >= 5 ? 'danger' : v.count >= 3 ? 'warning' : 'secondary'}">${v.count}x</span></td>
+                </tr>`).join('')}
+            </tbody>
+        </table>
+    `);
+}
+
+function copyAllTokens() {
+    const exams = (adminData.exams || []).filter(e => {
+        if (e.status !== 'aktif') return false;
+        const todayStr = new Date().toISOString().split('T')[0];
+        const startDate = e.start ? e.start.split(' ')[0] : '';
+        const endDate = e.end ? e.end.split(' ')[0] : '';
+        return startDate === todayStr || endDate === todayStr || (startDate <= todayStr && endDate >= todayStr);
+    });
+    if (!exams.length) { toastr('info', 'Tidak ada ujian aktif hari ini.'); return; }
+    const text = exams.map(e => `${e.nama}: ${e.token}`).join('\n');
+    navigator.clipboard.writeText(text).then(() => toastr('success', 'Semua token disalin!')).catch(() => toastr('info', text));
 }
 
 function renderExamTable() {
