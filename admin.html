@@ -167,6 +167,19 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Top 10 Pelanggar -->
+            <div class="card shadow-sm border-left border-danger" style="border-left-width: 4px !important;">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title font-weight-bold mb-0"><i class="fas fa-exclamation-triangle mr-2 text-danger"></i>Pelanggaran Terbanyak</h3>
+                    <small class="text-muted">Top 10</small>
+                </div>
+                <div class="card-body p-0">
+                    <div id="dashboardTopViolators">
+                        <p class="text-muted text-center p-3">Memuat...</p>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- ===== TAB: JADWAL UJIAN ===== -->
@@ -584,6 +597,45 @@ function renderDashboard() {
             </div>
         </div>
     `).join(''));
+
+    // Top 10 pelanggar terbanyak
+    const violations = adminData.violations || [];
+    if (violations.length === 0) {
+        $('#dashboardTopViolators').html('<p class="text-muted text-center p-3 mb-0"><i class="fas fa-check-circle text-success mr-1"></i>Tidak ada pelanggaran.</p>');
+    } else {
+        // Agregasi per nama siswa — ambil count tertinggi per siswa
+        const aggMap = {};
+        violations.forEach(v => {
+            const key = v.studentName || v.deviceId || 'Tidak Dikenal';
+            const count = parseInt(v.count) || 0;
+            if (!aggMap[key] || aggMap[key].count < count) {
+                aggMap[key] = { name: key, count: count, examName: v.examName || '-' };
+            }
+        });
+        const top10 = Object.values(aggMap)
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 10);
+
+        $('#dashboardTopViolators').html(`
+            <table class="table table-sm table-hover mb-0">
+                <thead class="bg-light"><tr>
+                    <th style="width:30px;" class="text-center">#</th>
+                    <th>Nama Siswa</th>
+                    <th>Ujian</th>
+                    <th class="text-center">Pelanggaran</th>
+                </tr></thead>
+                <tbody>
+                    ${top10.map((v, i) => `
+                    <tr class="${v.count >= 5 ? 'table-danger' : v.count >= 3 ? 'table-warning' : ''}">
+                        <td class="text-center font-weight-bold text-muted">${i + 1}</td>
+                        <td><strong>${esc(v.name)}</strong></td>
+                        <td><small class="text-muted">${esc(v.examName)}</small></td>
+                        <td class="text-center"><span class="badge badge-${v.count >= 5 ? 'danger' : v.count >= 3 ? 'warning' : 'secondary'}">${v.count}x</span></td>
+                    </tr>`).join('')}
+                </tbody>
+            </table>
+        `);
+    }
 }
 
 function renderExamTable() {
