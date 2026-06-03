@@ -648,7 +648,7 @@ function renderTopViolators() {
     // Agregasi per nama siswa — JUMLAHKAN semua pelanggaran dari semua sesi
     const aggMap = {};
     filtered.forEach(v => {
-        const key = (v.studentName && v.studentName.trim()) ? v.studentName.trim() : (v.deviceId || 'Tidak Dikenal');
+        const key = (v.studentName && String(v.studentName).trim()) ? String(v.studentName).trim() : (v.deviceId || 'Tidak Dikenal');
         const count = parseInt(v.count) || 0;
         if (!aggMap[key]) {
             aggMap[key] = { name: key, totalCount: 0, examNames: [] };
