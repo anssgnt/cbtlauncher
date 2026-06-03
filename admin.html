@@ -645,17 +645,21 @@ function renderTopViolators() {
         return;
     }
 
-    // Agregasi per nama siswa — ambil count tertinggi per siswa
+    // Agregasi per nama siswa — JUMLAHKAN semua pelanggaran dari semua sesi
     const aggMap = {};
     filtered.forEach(v => {
-        const key = v.studentName || v.deviceId || 'Tidak Dikenal';
+        const key = (v.studentName && v.studentName.trim()) ? v.studentName.trim() : (v.deviceId || 'Tidak Dikenal');
         const count = parseInt(v.count) || 0;
-        if (!aggMap[key] || aggMap[key].count < count) {
-            aggMap[key] = { name: key, count: count, kelas: v.studentClass || '', examName: v.examName || '-' };
+        if (!aggMap[key]) {
+            aggMap[key] = { name: key, totalCount: 0, examNames: [] };
+        }
+        aggMap[key].totalCount += count;
+        if (v.examName && !aggMap[key].examNames.includes(v.examName)) {
+            aggMap[key].examNames.push(v.examName);
         }
     });
     const top10 = Object.values(aggMap)
-        .sort((a, b) => b.count - a.count)
+        .sort((a, b) => b.totalCount - a.totalCount)
         .slice(0, 10);
 
     $('#dashboardTopViolators').html(`
@@ -663,18 +667,16 @@ function renderTopViolators() {
             <thead class="bg-light"><tr>
                 <th style="width:30px;" class="text-center">#</th>
                 <th>Nama Siswa</th>
-                <th>Kelas</th>
                 <th>Ujian</th>
-                <th class="text-center">Pelanggaran</th>
+                <th class="text-center">Total Pelanggaran</th>
             </tr></thead>
             <tbody>
                 ${top10.map((v, i) => `
-                <tr class="${v.count >= 5 ? 'table-danger' : v.count >= 3 ? 'table-warning' : ''}">
+                <tr class="${v.totalCount >= 5 ? 'table-danger' : v.totalCount >= 3 ? 'table-warning' : ''}">
                     <td class="text-center font-weight-bold text-muted">${i + 1}</td>
                     <td><strong>${esc(v.name)}</strong></td>
-                    <td><span class="badge badge-secondary">${esc(v.kelas) || '-'}</span></td>
-                    <td><small class="text-muted">${esc(v.examName)}</small></td>
-                    <td class="text-center"><span class="badge badge-${v.count >= 5 ? 'danger' : v.count >= 3 ? 'warning' : 'secondary'}">${v.count}x</span></td>
+                    <td><small class="text-muted">${v.examNames.map(n => esc(n)).join(', ') || '-'}</small></td>
+                    <td class="text-center"><span class="badge badge-${v.totalCount >= 5 ? 'danger' : v.totalCount >= 3 ? 'warning' : 'secondary'}">${v.totalCount}x</span></td>
                 </tr>`).join('')}
             </tbody>
         </table>
