@@ -62,7 +62,7 @@ function setupSpreadsheet() {
   var vSheet = ss.getSheetByName(VIOLATIONS_SHEET_NAME);
   if (!vSheet) {
     vSheet = ss.insertSheet(VIOLATIONS_SHEET_NAME);
-    vSheet.getRange(1,1,1,7).setValues([["Timestamp","ExamID","ExamName","DeviceID","DeviceName","ViolationCount","UserAgent"]]).setBackground("#dc2626").setFontColor("#fff").setFontWeight("bold");
+    vSheet.getRange(1,1,1,7).setValues([["Timestamp","ExamID","ExamName","StudentName","StudentClass","ViolationCount","UserAgent"]]).setBackground("#dc2626").setFontColor("#fff").setFontWeight("bold");
     vSheet.setFrozenRows(1);
   }
 
@@ -318,7 +318,7 @@ function handleGetAdminData(adminUser) {
   if (vSheet && vSheet.getLastRow() > 1) {
     var vData = vSheet.getDataRange().getValues();
     for (var j = 1; j < vData.length; j++) {
-      violations.push({ timestamp:vData[j][0], examId:vData[j][1], examName:vData[j][2], deviceId:vData[j][3], studentName:vData[j][4], count:parseInt(vData[j][5])||0, userAgent:vData[j][6] });
+      violations.push({ timestamp:vData[j][0], examId:vData[j][1], examName:vData[j][2], studentName:vData[j][3], studentClass:vData[j][4], count:parseInt(vData[j][5])||0, userAgent:vData[j][6] });
     }
   }
 
@@ -456,8 +456,16 @@ function handleReportViolation(payload) {
     var ss = getSpreadsheet();
     var vSheet = ss.getSheetByName(VIOLATIONS_SHEET_NAME);
     if (vSheet) {
-      // Kolom: Timestamp, ExamID, ExamName, DeviceID, DeviceName(StudentName), ViolationCount, UserAgent
-      vSheet.appendRow([new Date().toISOString(), payload.examId||"", payload.examName||"", payload.deviceId||"", payload.studentName||"", payload.violationCount||0, payload.userAgent||""]);
+      // Kolom: Timestamp, ExamID, ExamName, StudentName, StudentClass, ViolationCount, UserAgent
+      vSheet.appendRow([
+        new Date().toISOString(),
+        payload.examId || "",
+        payload.examName || "",
+        payload.studentName || "",
+        payload.studentClass || "",
+        payload.violationCount || 0,
+        payload.userAgent || ""
+      ]);
     }
     return responseJSON({ success: true });
   } catch(e) {
@@ -473,7 +481,7 @@ function handleGetViolations(adminUser) {
   if (vSheet && vSheet.getLastRow() > 1) {
     var data = vSheet.getDataRange().getValues();
     for (var i = data.length-1; i >= 1; i--) {
-      violations.push({ timestamp:data[i][0], examId:data[i][1], examName:data[i][2], deviceId:data[i][3], studentName:data[i][4], count:parseInt(data[i][5])||0, userAgent:data[i][6] });
+      violations.push({ timestamp:data[i][0], examId:data[i][1], examName:data[i][2], studentName:data[i][3], studentClass:data[i][4], count:parseInt(data[i][5])||0, userAgent:data[i][6] });
     }
   }
   return responseJSON({ success: true, violations: violations });
