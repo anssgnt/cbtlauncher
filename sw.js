@@ -18,6 +18,7 @@ self.addEventListener('install', event => {
         );
       })
   );
+  // Force skip waiting untuk activate SW baru immediately
   self.skipWaiting();
 });
 
@@ -26,7 +27,10 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) return caches.delete(cacheName);
+          // Hapus semua cache kecuali yang versi terbaru
+          if (!cacheName.includes('v6') && !cacheName.includes('20260603')) {
+            return caches.delete(cacheName);
+          }
         })
       );
     })

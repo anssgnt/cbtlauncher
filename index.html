@@ -1261,8 +1261,36 @@
         function setupPWAEnforcement() {
 
             if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('./sw.js').catch(err => console.error('SW Registration Failed:', err));
+                window.addEventListener('load', async () => {
+                    // Force clear old caches sebelum register SW baru
+                    if ('caches' in window) {
+                        try {
+                            const allCaches = await caches.keys();
+                            // Delete semua cache lama (keep hanya v6 ke depan)
+                            await Promise.all(
+                                allCaches
+                                    .filter(name => !name.includes('v6') && !name.includes('20260603'))
+                                    .map(name => caches.delete(name))
+                            );
+                        } catch(e) { console.log('Cache clear error:', e); }
+                    }
+                    
+                    navigator.serviceWorker.register('./sw.js', { scope: './' })
+                        .then(reg => {
+                            // Listen untuk SW update
+                            reg.addEventListener('updatefound', () => {
+                                const newWorker = reg.installing;
+                                newWorker.addEventListener('statechange', () => {
+                                    if (newWorker.state === 'activated') {
+                                        // SW baru sudah siap, reload untuk apply
+                                        window.location.reload();
+                                    }
+                                });
+                            });
+                            // Force check update setiap kali load
+                            reg.update().catch(e => console.log('SW update check:', e));
+                        })
+                        .catch(err => console.error('SW Registration Failed:', err));
                 });
             }
 
