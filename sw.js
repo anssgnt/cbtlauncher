@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spensada-cbt-v5';
+const CACHE_NAME = 'spensada-cbt-v6-20260603';
 const urlsToCache = [
   './index.html',
   './manifest.json',
@@ -40,6 +40,21 @@ self.addEventListener('fetch', event => {
   // API requests: always network, never cache
   if (event.request.url.includes('/api/') || event.request.url.includes('script.google.com')) {
     return;
+  }
+
+  // HTML documents: network-first (always check for updates)
+  if (event.request.destination === 'document' || event.request.url.endsWith('.html')) {
+    return event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
   }
 
   // Static assets: cache-first with network fallback
