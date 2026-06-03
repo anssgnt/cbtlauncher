@@ -12,11 +12,21 @@ const CONFIG_SHEET_NAME = "Config";
 const VIOLATIONS_SHEET_NAME = "Violations";
 const LOG_SHEET_NAME = "Log";
 
-// --- ADMIN CREDENTIALS ---
-const ADMIN_USERS = [
-  { username: "admin", password: "spensada2025" },
-  { username: "proktor", password: "proktor2025" }
-];
+// --- ADMIN CREDENTIALS (dari Script Properties) ---
+function getAdminUsers() {
+  var props = PropertiesService.getScriptProperties();
+  var raw = props.getProperty('ADMIN_USERS');
+  if (raw) {
+    try { return JSON.parse(raw); } catch(e) {}
+  }
+  // Default fallback — ubah lewat File > Project properties > Script properties
+  var defaultUsers = [
+    { username: "admin", password: "spensada2025" },
+    { username: "proktor", password: "proktor2025" }
+  ];
+  props.setProperty('ADMIN_USERS', JSON.stringify(defaultUsers));
+  return defaultUsers;
+}
 
 
 /** SETUP OTOMATIS (Jalankan sekali) */
@@ -52,7 +62,7 @@ function setupSpreadsheet() {
   var vSheet = ss.getSheetByName(VIOLATIONS_SHEET_NAME);
   if (!vSheet) {
     vSheet = ss.insertSheet(VIOLATIONS_SHEET_NAME);
-    vSheet.getRange(1,1,1,7).setValues([["Timestamp","ExamID","ExamName","StudentName","DeviceID","ViolationCount","UserAgent"]]).setBackground("#dc2626").setFontColor("#fff").setFontWeight("bold");
+    vSheet.getRange(1,1,1,8).setValues([["Timestamp","ExamID","ExamName","StudentName","StudentClass","DeviceID","ViolationCount","UserAgent"]]).setBackground("#dc2626").setFontColor("#fff").setFontWeight("bold");
     vSheet.setFrozenRows(1);
   }
 
@@ -86,7 +96,8 @@ function writeLog(action, user, detail) {
 
 function authenticateAdmin(payload) {
   if (!payload || !payload.username || !payload.password) return false;
-  return ADMIN_USERS.some(function(u) {
+  var users = getAdminUsers();
+  return users.some(function(u) {
     return u.username === payload.username && u.password === payload.password;
   });
 }
@@ -250,12 +261,37 @@ function handleAdminAction(payload) {
 }
 
 
-/** LOGIN */
+/** LOGIN (dengan rate limiting) */
 function handleLogin(payload) {
+  var ip = (payload._ip || "unknown") + "_" + (payload.username || "unknown");
+  var props = PropertiesService.getScriptProperties();
+  var failKey = "LOGIN_FAIL_" + ip;
+  var fails = parseInt(props.getProperty(failKey) || "0");
+  var firstFail = parseInt(props.getProperty(failKey + "_ts") || "0");
+  var now = Date.now();
+
+  // Reset setelah 15 menit
+  if (firstFail > 0 && (now - firstFail) > 900000) {
+    fails = 0;
+    props.deleteProperty(failKey);
+    props.deleteProperty(failKey + "_ts");
+  }
+
+  if (fails >= 5) {
+    return responseJSON({ error: true, message: "Terlalu banyak percobaan. Coba lagi 15 menit." });
+  }
+
   if (authenticateAdmin(payload)) {
+    props.deleteProperty(failKey);
+    props.deleteProperty(failKey + "_ts");
     writeLog("LOGIN", payload.username, "Login berhasil");
     return responseJSON({ success: true, message: "Login berhasil" });
   }
+
+  fails++;
+  props.setProperty(failKey, String(fails));
+  if (firstFail === 0) props.setProperty(failKey + "_ts", String(now));
+  writeLog("LOGIN_FAIL", payload.username, "Gagal login (" + fails + "x)");
   return responseJSON({ error: true, message: "Username atau password salah." });
 }
 
@@ -282,7 +318,7 @@ function handleGetAdminData(adminUser) {
   if (vSheet && vSheet.getLastRow() > 1) {
     var vData = vSheet.getDataRange().getValues();
     for (var j = 1; j < vData.length; j++) {
-      violations.push({ timestamp:vData[j][0], examId:vData[j][1], examName:vData[j][2], studentName:vData[j][3], deviceId:vData[j][4], count:vData[j][5], userAgent:vData[j][6] });
+      violations.push({ timestamp:vData[j][0], examId:vData[j][1], examName:vData[j][2], studentName:vData[j][3], studentClass:vData[j][4], deviceId:vData[j][5], count:vData[j][6], userAgent:vData[j][7] });
     }
   }
 
@@ -420,7 +456,7 @@ function handleReportViolation(payload) {
     var ss = getSpreadsheet();
     var vSheet = ss.getSheetByName(VIOLATIONS_SHEET_NAME);
     if (vSheet) {
-      vSheet.appendRow([new Date().toISOString(), payload.examId||"", payload.examName||"", payload.studentName||"", payload.deviceId||"", payload.violationCount||0, payload.userAgent||""]);
+      vSheet.appendRow([new Date().toISOString(), payload.examId||"", payload.examName||"", payload.studentName||"", payload.studentClass||"", payload.deviceId||"", payload.violationCount||0, payload.userAgent||""]);
     }
     return responseJSON({ success: true });
   } catch(e) {
@@ -436,7 +472,7 @@ function handleGetViolations(adminUser) {
   if (vSheet && vSheet.getLastRow() > 1) {
     var data = vSheet.getDataRange().getValues();
     for (var i = data.length-1; i >= 1; i--) {
-      violations.push({ timestamp:data[i][0], examId:data[i][1], examName:data[i][2], studentName:data[i][3], deviceId:data[i][4], count:data[i][5], userAgent:data[i][6] });
+      violations.push({ timestamp:data[i][0], examId:data[i][1], examName:data[i][2], studentName:data[i][3], studentClass:data[i][4], deviceId:data[i][5], count:data[i][6], userAgent:data[i][7] });
     }
   }
   return responseJSON({ success: true, violations: violations });

@@ -20,15 +20,13 @@
     <!-- Favicon Fix 404 -->
     <link rel="icon" type="image/x-icon" href="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png">
 
-    <!-- Google Fonts: Plus Jakarta Sans for premium feel -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- System font stack (zero KB, zero request) -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
 
     <style>
         /* Base Styles & Typography */
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             -webkit-user-select: none;
             user-select: none;
             -webkit-touch-callout: none;
@@ -91,8 +89,8 @@
 
     <!-- PWA Install Gatecade -->
     <div id="pwaInstallGate" class="fixed inset-0 z-[99999] bg-slate-50 flex flex-col items-center justify-center p-6 text-center transform transition-all duration-300">
-        <div class="w-20 h-20 sm:w-24 sm:h-24 bg-white border border-slate-200 rounded-[1.5rem] sm:rounded-[2rem] shadow-xl flex items-center justify-center mb-6 sm:mb-8 relative overflow-hidden transform hover:scale-105 transition-all">
-            <div class="absolute inset-0 bg-blue-100/30 blur-xl"></div>
+        <div class="w-20 h-20 sm:w-24 sm:h-24 bg-white border border-slate-200 rounded-[1.5rem] sm:rounded-[2rem] shadow-xl flex items-center justify-center mb-6 sm:mb-8 relative overflow-hidden">
+            <div class="absolute inset-0 bg-blue-100/30 blur-lg"></div>
             <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" alt="Logo" class="w-12 h-12 sm:w-16 sm:h-16 object-contain relative z-10 drop-shadow-sm">
         </div>
         <h2 class="text-[20px] sm:text-[22px] font-extrabold text-slate-800 mb-1.5 tracking-tight">Pasang Aplikasi Ujian</h2>
@@ -122,9 +120,6 @@
 
     <!-- NAME GATE: Input nama siswa saat pertama kali buka -->
     <div id="nameGate" class="fixed inset-0 z-[99998] bg-gradient-to-br from-[#1E40AF] via-[#3730A3] to-[#312E81] flex flex-col items-center justify-center p-6 text-center hidden">
-        <div class="absolute -top-10 -right-10 w-48 h-48 bg-white opacity-[0.05] rounded-full blur-2xl"></div>
-        <div class="absolute bottom-20 -left-10 w-40 h-40 bg-indigo-400 opacity-10 rounded-full blur-3xl"></div>
-        
         <div class="bg-white rounded-[2rem] shadow-2xl p-6 sm:p-8 w-full max-w-sm relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-500 to-blue-500"></div>
             
@@ -133,13 +128,28 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                 </div>
                 <h2 class="text-[18px] font-extrabold text-slate-800 tracking-tight">Siapa Kamu?</h2>
-                <p class="text-[12px] text-slate-500 font-medium mt-1">Masukkan nama lengkap untuk melanjutkan</p>
+                <p class="text-[12px] text-slate-500 font-medium mt-1">Masukkan nama & kelas untuk melanjutkan</p>
             </div>
             
             <div class="space-y-3">
                 <input type="text" id="nameGateInput" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3.5 text-[15px] font-bold text-slate-700 focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 transition-all placeholder:font-semibold placeholder:text-slate-300" placeholder="Nama Lengkap / NIS" autocomplete="name" spellcheck="false">
+                <select id="classGateInput" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3.5 text-[15px] font-bold text-slate-700 focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100 transition-all appearance-none cursor-pointer">
+                    <option value="">Pilih Kelas</option>
+                    <optgroup label="Kelas 7">
+                        <option value="7A">7A</option><option value="7B">7B</option><option value="7C">7C</option><option value="7D">7D</option>
+                        <option value="7E">7E</option><option value="7F">7F</option><option value="7G">7G</option><option value="7H">7H</option>
+                    </optgroup>
+                    <optgroup label="Kelas 8">
+                        <option value="8A">8A</option><option value="8B">8B</option><option value="8C">8C</option><option value="8D">8D</option>
+                        <option value="8E">8E</option><option value="8F">8F</option><option value="8G">8G</option><option value="8H">8H</option>
+                    </optgroup>
+                    <optgroup label="Kelas 9">
+                        <option value="9A">9A</option><option value="9B">9B</option><option value="9C">9C</option><option value="9D">9D</option>
+                        <option value="9E">9E</option><option value="9F">9F</option><option value="9G">9G</option><option value="9H">9H</option>
+                    </optgroup>
+                </select>
                 <div id="nameGateError" class="hidden">
-                    <p class="text-[11px] font-bold text-rose-500 text-center">Nama wajib diisi untuk melanjutkan.</p>
+                    <p class="text-[11px] font-bold text-rose-500 text-center">Nama & kelas wajib diisi untuk melanjutkan.</p>
                 </div>
                 <button onclick="submitNameGate()" class="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[14px] font-bold rounded-xl shadow-[0_8px_20px_rgba(79,70,229,0.25)] active:scale-[0.98] transition-transform flex items-center justify-center gap-2">
                     <span>Lanjutkan</span>
@@ -150,19 +160,14 @@
     </div>
 
     <!-- Top App Background (Curved Header Background) -->
-    <div class="fixed top-0 left-0 w-full h-[240px] sm:h-[280px] bg-gradient-to-br from-[#1E40AF] via-[#3730A3] to-[#312E81] rounded-b-[2.5rem] shadow-xl z-[-1] overflow-hidden">
-        <!-- Abstract Decorations behind header -->
-        <div class="absolute -top-10 -right-10 w-48 h-48 bg-white opacity-[0.07] rounded-full blur-2xl"></div>
-        <div class="absolute top-20 -left-10 w-32 h-32 bg-white opacity-[0.05] rounded-full blur-xl"></div>
-        <div class="absolute bottom-10 right-20 w-40 h-40 bg-indigo-400 opacity-20 rounded-full blur-3xl"></div>
-    </div>
+    <div class="fixed top-0 left-0 w-full h-[240px] sm:h-[280px] bg-gradient-to-br from-[#1E40AF] via-[#3730A3] to-[#312E81] rounded-b-[2.5rem] shadow-xl z-[-1] overflow-hidden"></div>
 
     <!-- Header Navigation -->
     <header class="w-full max-w-md mx-auto pt-6 sm:pt-8 px-5 sm:px-6 pb-2 flex items-center justify-between">
         <div class="flex items-center gap-3 sm:gap-3.5">
             <div class="bg-white/10 p-1.5 rounded-[0.9rem] backdrop-blur-md border border-white/20 shadow-[0_4px_15px_rgba(0,0,0,0.1)] flex-shrink-0 relative overflow-hidden">
                 <div class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent"></div>
-                <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" alt="Logo" class="w-9 h-9 sm:w-10 sm:h-10 object-contain drop-shadow-md relative z-10 transition-transform duration-300 hover:scale-105" onerror="this.style.display='none'">
+                <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" alt="Logo" class="w-9 h-9 sm:w-10 sm:h-10 object-contain drop-shadow-md relative z-10" onerror="this.style.display='none'">
             </div>
             <div class="flex flex-col">
                 <h1 class="text-[20px] sm:text-[22px] font-extrabold text-white tracking-tight leading-tight">Spensada Exam</h1>
@@ -182,7 +187,7 @@
     <main class="max-w-md w-full mx-auto px-4 sm:px-5 pt-5 sm:pt-6 pb-12 flex flex-col relative z-10">
 
         <!-- Info Card (Overlapping header) -->
-        <div class="bg-white rounded-[1.25rem] p-3.5 sm:p-4 shadow-[0_8px_30px_rgb(0,0,0,0.06)] mb-6 sm:mb-8 flex flex-col items-center justify-center border border-slate-100 transform transition-transform hover:scale-[1.01]">
+        <div class="bg-white rounded-[1.25rem] p-3.5 sm:p-4 shadow-[0_8px_30px_rgb(0,0,0,0.06)] mb-6 sm:mb-8 flex flex-col items-center justify-center border border-slate-100">
             <div class="flex items-center gap-1.5 mb-1 sm:mb-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                 <p class="text-[10px] font-extrabold text-indigo-600 uppercase tracking-[0.15em]">ASAS/ASAT T.A 2025/2026</p>
@@ -573,6 +578,30 @@
         const timeText = document.getElementById('serverTimeText');
 
         /**
+         * APP VERSION — untuk cache busting otomatis
+         * Naikkan angka ini setiap ada update biar siswa dapet versi terbaru
+         */
+        const APP_VERSION = 3;
+        (function checkVersion() {
+            const saved = parseInt(localStorage.getItem('app_version') || '0');
+            if (saved && saved !== APP_VERSION) {
+                // Hapus semua cache lama
+                localStorage.removeItem('cached_exams_data');
+                localStorage.removeItem('last_sync_timestamp');
+                localStorage.removeItem('pwa_enforce');
+                if ('caches' in window) {
+                    caches.keys().then(names => Promise.all(names.map(n => caches.delete(n))));
+                }
+                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.getRegistrations().then(regs =>
+                        regs.forEach(r => r.unregister())
+                    );
+                }
+            }
+            localStorage.setItem('app_version', String(APP_VERSION));
+        })();
+
+        /**
          * SECURITY FEATURES
          */
         // Generate unique device ID (persisten per perangkat)
@@ -788,22 +817,18 @@
                     return a.startObj - b.startObj;
                 });
 
-            sortedExams.forEach(exam => {
-                const isActiveStr = now >= exam.startObj && now <= exam.endObj;
-
-                validExamsCount++;
-
-                // DESIGN TERBARU KARTU UJIAN (SPLIT CARD)
-                const cardHtml = `
-                    <div class="bg-white rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.06)] relative flex flex-col mb-6 border border-slate-100/50 overflow-hidden transform transition-transform hover:-translate-y-1" id="card-${exam.id}">
-                        
-                        <!-- Top status line -->
+            // Chunked rendering: render 3 card per frame biar ringan di HP low-end
+            function renderCardsChunked(sorted, startIdx, done) {
+                const end = Math.min(startIdx + 3, sorted.length);
+                for (let i = startIdx; i < end; i++) {
+                    const exam = sorted[i];
+                    const isActiveStr = now >= exam.startObj && now <= exam.endObj;
+                    validExamsCount++;
+                    const cardHtml = `
+                    <div class="bg-white rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.06)] relative flex flex-col mb-6 border border-slate-100/50 overflow-hidden" id="card-${exam.id}">
                         <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r ${isActiveStr ? 'from-indigo-500 to-blue-500' : 'from-slate-200 to-slate-200'} z-10"></div>
-                        
-                        <!-- Card Body (Info Area) -->
                         <div class="p-5 sm:p-6 pb-3 sm:pb-4 relative">
-                            ${isActiveStr ? '<div class="absolute -top-10 -right-10 w-32 h-32 bg-indigo-50 rounded-full blur-2xl z-0 pointer-events-none"></div>' : ''}
-                            
+                            ${isActiveStr ? '<div class="absolute -top-10 -right-10 w-32 h-32 bg-indigo-50 rounded-full blur-xl z-0 pointer-events-none"></div>' : ''}
                             <div class="flex justify-between items-start mb-2 sm:mb-3 relative z-10">
                                 <div class="flex flex-col">
                                     <div class="flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 ${isActiveStr ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-100 text-slate-500'} rounded-lg inline-flex w-max mb-2.5 sm:mb-3">
@@ -813,7 +838,6 @@
                                     <h3 class="text-[16px] sm:text-[18px] font-extrabold text-slate-800 leading-snug tracking-tight pr-2 sm:pr-4">${exam.nama}</h3>
                                 </div>
                             </div>
-                            
                             <div class="flex items-center gap-2 text-slate-500 relative z-10 mb-1 mt-2 sm:mt-3">
                                 <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                 <p class="text-[11px] sm:text-[12px] font-semibold tracking-wide">
@@ -823,10 +847,7 @@
                                 </p>
                             </div>
                         </div>
-
-                        <!-- Card Footer (Action Area) -->
                         <div class="${isActiveStr ? 'bg-indigo-50/30' : 'bg-slate-50/50'} p-5 sm:p-6 pt-4 sm:pt-5 border-t border-slate-100 mt-auto flex flex-col gap-3 sm:gap-4 relative z-10">
-                            
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-1 sm:gap-1.5">
                                     ${isActiveStr ? '<svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' : '<svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>'}
@@ -834,33 +855,37 @@
                                 </div>
                                 <span class="text-[13px] sm:text-sm font-black ${isActiveStr ? 'text-rose-500' : 'text-slate-500'} font-mono bg-white px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg shadow-sm border border-slate-100/80 tracking-wider" id="${isActiveStr ? 'countdown-'+exam.id : 'countdown-start-'+exam.id}">--:--:--</span>
                             </div>
-                            
                             ${isActiveStr ? `
                                 <button onclick="openTokenModal('${exam.id}', '${exam.nama}')" class="w-full py-3.5 sm:py-4 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold text-[13px] sm:text-[14px] rounded-[0.85rem] sm:rounded-xl shadow-[0_6px_20_rgba(79,70,229,0.25)] transition-all flex justify-center items-center gap-2">
                                     <span>KERJAKAN SEKARANG</span>
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
                                 </button>
                             ` : `
-                                <button disabled class="w-full py-3.5 sm:py-4 bg-slate-200/80 text-slate-400 font-bold text-[13px] sm:text-[14px] rounded-[0.85rem] sm:rounded-xl cursor-not-allowed border border-slate-200/50 shadow-inner">
-                                    BELUM DIBUKA
-                                </button>
+                                <button disabled class="w-full py-3.5 sm:py-4 bg-slate-200/80 text-slate-400 font-bold text-[13px] sm:text-[14px] rounded-[0.85rem] sm:rounded-xl cursor-not-allowed border border-slate-200/50 shadow-inner">BELUM DIBUKA</button>
                             `}
                         </div>
                     </div>
                 `;
-                elList.insertAdjacentHTML('beforeend', cardHtml);
-            });
-
-            // Sembunyikan Skeleton & Tampilkan Konten Asli
-            elLoading.classList.add('hidden');
-            if (validExamsCount === 0) {
-                elEmpty.classList.remove('hidden');
-                elList.classList.add('hidden');
-            } else {
-                elEmpty.classList.add('hidden');
-                elList.classList.remove('hidden');
-                elList.classList.add('flex');
+                    elList.insertAdjacentHTML('beforeend', cardHtml);
+                }
+                if (end < sorted.length) {
+                    requestAnimationFrame(() => renderCardsChunked(sorted, end, done));
+                } else if (done) {
+                    done();
+                }
             }
+
+            renderCardsChunked(sortedExams, 0, () => {
+                elLoading.classList.add('hidden');
+                if (validExamsCount === 0) {
+                    elEmpty.classList.remove('hidden');
+                    elList.classList.add('hidden');
+                } else {
+                    elEmpty.classList.add('hidden');
+                    elList.classList.remove('hidden');
+                    elList.classList.add('flex');
+                }
+            });
         }
 
         function startCountdowns() {
@@ -1090,7 +1115,7 @@
                              <div class="loader-dots relative w-20 h-5 mb-3"><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div></div>
                              <p class="text-xs text-slate-500 font-semibold tracking-wide">Menghubungkan Halaman Ujian...</p>
                         </div>
-                        <iframe src="${link}" class="w-full h-full border-none z-10 relative bg-transparent" allow="fullscreen" sandbox="allow-scripts allow-top-navigation allow-forms allow-same-origin allow-modals" id="kioskIframe"></iframe>
+                        <iframe src="${link}" class="w-full h-full border-none z-10 relative bg-transparent" allow="fullscreen" sandbox="allow-scripts allow-forms allow-same-origin allow-modals" id="kioskIframe"></iframe>
                     </div>
                 </div>
             `;
@@ -1167,14 +1192,15 @@
                         fetch('/api/violation', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                examId: kioskExamId,
-                                examName: examInfo ? examInfo.nama : '',
-                                studentName: localStorage.getItem('student_name') || '',
-                                deviceId: localStorage.getItem('device_id') || generateDeviceId(),
-                                violationCount: violationCount,
-                                userAgent: navigator.userAgent
-                            })
+                                body: JSON.stringify({
+                                    examId: kioskExamId,
+                                    examName: examInfo ? examInfo.nama : '',
+                                    studentName: localStorage.getItem('student_name') || '',
+                                    studentClass: localStorage.getItem('student_class') || '',
+                                    deviceId: localStorage.getItem('device_id') || generateDeviceId(),
+                                    violationCount: violationCount,
+                                    userAgent: navigator.userAgent
+                                })
                         }).catch(() => {});
                     }
                     
@@ -1418,12 +1444,14 @@
 
         function submitNameGate() {
             const name = document.getElementById('nameGateInput').value.trim();
-            if (!name) {
+            const kelas = document.getElementById('classGateInput').value;
+            if (!name || !kelas) {
                 document.getElementById('nameGateError').classList.remove('hidden');
-                document.getElementById('nameGateInput').focus();
+                (name ? document.getElementById('classGateInput') : document.getElementById('nameGateInput')).focus();
                 return;
             }
             localStorage.setItem('student_name', name);
+            localStorage.setItem('student_class', kelas);
             const gate = document.getElementById('nameGate');
             gate.style.opacity = '0';
             gate.style.transition = 'opacity 0.3s ease';
@@ -1434,13 +1462,17 @@
 
         // Enter key pada name gate
         document.getElementById('nameGateInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') document.getElementById('classGateInput').focus();
+        });
+        document.getElementById('classGateInput').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') submitNameGate();
         });
 
         function showStudentName() {
             const name = localStorage.getItem('student_name');
+            const kelas = localStorage.getItem('student_class');
             if (name) {
-                document.getElementById('headerStudentName').innerText = 'Halo, ' + name;
+                document.getElementById('headerStudentName').innerText = kelas ? name + ' • ' + kelas : 'Halo, ' + name;
             }
         }
 

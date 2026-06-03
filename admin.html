@@ -10,11 +10,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- SweetAlert2 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+
     <link rel="icon" href="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png">
     <style>
-        body { font-family: 'Source Sans 3', sans-serif; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
         .login-page { background: linear-gradient(135deg, #1e3a5f 0%, #1a1a2e 100%); min-height: 100vh; }
         .token-badge { font-family: 'Courier New', monospace; letter-spacing: 2px; }
         .stat-icon { width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
@@ -282,13 +281,14 @@
                             <tr>
                                 <th>Waktu</th>
                                 <th>Siswa</th>
+                                <th>Kelas</th>
                                 <th>Ujian</th>
                                 <th>Jumlah</th>
                                 <th>Device</th>
                             </tr>
                         </thead>
                         <tbody id="violationTableBody">
-                            <tr><td colspan="5" class="text-center text-muted py-4">Memuat data...</td></tr>
+                            <tr><td colspan="6" class="text-center text-muted py-4">Memuat data...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -641,7 +641,7 @@ function renderTopViolators() {
         const key = v.studentName || v.deviceId || 'Tidak Dikenal';
         const count = parseInt(v.count) || 0;
         if (!aggMap[key] || aggMap[key].count < count) {
-            aggMap[key] = { name: key, count: count, examName: v.examName || '-' };
+            aggMap[key] = { name: key, count: count, kelas: v.studentClass || '', examName: v.examName || '-' };
         }
     });
     const top10 = Object.values(aggMap)
@@ -653,6 +653,7 @@ function renderTopViolators() {
             <thead class="bg-light"><tr>
                 <th style="width:30px;" class="text-center">#</th>
                 <th>Nama Siswa</th>
+                <th>Kelas</th>
                 <th>Ujian</th>
                 <th class="text-center">Pelanggaran</th>
             </tr></thead>
@@ -661,6 +662,7 @@ function renderTopViolators() {
                 <tr class="${v.count >= 5 ? 'table-danger' : v.count >= 3 ? 'table-warning' : ''}">
                     <td class="text-center font-weight-bold text-muted">${i + 1}</td>
                     <td><strong>${esc(v.name)}</strong></td>
+                    <td><span class="badge badge-secondary">${esc(v.kelas) || '-'}</span></td>
                     <td><small class="text-muted">${esc(v.examName)}</small></td>
                     <td class="text-center"><span class="badge badge-${v.count >= 5 ? 'danger' : v.count >= 3 ? 'warning' : 'secondary'}">${v.count}x</span></td>
                 </tr>`).join('')}
@@ -775,13 +777,14 @@ function renderTokenCards() {
 function renderViolationTable() {
     const violations = adminData.violations || [];
     if (violations.length === 0) {
-        $('#violationTableBody').html('<tr><td colspan="5" class="text-center text-muted py-4"><i class="fas fa-check-circle text-success mr-2"></i>Tidak ada pelanggaran. 🎉</td></tr>');
+        $('#violationTableBody').html('<tr><td colspan="6" class="text-center text-muted py-4"><i class="fas fa-check-circle text-success mr-2"></i>Tidak ada pelanggaran.</td></tr>');
         return;
     }
     $('#violationTableBody').html(violations.map(v => `
         <tr>
             <td><small>${fmtTime(v.timestamp)}</small></td>
             <td><strong class="text-danger">${esc(v.studentName || '-')}</strong></td>
+            <td><span class="badge badge-secondary">${esc(v.studentClass || '-')}</span></td>
             <td>${esc(v.examName || v.examId)}</td>
             <td><span class="badge badge-danger">${v.count}x</span></td>
             <td><code style="font-size:0.7rem;">${esc(v.deviceId || '-')}</code></td>

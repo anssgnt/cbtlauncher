@@ -1,7 +1,8 @@
-const CACHE_NAME = 'spensada-cbt-v3';
+const CACHE_NAME = 'spensada-cbt-v5';
 const urlsToCache = [
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  'https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png'
 ];
 
 self.addEventListener('install', event => {

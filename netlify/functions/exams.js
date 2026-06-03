@@ -48,14 +48,22 @@ async function fetchFromGAS() {
   }
 }
 
-export default async (req, context) => {
-  const headers = {
-    "Access-Control-Allow-Origin": "*",
+function buildHeaders(origin) {
+  const allowedOrigin = origin && (origin.endsWith('.netlify.app') || origin.includes('spensada.me'))
+    ? origin
+    : 'https://spensada.netlify.app';
+  return {
+    "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Methods": "GET, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     "Content-Type": "application/json",
     "Cache-Control": "public, max-age=30, s-maxage=60, stale-while-revalidate=300"
   };
+}
+
+export default async (req, context) => {
+  const origin = req.headers.get('origin') || '';
+  const headers = buildHeaders(origin);
 
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers });
@@ -135,13 +143,12 @@ export default async (req, context) => {
 };
 
 /**
- * Strip sensitive data (link & token) dari response publik.
- * Siswa hanya lihat jadwal, bukan link/token.
+ * Strip sensitive data (link, token, config) dari response publik.
+ * Siswa hanya lihat jadwal + pwaEnforce (perlu untuk gate).
  */
 function stripSensitiveData(data) {
   if (!data || !data.exams) return data;
   return {
-    ...data,
     exams: data.exams.map(exam => ({
       id: exam.id,
       nama: exam.nama,
@@ -149,8 +156,10 @@ function stripSensitiveData(data) {
       end: exam.end,
       status: exam.status,
       hasToken: !!(exam.token && exam.token.length > 0)
-      // link dan token TIDAK dikirim ke client
-    }))
+    })),
+    config: {
+      pwaEnforce: data.config?.pwaEnforce
+    }
   };
 }
 
