@@ -236,6 +236,7 @@ function handleAdminAction(payload) {
   var action = payload.action;
 
   if (action === "reportViolation") return handleReportViolation(payload);
+  if (action === "checkNotification") return handleCheckNotification(payload);
   if (action === "login") return handleLogin(payload);
 
   // Protected
@@ -256,6 +257,9 @@ function handleAdminAction(payload) {
     case "getViolations": return handleGetViolations(user);
     case "clearViolations": return handleClearViolations(payload, user);
     case "getLogs": return handleGetLogs(user);
+    case "broadcastNotification": return handleBroadcastNotification(payload, user);
+    case "clearNotifications": return handleClearNotifications(payload, user);
+    case "getCurrentNotification": return handleGetCurrentNotification(user);
     default: return responseJSON({ error: true, message: "Action tidak dikenali: " + action });
   }
 }
@@ -525,4 +529,72 @@ function handleGetLogs(adminUser) {
     }
   }
   return responseJSON({ success: true, logs: logs });
+}
+
+
+/** BROADCAST NOTIFICATION (Admin only) */
+function handleBroadcastNotification(payload, adminUser) {
+  try {
+    var props = PropertiesService.getScriptProperties();
+    var timestamp = Date.now();
+    var notification = {
+      id: timestamp,
+      message: payload.message || "",
+      type: payload.type || "announcement",
+      title: payload.title || "Pemberitahuan Sistem",
+      examName: payload.examName || "",
+      createdAt: new Date().toISOString(),
+      createdBy: adminUser
+    };
+    props.setProperty('CURRENT_NOTIFICATION', JSON.stringify(notification));
+    writeLog("BROADCAST_NOTIF", adminUser, payload.message || "Notifikasi dikirim");
+    return responseJSON({ success: true, message: "Notifikasi dikirim ke semua siswa.", notificationId: timestamp });
+  } catch(e) {
+    return responseJSON({ error: true, message: e.toString() });
+  }
+}
+
+/** CHECK NOTIFICATION (Public - dari siswa) */
+function handleCheckNotification(e) {
+  try {
+    var props = PropertiesService.getScriptProperties();
+    var currentNotif = props.getProperty('CURRENT_NOTIFICATION');
+    var clientLastId = (e && e.parameter && e.parameter.lastId) ? parseInt(e.parameter.lastId) : 0;
+    
+    if (currentNotif) {
+      var notif = JSON.parse(currentNotif);
+      // Hanya send jika notification lebih baru dari lastId client
+      if (notif.id > clientLastId) {
+        return responseJSON({ success: true, notification: notif });
+      }
+    }
+    
+    return responseJSON({ success: true, notification: null });
+  } catch(e) {
+    return responseJSON({ error: true, message: e.toString() });
+  }
+}
+
+/** CLEAR NOTIFICATIONS (Admin only) */
+function handleClearNotifications(payload, adminUser) {
+  try {
+    var props = PropertiesService.getScriptProperties();
+    props.deleteProperty('CURRENT_NOTIFICATION');
+    writeLog("CLEAR_NOTIF", adminUser, "Notifikasi dihapus");
+    return responseJSON({ success: true, message: "Notifikasi dihapus." });
+  } catch(e) {
+    return responseJSON({ error: true, message: e.toString() });
+  }
+}
+
+/** GET CURRENT NOTIFICATION (Admin only) */
+function handleGetCurrentNotification(adminUser) {
+  try {
+    var props = PropertiesService.getScriptProperties();
+    var currentNotif = props.getProperty('CURRENT_NOTIFICATION');
+    var notif = currentNotif ? JSON.parse(currentNotif) : null;
+    return responseJSON({ success: true, notification: notif });
+  } catch(e) {
+    return responseJSON({ error: true, message: e.toString() });
+  }
 }

@@ -1545,7 +1545,78 @@
 
         window.addEventListener('DOMContentLoaded', setupPWAEnforcement);
 
+        /**
+         * NOTIFICATION POLLING SYSTEM
+         * Long polling untuk real-time notification tanpa PWA requirement
+         */
+        let lastNotificationId = 0;
+        let notificationCheckInterval = null;
+        const NOTIFICATION_CHECK_INTERVAL = 5000; // 5 detik
 
+        async function startNotificationPolling() {
+            if (notificationCheckInterval) clearInterval(notificationCheckInterval);
+            
+            // Check setiap 5 detik
+            notificationCheckInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(URL_API + '?payload=' + encodeURIComponent(JSON.stringify({
+                        action: 'checkNotification',
+                        lastId: lastNotificationId
+                    })));
+                    
+                    if (!response.ok) return;
+                    const result = await response.json();
+                    
+                    if (result.success && result.notification) {
+                        const notif = result.notification;
+                        lastNotificationId = notif.id;
+                        showSystemNotification(notif);
+                    }
+                } catch (e) {
+                    console.log('Notification polling error:', e);
+                }
+            }, NOTIFICATION_CHECK_INTERVAL);
+        }
+
+        function showSystemNotification(notif) {
+            // Browser notification (jika permission granted)
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(notif.title || 'Spensada Exam', {
+                    body: notif.message,
+                    icon: 'https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png',
+                    badge: 'https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png',
+                    tag: 'exam-notif-' + notif.id,
+                    requireInteraction: true
+                });
+            }
+            
+            // Toast/Modal notification di app
+            CustomModal.alert(notif.message, notif.title || '📢 Pemberitahuan Sistem');
+            
+            // Log untuk debugging
+            console.log('Notification received:', notif);
+        }
+
+        function stopNotificationPolling() {
+            if (notificationCheckInterval) {
+                clearInterval(notificationCheckInterval);
+                notificationCheckInterval = null;
+            }
+        }
+
+        // Start polling saat app load
+        document.addEventListener('DOMContentLoaded', () => {
+            startNotificationPolling();
+            // Request notification permission sekali saja
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+        });
+
+        // Stop polling saat user keluar
+        window.addEventListener('beforeunload', () => {
+            stopNotificationPolling();
+        });
 
     </script>
 </body>

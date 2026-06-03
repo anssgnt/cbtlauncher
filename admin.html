@@ -146,6 +146,23 @@
                 </div>
             </div>
 
+            <!-- Broadcast Notifications -->
+            <div class="card shadow-sm border-left border-info" style="border-left-width: 4px !important;">
+                <div class="card-header"><h3 class="card-title font-weight-bold"><i class="fas fa-bullhorn mr-2 text-info"></i>📢 Broadcast Notifikasi ke Siswa</h3></div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <textarea id="notifMessage" class="form-control" rows="2" placeholder="Ketik pesan notifikasi... Contoh: 'Ujian Matematika sudah dimulai, silakan buka link ujian'" maxlength="200"></textarea>
+                            <small class="text-muted d-block mt-1"><i class="fas fa-info-circle mr-1"></i>Notifikasi akan dikirim ke semua siswa yang sedang online. Max 200 karakter.</small>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button onclick="broadcastNotification()" id="notifSendBtn" class="btn btn-info btn-block"><i class="fas fa-paper-plane mr-1"></i>Kirim Notif</button>
+                        </div>
+                    </div>
+                    <div id="notifStatus" class="mt-2"></div>
+                </div>
+            </div>
+
             <!-- Quick Actions -->
             <div class="card shadow-sm">
                 <div class="card-header"><h3 class="card-title font-weight-bold"><i class="fas fa-bolt mr-2 text-warning"></i>Aksi Cepat</h3></div>
@@ -906,6 +923,50 @@ function copyToken(token) {
 }
 
 // ==================== QUICK ACTIONS ====================
+
+async function broadcastNotification() {
+    const msg = $('#notifMessage').val().trim();
+    if (!msg) {
+        toastr('warning', 'Pesan notifikasi tidak boleh kosong');
+        return;
+    }
+    
+    const ok = await confirmAction('Kirim Notifikasi?', 'Pesan akan dikirim ke semua siswa yang online: "' + msg + '"', 'question');
+    if (!ok) return;
+    
+    const btn = $('#notifSendBtn');
+    const statusEl = $('#notifStatus');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Mengirim...');
+    statusEl.html('');
+    
+    try {
+        const res = await apiCall({
+            action: 'broadcastNotification',
+            message: msg,
+            type: 'announcement',
+            title: '📢 Pemberitahuan Sistem'
+        });
+        
+        if (res.error) {
+            toastr('error', res.message);
+            statusEl.html('<div class="alert alert-danger py-2 px-3 mb-0"><i class="fas fa-exclamation-circle mr-1"></i>' + res.message + '</div>');
+            return;
+        }
+        
+        toastr('success', 'Notifikasi berhasil dikirim ke semua siswa!');
+        statusEl.html('<div class="alert alert-success py-2 px-3 mb-0"><i class="fas fa-check-circle mr-1"></i>✓ Notifikasi dikirim dengan ID: ' + res.notificationId + '</div>');
+        $('#notifMessage').val('');
+        
+        // Clear status setelah 5 detik
+        setTimeout(() => statusEl.html(''), 5000);
+    } catch (e) {
+        toastr('error', 'Gagal mengirim notifikasi: ' + e.message);
+        statusEl.html('<div class="alert alert-danger py-2 px-3 mb-0"><i class="fas fa-times-circle mr-1"></i>' + e.message + '</div>');
+    } finally {
+        btn.prop('disabled', false).html('<i class="fas fa-paper-plane mr-1"></i>Kirim Notif');
+    }
+}
+
 async function actionClearCache() {
     const ok = await confirmAction('Flush Cache GAS?', 'Cache di server GAS akan dihapus.', 'question');
     if (!ok) return;
