@@ -382,7 +382,7 @@
 
 <script>
 // ==================== CONFIG ====================
-const API_URL = "https://script.google.com/macros/s/AKfycbyE9kxtudmZZv9FSj60yBlFVsH_j6f26lcKg3wVtOK2FLdkQ-UaZRFX5mHUDWNEHwJGOg/exec";
+// API admin lewat Netlify Function POST — credential tidak pernah di URL
 
 let credentials = { username: '', password: '' };
 let adminData = { exams: [], violations: [], logs: [], config: {}, stats: {} };
@@ -451,10 +451,20 @@ $('#loginUser').on('keydown', e => { if (e.key === 'Enter') $('#loginPass').focu
 // ==================== API ====================
 async function apiCall(payload) {
     const body = { ...credentials, ...payload };
-    const encoded = encodeURIComponent(JSON.stringify(body));
-    const url = API_URL + '?payload=' + encoded;
-    const response = await fetch(url, { method: 'GET', redirect: 'follow' });
-    if (!response.ok) throw new Error('HTTP ' + response.status);
+
+    // Kirim via POST ke Netlify Function — credential TIDAK pernah di URL
+    const response = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
+
+    if (response.status === 429) {
+        const data = await response.json();
+        throw new Error(data.message || 'Terlalu banyak percobaan. Coba lagi nanti.');
+    }
+
+    if (!response.ok) throw new Error('Server error: HTTP ' + response.status);
     return await response.json();
 }
 
