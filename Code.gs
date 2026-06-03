@@ -19,13 +19,13 @@ function getAdminUsers() {
   if (raw) {
     try { return JSON.parse(raw); } catch(e) {}
   }
-  // Default fallback — ubah lewat File > Project properties > Script properties
-  var defaultUsers = [
-    { username: "admin", password: "spensada2025" },
-    { username: "proktor", password: "proktor2025" }
-  ];
-  props.setProperty('ADMIN_USERS', JSON.stringify(defaultUsers));
-  return defaultUsers;
+  // NO DEFAULT FALLBACK - Must be set via Script Properties
+  // Instruksi: 
+  // 1. Buka Apps Script editor
+  // 2. Project Settings > Script properties
+  // 3. Tambahkan ADMIN_USERS dengan value:
+  //    [{"username":"admin","password":"PASSWORD_BARU"}]
+  return [];
 }
 
 
@@ -261,7 +261,7 @@ function handleAdminAction(payload) {
 }
 
 
-/** LOGIN (dengan rate limiting) */
+/** LOGIN (dengan rate limiting ketat) */
 function handleLogin(payload) {
   var ip = (payload._ip || "unknown") + "_" + (payload.username || "unknown");
   var props = PropertiesService.getScriptProperties();
@@ -270,28 +270,45 @@ function handleLogin(payload) {
   var firstFail = parseInt(props.getProperty(failKey + "_ts") || "0");
   var now = Date.now();
 
-  // Reset setelah 15 menit
-  if (firstFail > 0 && (now - firstFail) > 900000) {
+  // Reset setelah 30 menit (lebih lama)
+  if (firstFail > 0 && (now - firstFail) > 1800000) {
     fails = 0;
     props.deleteProperty(failKey);
     props.deleteProperty(failKey + "_ts");
   }
 
-  if (fails >= 5) {
-    return responseJSON({ error: true, message: "Terlalu banyak percobaan. Coba lagi 15 menit." });
+  // Blok setelah 3 gagal (lebih ketat) selama 30 menit
+  if (fails >= 3) {
+    return responseJSON({ error: true, message: "Terlalu banyak percobaan. Coba lagi 30 menit." });
   }
 
-  if (authenticateAdmin(payload)) {
+  // Validasi input
+  if (!payload || !payload.username || !payload.password) {
+    return responseJSON({ error: true, message: "Username dan password wajib diisi." });
+  }
+
+  // Authenticate
+  var users = getAdminUsers();
+  if (users.length === 0) {
+    writeLog("LOGIN_FAIL", payload.username, "ADMIN_USERS belum dikonfigurasi di Script Properties");
+    return responseJSON({ error: true, message: "Sistem belum dikonfigurasi. Hubungi administrator." });
+  }
+
+  var authenticated = users.some(function(u) {
+    return u.username === payload.username && u.password === payload.password;
+  });
+
+  if (authenticated) {
     props.deleteProperty(failKey);
     props.deleteProperty(failKey + "_ts");
-    writeLog("LOGIN", payload.username, "Login berhasil");
+    writeLog("LOGIN", payload.username, "Login berhasil dari " + payload._ip);
     return responseJSON({ success: true, message: "Login berhasil" });
   }
 
   fails++;
   props.setProperty(failKey, String(fails));
   if (firstFail === 0) props.setProperty(failKey + "_ts", String(now));
-  writeLog("LOGIN_FAIL", payload.username, "Gagal login (" + fails + "x)");
+  writeLog("LOGIN_FAIL", payload.username, "Gagal login (" + fails + "x) dari " + payload._ip);
   return responseJSON({ error: true, message: "Username atau password salah." });
 }
 
