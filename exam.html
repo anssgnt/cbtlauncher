@@ -307,6 +307,12 @@ body.exam-mode{overflow:hidden}
   </button>
 </div>
 
+<div style="text-align:center; margin-bottom:24px;">
+  <button id="pwaInstallBtn" style="display:none; background:linear-gradient(135deg, #22c55e, #16a34a); border:none; color:#fff; font-size:13px; font-weight:700; padding:10px 20px; border-radius:100px; cursor:pointer; align-items:center; gap:6px; box-shadow:0 4px 12px rgba(34,197,94,0.3); margin:0 auto;">
+    <span class="material-icons-round" style="font-size:18px;">get_app</span> Install Aplikasi CBT
+  </button>
+</div>
+
 </div>
 </div>
 
@@ -334,6 +340,10 @@ body.exam-mode{overflow:hidden}
     </div>
   </div>
   <div class="right">
+    <div class="battery-indicator" id="batteryIndicator" style="display:none; align-items:center; gap:4px; padding:6px 10px; border-radius:10px; font-size:12px; font-weight:700; background:var(--surface-2); color:var(--text-secondary);">
+      <span class="material-icons-round" id="batteryIcon" style="font-size:16px;">battery_full</span>
+      <span id="batteryText">100%</span>
+    </div>
     <div class="timer" id="timerDisplay">
       <span class="material-icons-round" style="font-size:16px">timer</span>
       <span id="timerText">00:00:00</span>
@@ -395,6 +405,15 @@ body.exam-mode{overflow:hidden}
 <div class="contact">Hubungi pengawas ujian untuk informasi lebih lanjut</div>
 </div>
 
+<!-- OFFLINE OVERLAY -->
+<div class="kicked-overlay" id="offlineOverlay" style="z-index:100000; background:rgba(15,23,42,0.95); backdrop-filter:blur(10px);">
+  <div class="kick-icon" style="background:linear-gradient(135deg,#64748b,#334155); box-shadow:0 20px 40px rgba(0,0,0,0.4);">
+    <span class="material-icons-round">wifi_off</span>
+  </div>
+  <h1>Koneksi Terputus</h1>
+  <p>Menunggu jaringan internet kembali...</p>
+</div>
+
 <!-- BLOCK SCREEN -->
 <div class="block-screen" id="blockScreen">
 <div class="lock">
@@ -411,9 +430,67 @@ const MAX_VIOLATIONS_DEFAULT = 5;
 let examData = null, currentExam = null;
 let studentName = '', studentClass = '';
 let violationCount = 0, maxViolations = MAX_VIOLATIONS_DEFAULT;
-let timerInterval = null, examEndTime = null;
+let timerInterval = null, examEndTime = null, heartbeatInterval = null;
 let isLocked = false, fsActive = false;
 let scheduleOffset = 0;
+
+// === PWA & SERVICE WORKER ===
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW failed', err));
+  });
+}
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const installBtn = document.getElementById('pwaInstallBtn');
+  if (installBtn) {
+    installBtn.style.display = 'inline-flex';
+    installBtn.addEventListener('click', async () => {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') installBtn.style.display = 'none';
+      deferredPrompt = null;
+    });
+  }
+});
+
+// === BATTERY API ===
+async function initBattery() {
+  if ('getBattery' in navigator) {
+    try {
+      const battery = await navigator.getBattery();
+      const batEl = document.getElementById('batteryIndicator');
+      const iconEl = document.getElementById('batteryIcon');
+      const textEl = document.getElementById('batteryText');
+      batEl.style.display = 'flex';
+
+      function updateBattery() {
+        const level = Math.round(battery.level * 100);
+        textEl.textContent = level + '%';
+        if (battery.charging) {
+          iconEl.textContent = 'battery_charging_full';
+          batEl.style.color = '#16a34a'; batEl.style.background = '#dcfce7';
+        } else if (level <= 15) {
+          iconEl.textContent = 'battery_alert';
+          batEl.style.color = '#ef4444'; batEl.style.background = '#fef2f2';
+          if (isLocked) alert('Peringatan: Baterai Anda lemah (' + level + '%). Segera hubungkan charger!');
+        } else if (level <= 50) {
+          iconEl.textContent = 'battery_5_bar';
+          batEl.style.color = '#f59e0b'; batEl.style.background = '#fffbeb';
+        } else {
+          iconEl.textContent = 'battery_full';
+          batEl.style.color = 'var(--text-secondary)'; batEl.style.background = 'var(--surface-2)';
+        }
+      }
+      battery.addEventListener('levelchange', updateBattery);
+      battery.addEventListener('chargingchange', updateBattery);
+      updateBattery();
+    } catch(e) {}
+  }
+}
+initBattery();
 
 // Reset state on load (handle page refresh during exam)
 document.getElementById('blockScreen').classList.remove('show');
@@ -613,6 +690,7 @@ async function verifyToken() {
   document.getElementById('maxViolations').textContent = maxViolations;
   examEndTime = end;
   startTimer();
+  startHeartbeat();
   setupLocks();
   document.getElementById('fsNotice').classList.add('show');
 }
@@ -660,6 +738,23 @@ function startTimer() {
     const t = document.getElementById('timerDisplay');
     t.className = diff < 300000 ? 'timer danger' : diff < 600000 ? 'timer warning' : 'timer';
   }, 1000);
+}
+
+// === HEARTBEAT ===
+function startHeartbeat() {
+  if (heartbeatInterval) clearInterval(heartbeatInterval);
+  heartbeatInterval = setInterval(() => {
+    if (isLocked && currentExam) {
+      api({
+        action: 'heartbeat',
+        examId: currentExam.id,
+        examName: currentExam.nama,
+        studentName,
+        studentClass,
+        token: currentExam.token
+      });
+    }
+  }, 60000);
 }
 
 // === LOCKS ===
@@ -725,6 +820,13 @@ function setupLocks() {
     }
   });
 
+  window.addEventListener('offline', () => {
+    if (isLocked) document.getElementById('offlineOverlay').classList.add('show');
+  });
+  window.addEventListener('online', () => {
+    document.getElementById('offlineOverlay').classList.remove('show');
+  });
+
   // Removed DevTools detection because it causes false positives when virtual keyboards appear on mobile/tablets.
 }
 
@@ -764,6 +866,7 @@ function resumeExam() {
 function kickUser(reason) {
   isLocked = false;
   clearInterval(timerInterval);
+  clearInterval(heartbeatInterval);
   sessionStorage.removeItem('cbt_activeToken');
   document.getElementById('kickedOverlay').classList.add('show');
   
