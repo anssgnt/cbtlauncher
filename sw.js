@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spensada-cbt-v6-20260603';
+const CACHE_NAME = 'spensada-cbt-v7-20260604';
 const urlsToCache = [
   './index.html',
   './manifest.json',
