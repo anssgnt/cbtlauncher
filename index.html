@@ -93,8 +93,8 @@
 
 <body class="text-slate-800 min-h-screen relative overflow-x-hidden">
 
-    <!-- PWA Install Gatecade -->
-    <div id="pwaInstallGate" class="fixed inset-0 z-[99999] bg-slate-50 flex flex-col items-center justify-center p-6 text-center transform transition-all duration-300">
+    <!-- PWA Install Gatecade (hidden by default, shown only if pwaEnforce=on) -->
+    <div id="pwaInstallGate" class="fixed inset-0 z-[99999] bg-slate-50 flex-col items-center justify-center p-6 text-center transform transition-all duration-300" style="display:none;">
         <div class="w-20 h-20 sm:w-24 sm:h-24 bg-white border border-slate-200 rounded-[1.5rem] sm:rounded-[2rem] shadow-xl flex items-center justify-center mb-6 sm:mb-8 relative overflow-hidden">
             <div class="absolute inset-0 bg-blue-100/30 blur-lg"></div>
             <img src="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png" alt="Logo" class="w-12 h-12 sm:w-16 sm:h-16 object-contain relative z-10 drop-shadow-sm">
@@ -1272,35 +1272,30 @@
 
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', async () => {
-                    // Force clear old caches sebelum register SW baru
                     if ('caches' in window) {
                         try {
                             const allCaches = await caches.keys();
-                            // Delete semua cache lama (keep hanya v6 ke depan)
                             await Promise.all(
                                 allCaches
-                                    .filter(name => !name.includes('v6') && !name.includes('20260603'))
+                                    .filter(name => !name.includes('v8') && !name.includes('20260605'))
                                     .map(name => caches.delete(name))
                             );
-                        } catch(e) { console.log('Cache clear error:', e); }
+                        } catch(e) {}
                     }
                     
                     navigator.serviceWorker.register('./sw.js', { scope: './' })
                         .then(reg => {
-                            // Listen untuk SW update
                             reg.addEventListener('updatefound', () => {
                                 const newWorker = reg.installing;
                                 newWorker.addEventListener('statechange', () => {
                                     if (newWorker.state === 'activated') {
-                                        // SW baru sudah siap, reload untuk apply
                                         window.location.reload();
                                     }
                                 });
                             });
-                            // Force check update setiap kali load
-                            reg.update().catch(e => console.log('SW update check:', e));
+                            reg.update().catch(() => {});
                         })
-                        .catch(err => console.error('SW Registration Failed:', err));
+                        .catch(() => {});
                 });
             }
 
@@ -1309,47 +1304,36 @@
                 pwa_deferredPrompt = e;
             });
 
-            // Cek config PWA dari server (quick fetch) sebelum tampilkan gate
-            // Jika sudah ada di localStorage, langsung pakai. Jika belum, fetch dulu.
-            const cachedEnforce = localStorage.getItem('pwa_enforce');
-            
-            if (cachedEnforce === 'off') {
-                // Sudah pasti OFF — langsung masuk tanpa gate
-                const gate = document.getElementById('pwaInstallGate');
-                if (gate) gate.remove();
-                initApp();
-                return;
-            }
-
-            if (cachedEnforce === null) {
-                // Belum pernah fetch config — cek ke server dulu sebelum tampilkan gate
-                fetch(URL_API)
-                    .then(r => r.json())
-                    .then(data => {
-                        const pwaEnforceSetting = data && data.config && data.config.pwaEnforce;
-                        if (pwaEnforceSetting) {
-                            localStorage.setItem('pwa_enforce', pwaEnforceSetting);
-                        }
-                        
-                        // Jika setting OFF, langsung remove gate dan init app
-                        if (pwaEnforceSetting === 'off') {
-                            const gate = document.getElementById('pwaInstallGate');
-                            if (gate) gate.remove();
-                            initApp();
-                        } else {
-                            // ON atau undefined → tampilkan gate
-                            proceedPWACheck();
-                        }
-                    })
-                    .catch(() => {
-                        // Gagal fetch — fallback ke default (ON) - tampilkan gate
+            // ALWAYS fetch config terbaru dari server untuk cek PWA setting
+            // Tidak bergantung pada localStorage (bisa stale)
+            fetch(URL_API + '?t=' + Date.now())
+                .then(r => r.json())
+                .then(data => {
+                    const pwaEnforceSetting = (data && data.config && data.config.pwaEnforce) || 'on';
+                    // Update localStorage dengan nilai terbaru
+                    localStorage.setItem('pwa_enforce', pwaEnforceSetting);
+                    
+                    if (pwaEnforceSetting === 'off') {
+                        // Admin set OFF — bypass gate langsung
+                        const gate = document.getElementById('pwaInstallGate');
+                        if (gate) gate.remove();
+                        initApp();
+                    } else {
+                        // Admin set ON — jalankan PWA check
                         proceedPWACheck();
-                    });
-                return;
-            }
-
-            // cachedEnforce === 'on' atau value lain — lanjut pengecekan PWA normal
-            proceedPWACheck();
+                    }
+                })
+                .catch(() => {
+                    // Gagal fetch — fallback ke localStorage atau default ON
+                    const fallback = localStorage.getItem('pwa_enforce') || 'on';
+                    if (fallback === 'off') {
+                        const gate = document.getElementById('pwaInstallGate');
+                        if (gate) gate.remove();
+                        initApp();
+                    } else {
+                        proceedPWACheck();
+                    }
+                });
         }
 
         function proceedPWACheck() {
@@ -1426,6 +1410,7 @@
                 initApp();
             } else {
                 // Not standalone - show install gate
+                if (gate) gate.style.display = 'flex'; // Tampilkan gate
                 document.body.style.overflow = "hidden";
                 
                 // Show bypass button universally after 3 seconds as safety net for all bugged Chrome apps
