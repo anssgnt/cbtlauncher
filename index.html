@@ -1066,8 +1066,17 @@
             const examInfo = examsBank.find(e => e.id === examId) || { nama: examName || 'Ujian' };
             
             if (!link) {
-                await CustomModal.alert("Link ujian tidak ditemukan atau sesi invalid.", "Gagal");
+                await CustomModal.alert("Link ujian tidak ditemukan atau sesi invalid. Hubungi pengawas ujian.", "Gagal");
                 fetchData();
+                return;
+            }
+
+            // Validasi format link
+            try {
+                new URL(link);
+            } catch (e) {
+                await CustomModal.alert("Link ujian tidak valid (format tidak benar). Hubungi admin untuk mengupdate link ujian.", "Gagal");
+                console.error('Invalid link URL:', link, e);
                 return;
             }
 
@@ -1120,7 +1129,7 @@
                              <div class="loader-dots relative w-20 h-5 mb-3"><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div><div class="absolute top-1 w-3 h-3 rounded-full bg-indigo-300"></div></div>
                              <p class="text-xs text-slate-500 font-semibold tracking-wide">Menghubungkan Halaman Ujian...</p>
                         </div>
-                        <iframe src="${link}" class="w-full h-full border-none z-10 relative bg-transparent" allow="fullscreen" sandbox="allow-scripts allow-forms allow-same-origin allow-modals" id="kioskIframe"></iframe>
+                        <iframe src="${link}" class="w-full h-full border-none z-10 relative bg-transparent" allow="camera; microphone; autoplay; clipboard-read; clipboard-write; fullscreen" sandbox="allow-scripts allow-forms allow-same-origin allow-modals allow-popups allow-top-navigation" id="kioskIframe" onload="console.log('Iframe loaded successfully')" onerror="console.error('Iframe failed to load:', this.src)"></iframe>
                     </div>
                 </div>
             `;

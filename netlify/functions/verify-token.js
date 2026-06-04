@@ -123,15 +123,32 @@ export default async (req, context) => {
       return new Response(JSON.stringify({ error: true, message: "Ujian tidak ditemukan." }), { status: 404, headers });
     }
 
+    if (!exam.link || exam.link.trim() === "") {
+      return new Response(JSON.stringify({ error: true, message: "Link ujian belum dikonfigurasi oleh admin." }), { status: 400, headers });
+    }
+
     if (exam.token && exam.token.toUpperCase() !== token.toUpperCase()) {
       // Catat failed attempt untuk monitoring
       console.log(`TOKEN_FAIL: ip=${clientIp} exam=${examId} token=${token}`);
       return new Response(JSON.stringify({ error: true, message: "Token salah." }), { status: 403, headers });
     }
 
+    // Validasi link format
+    let linkUrl = exam.link.trim();
+    if (!linkUrl.startsWith('http://') && !linkUrl.startsWith('https://')) {
+      linkUrl = 'https://' + linkUrl;
+    }
+
+    try {
+      new URL(linkUrl);
+    } catch (e) {
+      console.error(`INVALID_LINK: exam=${examId} link=${exam.link}`);
+      return new Response(JSON.stringify({ error: true, message: "Link ujian tidak valid. Hubungi admin." }), { status: 400, headers });
+    }
+
     return new Response(JSON.stringify({
       success: true,
-      link: exam.link,
+      link: linkUrl,
       examName: exam.nama
     }), { status: 200, headers });
 
