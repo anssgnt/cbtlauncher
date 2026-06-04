@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spensada-cbt-v7-20260604';
+const CACHE_NAME = 'spensada-cbt-v8-20260605';
 const urlsToCache = [
   './index.html',
   './manifest.json',
@@ -27,8 +27,9 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          // Hapus semua cache kecuali yang versi terbaru
-          if (!cacheName.includes('v6') && !cacheName.includes('20260603')) {
+          // Hapus SEMUA cache lama - AGGRESSIVE
+          if (!cacheName.includes('v8') && !cacheName.includes('20260605')) {
+            console.log('🗑️ Clearing old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -36,6 +37,7 @@ self.addEventListener('activate', event => {
     })
   );
   self.clients.claim();
+  self.skipWaiting();
 });
 
 self.addEventListener('fetch', event => {
