@@ -204,6 +204,17 @@ body.exam-mode{overflow:hidden}
 @keyframes spin{to{transform:rotate(360deg)}}
 .btn-sched-nav{width:26px;height:26px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#94a3b8;transition:all .2s;font-size:14px;line-height:1}
 .btn-sched-nav:active{background:#f1f5f9}
+
+@media (max-width: 600px) {
+  .topbar { padding: 0 8px; gap: 4px; }
+  .topbar .exam-icon { display: none; }
+  .topbar .student-name, .topbar .student-class, .topbar .exam-subtitle { display: none; }
+  .topbar .student-chip { padding: 4px; background: transparent; }
+  .topbar .right { gap: 4px; }
+  .topbar .timer { font-size: 12px; padding: 6px 8px; }
+  .topbar .violation-chip { font-size: 11px; padding: 6px 8px; }
+  .topbar .exam-title { font-size: 13px; max-width: 120px; }
+}
 </style>
 </head>
 <body>
@@ -423,6 +434,19 @@ if (savedName && savedClass) {
   document.getElementById('greetingSub').textContent = 'Masukkan token dari pengawas untuk mulai ujian.';
 }
 
+// Auto-resume if page is refreshed during active exam
+function checkActiveSession() {
+  const activeToken = sessionStorage.getItem('cbt_activeToken');
+  if (activeToken && savedName && savedClass) {
+    violationCount = parseInt(sessionStorage.getItem('cbt_violationCount')) || 0;
+    document.getElementById('violationCount').textContent = violationCount;
+    document.getElementById('tokenInput').value = activeToken;
+    document.getElementById('tokenPage').style.display = 'none'; // hide immediately to prevent flash
+    verifyToken();
+  }
+}
+setTimeout(checkActiveSession, 50); // slight delay to allow inputs to populate
+
 // === CLEAR CACHE ===
 function clearAppCache() {
   if (confirm('Apakah kamu yakin ingin membersihkan data yang tersimpan dan me-refresh aplikasi?')) {
@@ -582,6 +606,8 @@ async function verifyToken() {
 
   localStorage.setItem('cbt_studentName', studentName);
   localStorage.setItem('cbt_studentClass', studentClass);
+  sessionStorage.setItem('cbt_activeToken', token);
+  sessionStorage.setItem('cbt_violationCount', violationCount);
 
   document.getElementById('tokenPage').style.display = 'none';
   document.getElementById('maxViolations').textContent = maxViolations;
@@ -710,6 +736,7 @@ async function reportViolation(type, detail) {
   setTimeout(() => violationCooldown = false, 3000);
 
   violationCount++;
+  sessionStorage.setItem('cbt_violationCount', violationCount);
   document.getElementById('violationCount').textContent = violationCount;
 
   await api({
@@ -737,6 +764,7 @@ function resumeExam() {
 function kickUser(reason) {
   isLocked = false;
   clearInterval(timerInterval);
+  sessionStorage.removeItem('cbt_activeToken');
   document.getElementById('kickedOverlay').classList.add('show');
   
   const kickedReasonEl = document.getElementById('kickedReason');
