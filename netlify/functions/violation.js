@@ -7,19 +7,10 @@
 
 const GAS_URL = "https://script.google.com/macros/s/AKfycbyE9kxtudmZZv9FSj60yBlFVsH_j6f26lcKg3wVtOK2FLdkQ-UaZRFX5mHUDWNEHwJGOg/exec";
 
-// In-memory rate limiter
+// In-memory rate limiter (cleanup by window expiry, no setInterval needed in serverless)
 const rateLimitMap = new Map();
 const RL_WINDOW = 60000;
 const RL_MAX = 20;
-
-if (typeof setInterval !== 'undefined') {
-  setInterval(() => {
-    const now = Date.now();
-    for (const [key, val] of rateLimitMap) {
-      if (now - val.windowStart > RL_WINDOW * 2) rateLimitMap.delete(key);
-    }
-  }, 300000);
-}
 
 function isRateLimited(ip) {
   const now = Date.now();

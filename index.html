@@ -1529,13 +1529,13 @@
         }
 
         function initApp() {
-            // Cek apakah nama sudah diisi
             const savedName = localStorage.getItem('student_name');
-            if (!savedName) {
-                // Tampilkan name gate
+            const savedClass = localStorage.getItem('student_class');
+            if (!savedName || !savedClass) {
                 document.getElementById('nameGate').classList.remove('hidden');
-                document.getElementById('nameGateInput').focus();
-                return; // Jangan start app dulu, tunggu nama diisi
+                if (savedName) document.getElementById('nameGateInput').value = savedName;
+                document.getElementById(savedName ? 'classGateInput' : 'nameGateInput').focus();
+                return;
             }
             showStudentName();
             startApp();

@@ -64,6 +64,13 @@ function setupSpreadsheet() {
     vSheet = ss.insertSheet(VIOLATIONS_SHEET_NAME);
     vSheet.getRange(1,1,1,7).setValues([["Timestamp","ExamID","ExamName","StudentName","StudentClass","ViolationCount","UserAgent"]]).setBackground("#dc2626").setFontColor("#fff").setFontWeight("bold");
     vSheet.setFrozenRows(1);
+  } else {
+    // Migration: tambah kolom StudentClass jika belum ada
+    var headers = vSheet.getRange(1,1,1,vSheet.getLastColumn()).getValues()[0];
+    if (headers.indexOf("StudentClass") === -1) {
+      vSheet.insertColumnAfter(4);
+      vSheet.getRange(1,5).setValue("StudentClass").setBackground("#dc2626").setFontColor("#fff").setFontWeight("bold");
+    }
   }
 
   // Sheet Log
@@ -267,9 +274,8 @@ function handleAdminAction(payload) {
 
 /** LOGIN (dengan rate limiting ketat) */
 function handleLogin(payload) {
-  var ip = (payload._ip || "unknown") + "_" + (payload.username || "unknown");
+  var failKey = "LOGIN_FAIL_" + (payload.username || "unknown");
   var props = PropertiesService.getScriptProperties();
-  var failKey = "LOGIN_FAIL_" + ip;
   var fails = parseInt(props.getProperty(failKey) || "0");
   var firstFail = parseInt(props.getProperty(failKey + "_ts") || "0");
   var now = Date.now();
