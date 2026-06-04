@@ -1022,7 +1022,22 @@ async function saveConfig() {
     try {
         const res = await apiCall({ action: 'updateConfig', config });
         if (res.error) { toastr('error', res.message); return; }
-        Swal.fire({ icon: 'success', title: 'Tersimpan!', text: 'Pengaturan berhasil disimpan.', confirmButtonColor: '#4f46e5', timer: 2000, showConfirmButton: false });
+        
+        // Flush Netlify cache juga
+        await fetch('/api/exams?bust=' + Date.now());
+        
+        // Jika PWA setting berubah, broadcast notif ke siswa
+        if (config.PWA_ENFORCE) {
+            const msg = config.PWA_ENFORCE === 'on' 
+                ? '🔔 Pengaturan PWA diaktifkan kembali. Aplikasi dimulai ulang...'
+                : '📱 Anda sekarang bisa akses ujian langsung dari browser tanpa install aplikasi.';
+            await apiCall({ action: 'broadcastNotification', message: msg, type: 'system' });
+        }
+        
+        Swal.fire({ icon: 'success', title: 'Tersimpan!', text: 'Pengaturan berhasil disimpan & cache ter-flush.', confirmButtonColor: '#4f46e5', timer: 2500, showConfirmButton: false });
+        
+        // Refresh admin data untuk lihat perubahan
+        setTimeout(() => refreshAdminData(), 1500);
     } catch (e) { toastr('error', e.message); }
 }
 
