@@ -132,7 +132,7 @@
                 <div class="w-14 h-14 bg-indigo-50 rounded-[1.2rem] flex items-center justify-center mb-3 border border-indigo-100">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                 </div>
-                <h2 class="text-[18px] font-extrabold text-slate-800 tracking-tight">Siapa Kamu?</h2>
+                <h2 class="text-[18px] font-extrabold text-slate-800 tracking-tight">Nama Lengkap Kamu?</h2>
                 <p class="text-[12px] text-slate-500 font-medium mt-1">Masukkan nama & kelas untuk melanjutkan</p>
             </div>
             
@@ -195,7 +195,7 @@
         <div class="bg-white rounded-[1.25rem] p-3.5 sm:p-4 shadow-[0_8px_30px_rgb(0,0,0,0.06)] mb-6 sm:mb-8 flex flex-col items-center justify-center border border-slate-100">
             <div class="flex items-center gap-1.5 mb-1 sm:mb-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                <p class="text-[10px] font-extrabold text-indigo-600 uppercase tracking-[0.15em]">ASAS/ASAT T.A 2025/2026</p>
+                <p class="text-[10px] font-extrabold text-indigo-600 uppercase tracking-[0.15em]">ASAS/ASAT T.A 2025/2026 V.01</p>
             </div>
             <div class="flex items-center gap-2 mt-0.5">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -592,7 +592,7 @@
          * APP VERSION — untuk cache busting otomatis
          * Naikkan angka ini setiap ada update biar siswa dapet versi terbaru
          */
-        const APP_VERSION = 11;
+        const APP_VERSION = 12;
         (function checkVersion() {
             const saved = parseInt(localStorage.getItem('app_version') || '0');
             if (saved && saved !== APP_VERSION) {
