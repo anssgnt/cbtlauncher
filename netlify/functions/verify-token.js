@@ -29,12 +29,32 @@ let cachedData = null;
 let cacheTimestamp = 0;
 const CACHE_TTL = 60 * 1000;
 
+// Request coalescing: 10 request bersamaan → hanya 1 ke GAS
+const pendingRequests = new Map();
+const COALESCE_WINDOW = 500; // ms
+
 async function getExamData() {
   const now = Date.now();
   if (cachedData && (now - cacheTimestamp) < CACHE_TTL) {
     return cachedData;
   }
 
+  // Coalesce: kalau sudah ada pending request, tunggu hasilnya
+  const pending = pendingRequests.get('examData');
+  if (pending) return pending;
+
+  const promise = fetchExamData();
+  pendingRequests.set('examData', promise);
+  try {
+    const result = await promise;
+    return result;
+  } finally {
+    pendingRequests.delete('examData');
+  }
+}
+
+async function fetchExamData() {
+  const now = Date.now();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
   try {
@@ -52,6 +72,64 @@ async function getExamData() {
     if (cachedData) return cachedData;
     throw e;
   }
+}
+
+// Token verification coalescing: same examId+token → share result
+const pendingVerifications = new Map();
+
+async function verifyToken(examId, token, clientIp) {
+  const key = `${examId}:${token}`;
+
+  // Coalesce: kalau sudah ada request sama, tunggu
+  const pending = pendingVerifications.get(key);
+  if (pending) {
+    console.log(`COALESCED: ip=${clientIp} exam=${examId} (shared with existing request)`);
+    return pending;
+  }
+
+  const promise = doVerify(examId, token, clientIp);
+  pendingVerifications.set(key, promise);
+  try {
+    const result = await promise;
+    return result;
+  } finally {
+    pendingVerifications.delete(key);
+  }
+}
+
+async function doVerify(examId, token, clientIp) {
+  const data = await getExamData();
+  if (!data || !data.exams) {
+    return { error: true, message: "Data ujian tidak tersedia.", status: 503 };
+  }
+
+  const exam = data.exams.find(e => e.id === examId);
+  if (!exam) {
+    return { error: true, message: "Ujian tidak ditemukan.", status: 404 };
+  }
+
+  if (!exam.link || exam.link.trim() === "") {
+    return { error: true, message: "Link ujian belum dikonfigurasi oleh admin.", status: 400 };
+  }
+
+  if (exam.token && exam.token.toUpperCase() !== token.toUpperCase()) {
+    console.log(`TOKEN_FAIL: ip=${clientIp} exam=${examId} token=${token}`);
+    return { error: true, message: "Token salah.", status: 403 };
+  }
+
+  let linkUrl = exam.link.trim();
+  if (!linkUrl.startsWith('http://') && !linkUrl.startsWith('https://')) {
+    linkUrl = 'https://' + linkUrl;
+  }
+
+  try {
+    new URL(linkUrl);
+  } catch (e) {
+    console.error(`INVALID_LINK: exam=${examId} link=${exam.link}`);
+    return { error: true, message: "Link ujian tidak valid. Hubungi admin.", status: 400 };
+  }
+
+  return { success: true, link: linkUrl, examName: exam.nama, status: 200 };
 }
 
 function getClientIP(req) {
@@ -104,44 +182,9 @@ export default async (req, context) => {
       return new Response(JSON.stringify({ error: true, message: "examId dan token wajib diisi." }), { status: 400, headers });
     }
 
-    const data = await getExamData();
-    if (!data || !data.exams) {
-      return new Response(JSON.stringify({ error: true, message: "Data ujian tidak tersedia." }), { status: 503, headers });
-    }
-
-    const exam = data.exams.find(e => e.id === examId);
-    if (!exam) {
-      return new Response(JSON.stringify({ error: true, message: "Ujian tidak ditemukan." }), { status: 404, headers });
-    }
-
-    if (!exam.link || exam.link.trim() === "") {
-      return new Response(JSON.stringify({ error: true, message: "Link ujian belum dikonfigurasi oleh admin." }), { status: 400, headers });
-    }
-
-    if (exam.token && exam.token.toUpperCase() !== token.toUpperCase()) {
-      // Catat failed attempt untuk monitoring
-      console.log(`TOKEN_FAIL: ip=${clientIp} exam=${examId} token=${token}`);
-      return new Response(JSON.stringify({ error: true, message: "Token salah." }), { status: 403, headers });
-    }
-
-    // Validasi link format
-    let linkUrl = exam.link.trim();
-    if (!linkUrl.startsWith('http://') && !linkUrl.startsWith('https://')) {
-      linkUrl = 'https://' + linkUrl;
-    }
-
-    try {
-      new URL(linkUrl);
-    } catch (e) {
-      console.error(`INVALID_LINK: exam=${examId} link=${exam.link}`);
-      return new Response(JSON.stringify({ error: true, message: "Link ujian tidak valid. Hubungi admin." }), { status: 400, headers });
-    }
-
-    return new Response(JSON.stringify({
-      success: true,
-      link: linkUrl,
-      examName: exam.nama
-    }), { status: 200, headers });
+    // Coalesced verification: 10 request bersamaan → hanya 1 ke GAS
+    const result = await verifyToken(examId, token, clientIp);
+    return new Response(JSON.stringify(result), { status: result.status, headers });
 
   } catch (e) {
     return new Response(JSON.stringify({ error: true, message: "Server error: " + e.message }), { status: 500, headers });
