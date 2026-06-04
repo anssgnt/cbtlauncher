@@ -437,8 +437,14 @@
                         this.hide();
                     };
 
-                    this.confirmBtn.addEventListener('click', handleConfirm);
-                    this.cancelBtn.addEventListener('click', handleCancel);
+                    // Clone node untuk hapus semua listener lama (anti-leak)
+                    const newConfirm = this.confirmBtn.cloneNode(true);
+                    const newCancel = this.cancelBtn.cloneNode(true);
+                    this.confirmBtn.replaceWith(newConfirm);
+                    this.cancelBtn.replaceWith(newCancel);
+
+                    newConfirm.addEventListener('click', handleConfirm);
+                    newCancel.addEventListener('click', handleCancel);
                 });
             },
             
@@ -586,7 +592,7 @@
          * APP VERSION — untuk cache busting otomatis
          * Naikkan angka ini setiap ada update biar siswa dapet versi terbaru
          */
-        const APP_VERSION = 8;
+        const APP_VERSION = 9;
         (function checkVersion() {
             const saved = parseInt(localStorage.getItem('app_version') || '0');
             if (saved && saved !== APP_VERSION) {
@@ -1192,7 +1198,7 @@
         }
 
         function stopDeviceMonitoring() {
-            if (healthTimer) clearInterval(healthTimer);
+            if (healthTimer) { clearInterval(healthTimer); healthTimer = null; }
         }
 
         let isViolationModalOpen = false;
@@ -1218,15 +1224,14 @@
                         fetch('/api/violation', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    examId: kioskExamId,
-                                    examName: examInfo ? examInfo.nama : '',
-                                    studentName: localStorage.getItem('student_name') || '',
-                                    studentClass: localStorage.getItem('student_class') || '',
-                                    deviceId: localStorage.getItem('device_id') || generateDeviceId(),
-                                    violationCount: violationCount,
-                                    userAgent: navigator.userAgent
-                                })
+                            body: JSON.stringify({
+                                examId: kioskExamId,
+                                examName: examInfo ? examInfo.nama : '',
+                                studentName: localStorage.getItem('student_name') || '',
+                                studentClass: localStorage.getItem('student_class') || '',
+                                violationCount: violationCount,
+                                userAgent: navigator.userAgent
+                            })
                         }).catch(() => {});
                     }
                     
@@ -1262,18 +1267,22 @@
             try {
                 if ('wakeLock' in navigator) {
                     wakeLock = await navigator.wakeLock.request('screen');
-                    console.log('Screen Wake Lock active');
+                    // Re-acquire setelah screen mati/menyala (spec: lock otomatis dilepas)
+                    wakeLock.addEventListener('release', () => {
+                        if (!isLeavingKiosk) {
+                            requestWakeLock(); // re-acquire
+                        }
+                    });
                 }
             } catch (err) {
-                console.warn(`${err.name}, ${err.message}`);
+                console.warn('WakeLock:', err.message);
             }
         }
 
         function releaseWakeLock() {
             if (wakeLock !== null) {
-                wakeLock.release().then(() => {
-                    wakeLock = null;
-                });
+                wakeLock.release().catch(() => {});
+                wakeLock = null;
             }
         }
 

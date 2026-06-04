@@ -144,7 +144,7 @@ export default async (req, context) => {
 
 /**
  * Strip sensitive data (link, token, config) dari response publik.
- * Siswa hanya lihat jadwal + pwaEnforce (perlu untuk gate).
+ * Siswa hanya lihat jadwal + config yang perlu.
  */
 function stripSensitiveData(data) {
   if (!data || !data.exams) return data;
@@ -158,7 +158,9 @@ function stripSensitiveData(data) {
       hasToken: !!(exam.token && exam.token.length > 0)
     })),
     config: {
-      pwaEnforce: data.config?.pwaEnforce
+      pwaEnforce: data.config?.pwaEnforce || 'on',
+      violationReport: data.config?.violationReport || 'on',
+      maxViolations: data.config?.maxViolations || 5
     }
   };
 }

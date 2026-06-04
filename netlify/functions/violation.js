@@ -97,9 +97,8 @@ export default async (req, context) => {
       examName: body.examName || "",
       studentName: body.studentName || "",
       studentClass: body.studentClass || "",
-      deviceId: body.deviceId || "",
       violationCount: body.violationCount || 0,
-      userAgent: body.userAgent || ""
+      userAgent: body.userAgent || navigator?.userAgent || ""
     });
 
     const now = Date.now();
