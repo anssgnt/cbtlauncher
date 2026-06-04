@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#6366f1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Ujian Online - CBT</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --primary:#6366f1;--primary-light:#818cf8;--primary-dark:#4f46e5;--primary-bg:#eef2ff;
+  --danger:#ef4444;--danger-light:#fca5a5;--danger-bg:#fef2f2;
+  --success:#10b981;--success-bg:#ecfdf5;
+  --warning:#f59e0b;--warning-bg:#fffbeb;
+  --bg:#f8fafc;--surface:#fff;--surface-2:#f1f5f9;
+  --text:#0f172a;--text-secondary:#64748b;--text-muted:#94a3b8;
+  --border:#e2e8f0;--shadow-sm:0 1px 2px rgba(0,0,0,.05);
+  --shadow:0 4px 6px -1px rgba(0,0,0,.07),0 2px 4px -2px rgba(0,0,0,.05);
+  --shadow-lg:0 10px 15px -3px rgba(0,0,0,.08),0 4px 6px -4px rgba(0,0,0,.04);
+  --shadow-xl:0 20px 25px -5px rgba(0,0,0,.1),0 8px 10px -6px rgba(0,0,0,.06);
+  --radius:16px;--radius-sm:12px;--radius-xs:8px;
+}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;overflow-y:auto;height:100vh;height:100dvh;width:100vw;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+body.exam-mode{overflow:hidden}
+
+/* === LOGIN TOKEN === */
+.token-page{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;position:relative;overflow:hidden;background:#0f172a}
+.token-page .bg-glow{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
+.token-page .bg-glow.g1{width:400px;height:400px;background:#6366f1;top:-100px;left:-100px;opacity:.3;animation:floatGlow 8s ease-in-out infinite}
+.token-page .bg-glow.g2{width:300px;height:300px;background:#a855f7;bottom:-80px;right:-80px;opacity:.25;animation:floatGlow 10s ease-in-out infinite reverse}
+.token-page .bg-glow.g3{width:200px;height:200px;background:#ec4899;top:50%;left:50%;transform:translate(-50%,-50%);opacity:.15;animation:floatGlow 6s ease-in-out infinite}
+@keyframes floatGlow{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-30px) scale(1.1)}}
+.token-page .bg-grid{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.04) 1px,transparent 1px);background-size:24px 24px;pointer-events:none}
+.token-page .bg-orb{position:absolute;width:100px;height:100px;border-radius:50%;border:1px solid rgba(255,255,255,.06);pointer-events:none;animation:orbit 20s linear infinite}
+@keyframes orbit{0%{transform:rotate(0deg) translateX(120px) rotate(0deg)}100%{transform:rotate(360deg) translateX(120px) rotate(-360deg)}}
+
+.token-box{position:relative;z-index:1;width:100%;max-width:400px}
+
+.token-card{background:rgba(255,255,255,.06);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.1);border-radius:28px;padding:32px 24px;animation:cardIn .7s cubic-bezier(.16,1,.3,1)}
+@keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+.token-card .brand{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.token-card .brand .brand-icon{width:44px;height:44px;background:linear-gradient(135deg,#6366f1,#a855f7,#ec4899);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 8px 24px rgba(99,102,241,.35)}
+.token-card .brand .brand-text{color:rgba(255,255,255,.9);font-weight:800;font-size:16px;letter-spacing:-.3px}
+.token-card .brand .brand-text small{display:block;font-weight:400;font-size:11px;color:rgba(255,255,255,.4);letter-spacing:0}
+.token-card .greeting{color:rgba(255,255,255,.9);font-size:20px;font-weight:800;margin-bottom:4px;letter-spacing:-.5px}
+.token-card .greeting-sub{color:rgba(255,255,255,.4);font-size:13px;margin-bottom:20px;line-height:1.5}
+
+.token-card .input-group input,.token-card .input-group select{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.9);padding:14px 14px 14px 44px;border-radius:14px;font-size:14px}
+.token-card .input-group input:focus,.token-card .input-group select:focus{border-color:rgba(99,102,241,.6);background:rgba(255,255,255,.12);box-shadow:0 0 0 4px rgba(99,102,241,.15)}
+.token-card .input-group input::placeholder{color:rgba(255,255,255,.3)}
+.token-card .input-group select option{background:#1e293b;color:#fff}
+.token-card .input-group .input-icon{color:rgba(255,255,255,.3)}
+.token-card .input-group input:focus + .input-icon,.token-card .input-group select:focus ~ .input-icon{color:rgba(99,102,241,.7)}
+
+.token-card .token-input{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);color:#fbbf24;padding:18px 14px;border-radius:14px;text-align:center;font-size:24px;font-weight:800;letter-spacing:10px;text-transform:uppercase;font-family:'Inter',monospace}
+.token-card .token-input:focus{border-color:rgba(251,191,36,.5);background:rgba(255,255,255,.12);box-shadow:0 0 0 4px rgba(251,191,36,.1)}
+.token-card .token-input::placeholder{color:rgba(255,255,255,.15);letter-spacing:4px;font-size:20px}
+
+.token-card .section-label{color:rgba(255,255,255,.35);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px}
+
+.token-card .btn-primary{background:linear-gradient(135deg,#6366f1,#a855f7);border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:700;color:#fff;cursor:pointer;width:100%;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(99,102,241,.35)}
+.token-card .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(99,102,241,.45)}
+.token-card .btn-primary:active{transform:translateY(0) scale(.98)}
+.token-card .btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+
+.error-msg{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.25);color:#fca5a5;border-radius:12px}
+
+.error-msg{background:var(--danger-bg);color:var(--danger);padding:12px 16px;border-radius:var(--radius-xs);font-size:13px;font-weight:500;margin-bottom:16px;display:none;align-items:center;gap:8px;border:1px solid rgba(239,68,68,.15)}
+.error-msg .material-icons-round{font-size:18px}
+
+.form-section{margin-bottom:20px}
+.form-section .section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:10px}
+
+.input-group{position:relative;margin-bottom:14px}
+.input-group .input-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:20px;pointer-events:none;transition:color .2s}
+.input-group input,.input-group select{width:100%;padding:14px 14px 14px 46px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:15px;font-weight:500;font-family:inherit;background:var(--surface);transition:all .2s;color:var(--text);appearance:none;-webkit-appearance:none}
+.input-group input:focus,.input-group select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 4px rgba(99,102,241,.12)}
+.input-group input:focus + .input-icon,.input-group input:focus ~ .input-icon{color:var(--primary)}
+.input-group input::placeholder{color:var(--text-muted);font-weight:400}
+.input-group select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+
+
+
+.btn{padding:16px 28px;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .25s cubic-bezier(.16,1,.3,1);width:100%;position:relative;overflow:hidden}
+.btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.btn:active{transform:translateY(0) scale(.98)}
+.btn-primary{background:linear-gradient(135deg,var(--primary),#7c3aed);color:#fff;box-shadow:0 4px 16px rgba(99,102,241,.35)}
+.btn-primary:hover{box-shadow:0 8px 24px rgba(99,102,241,.45)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.btn .ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.3);transform:scale(0);animation:ripple .6s linear}
+@keyframes ripple{to{transform:scale(4);opacity:0}}
+
+/* === FULLSCREEN NOTICE === */
+.fs-notice{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(12px);z-index:9998;align-items:center;justify-content:center;flex-direction:column;color:#fff;text-align:center;padding:24px}
+.fs-notice.show{display:flex}
+.fs-notice .lock-icon{width:88px;height:88px;background:linear-gradient(135deg,var(--primary),#7c3aed);border-radius:28px;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;animation:bounce 2s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.fs-notice .lock-icon .material-icons-round{font-size:40px;color:#fff}
+.fs-notice h2{font-size:24px;font-weight:800;margin-bottom:8px}
+.fs-notice p{color:#94a3b8;font-size:14px;margin-bottom:28px;max-width:360px;line-height:1.6}
+.fs-notice .btn{width:auto;padding:16px 48px}
+
+/* === EXAM VIEW === */
+.exam-page{display:none;height:100vh;height:100dvh;width:100vw;position:relative;background:var(--bg)}
+
+/* TOPBAR - Material 3 Style */
+.topbar{position:fixed;top:0;left:0;right:0;height:64px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:999;box-shadow:var(--shadow-sm)}
+.topbar .exam-info{display:flex;align-items:center;gap:12px;min-width:0}
+.topbar .exam-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--primary),#7c3aed);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.topbar .exam-icon .material-icons-round{font-size:20px;color:#fff}
+.topbar .exam-title{font-weight:700;font-size:14px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.topbar .exam-subtitle{font-size:11px;color:var(--text-secondary)}
+.topbar .right{display:flex;align-items:center;gap:10px}
+.topbar .timer{display:flex;align-items:center;gap:6px;font-family:'Inter',monospace;font-size:14px;font-weight:700;background:var(--primary-bg);color:var(--primary);padding:8px 14px;border-radius:10px;transition:all .3s}
+.topbar .timer.warning{background:var(--warning-bg);color:#b45309;animation:shake 1s infinite}
+.topbar .timer.danger{background:var(--danger-bg);color:var(--danger);animation:shake .5s infinite}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+.topbar .violation-chip{display:flex;align-items:center;gap:4px;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;background:var(--danger-bg);color:var(--danger);border:1px solid rgba(239,68,68,.15)}
+.topbar .student-chip{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:12px;background:var(--surface-2);font-size:12px}
+.topbar .student-avatar{width:28px;height:28px;background:linear-gradient(135deg,#f472b6,#a855f7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.topbar .student-name{font-weight:600;font-size:12px}
+.topbar .student-class{color:var(--text-muted);font-size:11px}
+.topbar .fs-btn{width:36px;height:36px;border:none;background:var(--surface-2);border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);transition:all .2s}
+.topbar .fs-btn:hover{background:var(--primary-bg);color:var(--primary)}
+
+/* IFRAME */
+.form-frame{position:fixed;top:64px;left:0;right:0;bottom:0;border:none;width:100%;height:calc(100vh - 64px);height:calc(100dvh - 64px)}
+
+/* === VIOLATION OVERLAY === */
+.violation-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);backdrop-filter:blur(16px);z-index:9999;align-items:center;justify-content:center;flex-direction:column;color:#fff;text-align:center;padding:24px}
+.violation-overlay.show{display:flex;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.violation-overlay .warn-icon{width:96px;height:96px;background:linear-gradient(135deg,#f59e0b,#ef4444);border-radius:32px;display:flex;align-items:center;justify-content:center;margin-bottom:24px;animation:pulseWarn 1.5s infinite}
+@keyframes pulseWarn{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 20px rgba(239,68,68,0)}}
+.violation-overlay .warn-icon .material-icons-round{font-size:48px;color:#fff}
+.violation-overlay h1{font-size:22px;font-weight:800;margin-bottom:8px;color:#fca5a5}
+.violation-overlay .viol-type{font-size:16px;font-weight:600;color:#fff;margin-bottom:8px}
+.violation-overlay p{font-size:14px;color:#94a3b8;margin-bottom:24px;max-width:400px;line-height:1.6}
+.violation-overlay .detail-card{background:rgba(255,255,255,.08);backdrop-filter:blur(8px);padding:16px 24px;border-radius:var(--radius-sm);margin-bottom:24px;font-size:13px;display:flex;gap:24px;justify-content:center;border:1px solid rgba(255,255,255,.1)}
+.violation-overlay .detail-item{text-align:center}
+.violation-overlay .detail-item .val{font-size:24px;font-weight:800;color:#fca5a5}
+.violation-overlay .detail-item .label{font-size:11px;color:#94a3b8;margin-top:2px}
+
+/* === KICKED === */
+.kicked-overlay{display:none;position:fixed;inset:0;background:#0f172a;z-index:99999;align-items:center;justify-content:center;flex-direction:column;color:#fff;text-align:center;padding:24px}
+.kicked-overlay.show{display:flex;animation:fadeIn .5s ease}
+.kicked-overlay .kick-icon{width:120px;height:120px;background:linear-gradient(135deg,#dc2626,#991b1b);border-radius:40px;display:flex;align-items:center;justify-content:center;margin-bottom:28px;box-shadow:0 20px 40px rgba(220,38,38,.4)}
+.kicked-overlay .kick-icon .material-icons-round{font-size:56px;color:#fff}
+.kicked-overlay h1{font-size:28px;font-weight:800;margin-bottom:8px}
+.kicked-overlay p{color:#94a3b8;font-size:14px;line-height:1.6}
+.kicked-overlay .contact{margin-top:16px;padding:12px 20px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:var(--radius-xs);color:#fca5a5;font-weight:600;font-size:14px}
+
+/* === BLOCK SCREEN === */
+.block-screen{display:none;position:fixed;inset:0;background:#0f172a;z-index:10000;align-items:center;justify-content:center;color:#fff;text-align:center;padding:24px}
+.block-screen.show{display:flex}
+.block-screen .lock{width:80px;height:80px;background:linear-gradient(135deg,#334155,#1e293b);border-radius:24px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;animation:lockPulse 2s infinite}
+@keyframes lockPulse{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.3)}50%{box-shadow:0 0 0 16px rgba(99,102,241,0)}}
+.block-screen .lock .material-icons-round{font-size:36px;color:var(--primary-light)}
+.block-screen h2{font-size:20px;font-weight:700;margin-bottom:6px}
+.block-screen p{color:#64748b;font-size:13px}
+
+/* === TOAST === */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:12px 20px;border-radius:12px;color:#fff;font-size:13px;font-weight:600;z-index:99999;animation:toastIn .4s cubic-bezier(.16,1,.3,1);box-shadow:0 8px 24px rgba(0,0,0,.2);display:flex;align-items:center;gap:8px}
+.toast.success{background:var(--success)}.toast.error{background:var(--danger)}.toast.info{background:var(--primary)}
+@keyframes toastIn{from{transform:translateX(-50%) translateY(20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+.sched-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.sched-item:last-child{border-bottom:none}
+.sched-time{flex-shrink:0;text-align:center;min-width:48px}
+.sched-time .sched-hour{font-size:13px;font-weight:800;color:rgba(255,255,255,.8);line-height:1.2}
+.sched-time .sched-label{font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.5px}
+.sched-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.sched-dot.live{background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.2);animation:schedPulse 2s infinite}
+.sched-dot.upcoming{background:#818cf8}
+.sched-dot.done{background:rgba(255,255,255,.15)}
+@keyframes schedPulse{0%,100%{box-shadow:0 0 0 4px rgba(34,197,94,.2)}50%{box-shadow:0 0 0 8px rgba(34,197,94,0)}}
+.sched-info{flex:1;min-width:0}
+.sched-info .sched-name{font-size:13px;font-weight:600;color:rgba(255,255,255,.8)}
+.sched-info .sched-meta{font-size:11px;color:rgba(255,255,255,.35);margin-top:1px}
+.sched-status{flex-shrink:0;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px}
+.sched-status.live{background:rgba(34,197,94,.15);color:#4ade80}
+.sched-status.upcoming{background:rgba(99,102,241,.15);color:#a5b4fc}
+.sched-status.done{background:rgba(255,255,255,.06);color:rgba(255,255,255,.3)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn-sched-nav{width:28px;height:28px;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(255,255,255,.06);cursor:pointer;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.4);transition:all .2s;font-size:16px;line-height:1}
+.btn-sched-nav:hover{background:rgba(255,255,255,.12);color:rgba(255,255,255,.7)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN TOKEN -->
+<div class="token-page" id="tokenPage">
+<div class="bg-glow g1"></div>
+<div class="bg-glow g2"></div>
+<div class="bg-glow g3"></div>
+<div class="bg-grid"></div>
+<div class="token-box">
+<div class="token-card">
+<div class="brand">
+  <div class="brand-icon">📝</div>
+  <div class="brand-text">Spensada CBT<small>Sistem Ujian Online</small></div>
+</div>
+<div class="greeting">Hai, Selamat Datang! 👋</div>
+<div class="greeting-sub">Masukkan data kamu dan token dari pengawas untuk memulai ujian.</div>
+
+<div id="errorMsg" class="error-msg">
+  <span class="material-icons-round">error</span>
+  <span id="errorText"></span>
+</div>
+
+<div class="form-section">
+  <div class="section-label">Data Diri</div>
+  <div class="input-group">
+    <input type="text" id="studentNameInput" placeholder="Nama Lengkap">
+    <span class="material-icons-round input-icon">person</span>
+  </div>
+  <div class="input-group">
+    <select id="studentClassInput">
+      <option value="" disabled selected>Pilih Kelas</option>
+      <option value="7A">7A</option><option value="7B">7B</option><option value="7C">7C</option><option value="7D">7D</option>
+      <option value="7E">7E</option><option value="7F">7F</option><option value="7G">7G</option><option value="7H">7H</option>
+      <option value="8A">8A</option><option value="8B">8B</option><option value="8C">8C</option><option value="8D">8D</option>
+      <option value="8E">8E</option><option value="8F">8F</option><option value="8G">8G</option><option value="8H">8H</option>
+    </select>
+    <span class="material-icons-round input-icon">class</span>
+  </div>
+</div>
+
+<div class="form-section">
+  <div class="section-label">Token Ujian</div>
+  <div class="input-group">
+    <input type="text" id="tokenInput" class="token-input" placeholder="......" maxlength="10" autocomplete="off" autofocus>
+  </div>
+</div>
+
+<button class="btn-primary" id="startBtn" onclick="verifyToken()">
+  <span>🔑</span> Masuk Ujian
+</button>
+
+<!-- Jadwal -->
+<div id="examSchedule" style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.08)">
+  <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.3);margin-bottom:10px;display:flex;align-items:center;gap:6px">
+    <span>📅</span> Jadwal Ujian
+    <span id="scheduleRefreshBtn" style="font-size:12px;cursor:pointer;color:rgba(255,255,255,.3);margin-left:auto" onclick="loadExamData()">↻</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+    <button id="schedPrevBtn" class="btn-sched-nav" onclick="shiftSchedule(-1)" style="visibility:hidden">‹</button>
+    <span id="schedDateLabel" style="font-size:11px;font-weight:600;color:rgba(255,255,255,.5);flex:1;text-align:center">Hari Ini</span>
+    <button id="schedNextBtn" class="btn-sched-nav" onclick="shiftSchedule(1)">›</button>
+  </div>
+  <div id="scheduleList"><div style="text-align:center;padding:16px 0;color:rgba(255,255,255,.3);font-size:13px"><span style="display:inline-block;animation:spin 1s linear infinite">↻</span> Memuat jadwal...</div></div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- FULLSCREEN NOTICE -->
+<div class="fs-notice" id="fsNotice">
+<div class="lock-icon">
+  <span class="material-icons-round">lock</span>
+</div>
+<h2>Mode Ujian Aktif</h2>
+<p>Ujian ini memerlukan mode layar penuh. Jangan keluar dari halaman ini selama ujian berlangsung.</p>
+<button class="btn btn-primary" onclick="enterFullscreen()">
+  <span class="material-icons-round" style="margin-right:8px;vertical-align:middle">fullscreen</span>
+  Masuk Fullscreen & Mulai
+</button>
+</div>
+
+<!-- EXAM VIEW -->
+<div class="exam-page" id="examPage">
+<div class="topbar">
+  <div class="exam-info">
+    <div class="exam-icon"><span class="material-icons-round">quiz</span></div>
+    <div>
+      <div class="exam-title" id="topExamName">Ujian</div>
+      <div class="exam-subtitle" id="topExamSub">Sedang berlangsung</div>
+    </div>
+  </div>
+  <div class="right">
+    <div class="timer" id="timerDisplay">
+      <span class="material-icons-round" style="font-size:16px">timer</span>
+      <span id="timerText">00:00:00</span>
+    </div>
+    <div class="violation-chip" id="violationBadge">
+      <span class="material-icons-round" style="font-size:14px">warning</span>
+      <span id="violationCount">0</span>/<span id="maxViolations">5</span>
+    </div>
+    <div class="student-chip">
+      <div class="student-avatar" id="studentAvatar">-</div>
+      <div>
+        <div class="student-name" id="topStudentName">-</div>
+        <div class="student-class" id="topStudentClass">-</div>
+      </div>
+    </div>
+    <button class="fs-btn" onclick="toggleFullscreen()" title="Fullscreen">
+      <span class="material-icons-round" style="font-size:20px">fullscreen</span>
+    </button>
+  </div>
+</div>
+<iframe class="form-frame" id="formFrame" allow="accelerometer; camera; microphone; geolocation" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+</div>
+
+<!-- VIOLATION OVERLAY -->
+<div class="violation-overlay" id="violationOverlay">
+<div class="warn-icon">
+  <span class="material-icons-round">gpp_maybe</span>
+</div>
+<h1>Pelanggaran Terdeteksi!</h1>
+<div class="viol-type" id="violType">Tab Switch</div>
+<p id="violDesc">Anda terdeteksi meninggalkan halaman ujian. Pelanggaran telah dicatat.</p>
+<div class="detail-card">
+  <div class="detail-item">
+    <div class="val" id="violCurrent">1</div>
+    <div class="label">Pelanggaran</div>
+  </div>
+  <div class="detail-item">
+    <div class="val" id="violMax">5</div>
+    <div class="label">Batas Maks</div>
+  </div>
+  <div class="detail-item">
+    <div class="val" id="violTime">--:--</div>
+    <div class="label">Waktu</div>
+  </div>
+</div>
+<button class="btn btn-primary" onclick="resumeExam()" style="width:auto;padding:14px 40px">
+  <span class="material-icons-round" style="margin-right:8px;vertical-align:middle">arrow_back</span>
+  Kembali ke Ujian
+</button>
+</div>
+
+<!-- KICKED -->
+<div class="kicked-overlay" id="kickedOverlay">
+<div class="kick-icon">
+  <span class="material-icons-round">block</span>
+</div>
+<h1>Ujian Berakhir</h1>
+<p>Anda telah melebihi batas pelanggaran<br>dan dikeluarkan dari ujian.</p>
+<div class="contact">Hubungi pengawas ujian untuk informasi lebih lanjut</div>
+</div>
+
+<!-- BLOCK SCREEN -->
+<div class="block-screen" id="blockScreen">
+<div class="lock">
+  <span class="material-icons-round">lock</span>
+</div>
+<h2>Layar Terkunci</h2>
+<p>Kembali ke halaman ujian untuk melanjutkan</p>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbyE9kxtudmZZv9FSj60yBlFVsH_j6f26lcKg3wVtOK2FLdkQ-UaZRFX5mHUDWNEHwJGOg/exec";
+const MAX_VIOLATIONS_DEFAULT = 5;
+
+let examData = null, currentExam = null;
+let studentName = '', studentClass = '';
+let violationCount = 0, maxViolations = MAX_VIOLATIONS_DEFAULT;
+let timerInterval = null, examEndTime = null;
+let isLocked = false, fsActive = false;
+let scheduleOffset = 0;
+
+// === API ===
+async function api(payload) {
+  const url = API_URL + '?payload=' + encodeURIComponent(JSON.stringify(payload));
+  const res = await fetch(url, { redirect: 'follow' });
+  const text = await res.text();
+  try { return JSON.parse(text); } catch(e) { return { error: true, message: 'Response tidak valid' }; }
+}
+
+// === LOAD DATA ===
+async function loadExamData() {
+  try {
+    const res = await fetch(API_URL, { redirect: 'follow' });
+    const text = await res.text();
+    const data = JSON.parse(text);
+    if (data.exams) {
+      examData = data.exams;
+      maxViolations = parseInt(data.config?.maxViolations) || MAX_VIOLATIONS_DEFAULT;
+    }
+    renderSchedule();
+  } catch(e) {}
+}
+loadExamData();
+
+// === SCHEDULE ===
+function shiftSchedule(direction) {
+  scheduleOffset += direction;
+  if (scheduleOffset < 0) scheduleOffset = 0;
+  renderSchedule();
+}
+
+function renderSchedule() {
+  const el = document.getElementById('scheduleList');
+  const dateLabel = document.getElementById('schedDateLabel');
+  const prevBtn = document.getElementById('schedPrevBtn');
+  const nextBtn = document.getElementById('schedNextBtn');
+  if (!el) return;
+
+  const exams = examData || [];
+  const now = new Date();
+  const targetDate = new Date(now);
+  targetDate.setDate(targetDate.getDate() + scheduleOffset);
+  const targetStr = targetDate.toISOString().slice(0,10);
+
+  // Label tanggal
+  const todayStr = now.toISOString().slice(0,10);
+  const tomorrowStr = new Date(now); tomorrowStr.setDate(tomorrowStr.getDate() + 1); const tomStr = tomorrowStr.toISOString().slice(0,10);
+  if (targetStr === todayStr) dateLabel.textContent = 'Hari Ini';
+  else if (targetStr === tomStr) dateLabel.textContent = 'Besok';
+  else dateLabel.textContent = targetDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' });
+
+  prevBtn.style.visibility = scheduleOffset <= 0 ? 'hidden' : 'visible';
+
+  const dayExams = exams.filter(e => {
+    if (e.status !== 'aktif') return false;
+    const s = e.start ? e.start.split(' ')[0] : '';
+    const en = e.end ? e.end.split(' ')[0] : '';
+    return s === targetStr || en === targetStr;
+  }).sort((a, b) => {
+    return (a.start || '').localeCompare(b.start || '');
+  });
+
+  if (dayExams.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:20px 0;color:var(--text-muted);font-size:13px"><span class="material-icons-round" style="font-size:24px;vertical-align:middle">event_busy</span><br><span style="margin-top:6px;display:inline-block">Tidak ada ujian</span></div>';
+    return;
+  }
+
+  el.innerHTML = dayExams.map(e => {
+    const start = new Date((e.start || '').replace(' ', 'T'));
+    const end = new Date((e.end || '').replace(' ', 'T'));
+    const isLive = now >= start && now <= end;
+    const isDone = now > end;
+    const statusClass = isLive ? 'live' : isDone ? 'done' : 'upcoming';
+    const statusLabel = isLive ? 'SEDANG BERLANGSUNG' : isDone ? 'SELESAI' : 'AKAN DATANG';
+    const startHour = e.start ? e.start.slice(11, 16) : '--:--';
+    const endHour = e.end ? e.end.slice(11, 16) : '--:--';
+    return '<div class="sched-item">' +
+      '<div class="sched-time"><div class="sched-hour">' + startHour + '</div><div class="sched-label">mulai</div></div>' +
+      '<div class="sched-dot ' + statusClass + '"></div>' +
+      '<div class="sched-info"><div class="sched-name">' + e.nama + '</div><div class="sched-meta">' + startHour + ' — ' + endHour + '</div></div>' +
+      '<div class="sched-status ' + statusClass + '">' + statusLabel + '</div>' +
+      '</div>';
+  }).join('');
+}
+
+// === RIPPLE EFFECT ===
+document.querySelectorAll('.btn').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    const ripple = document.createElement('span');
+    ripple.classList.add('ripple');
+    const rect = this.getBoundingClientRect();
+    ripple.style.left = (e.clientX - rect.left) + 'px';
+    ripple.style.top = (e.clientY - rect.top) + 'px';
+    this.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+  });
+});
+
+// === TOKEN VERIFY ===
+async function verifyToken() {
+  const token = document.getElementById('tokenInput').value.trim().toUpperCase();
+  studentName = document.getElementById('studentNameInput').value.trim();
+  studentClass = document.getElementById('studentClassInput').value;
+  const errEl = document.getElementById('errorMsg');
+  const errText = document.getElementById('errorText');
+  const btn = document.getElementById('startBtn');
+
+  function showErr(msg) {
+    errText.textContent = msg;
+    errEl.style.display = 'flex';
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-icons-round" style="margin-right:8px;vertical-align:middle">login</span> Masuk Ujian';
+  }
+
+  if (!studentName) return showErr('Nama wajib diisi');
+  if (!studentClass) return showErr('Kelas wajib dipilih');
+  if (!token) return showErr('Token wajib diisi');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="material-icons-round" style="margin-right:8px;vertical-align:middle">hourglass_empty</span> Memverifikasi...';
+  errEl.style.display = 'none';
+
+  if (!examData) await loadExamData();
+  if (!examData) return showErr('Gagal memuat data ujian');
+
+  currentExam = examData.find(e => e.token.toUpperCase() === token && e.status === 'aktif');
+  if (!currentExam) return showErr('Token salah atau ujian tidak aktif');
+
+  const now = new Date();
+  const start = new Date(currentExam.start.replace(' ', 'T'));
+  const end = new Date(currentExam.end.replace(' ', 'T'));
+  if (now < start) return showErr('Ujian belum dimulai. Mulai: ' + currentExam.start);
+  if (now > end) return showErr('Ujian sudah berakhir');
+
+  document.getElementById('tokenPage').style.display = 'none';
+  document.getElementById('maxViolations').textContent = maxViolations;
+  examEndTime = end;
+  startTimer();
+  setupLocks();
+  document.getElementById('fsNotice').classList.add('show');
+}
+
+// === FULLSCREEN ===
+function enterFullscreen() {
+  const el = document.documentElement;
+  const rfs = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+  if (rfs) {
+    rfs.call(el).then(() => { fsActive = true; document.getElementById('fsNotice').classList.remove('show'); startExam(); })
+      .catch(() => { document.getElementById('fsNotice').classList.remove('show'); startExam(); });
+  } else {
+    document.getElementById('fsNotice').classList.remove('show');
+    startExam();
+  }
+}
+
+function toggleFullscreen() {
+  if (document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen().catch(()=>{});
+}
+
+// === START EXAM ===
+function startExam() {
+  document.getElementById('examPage').style.display = 'block';
+  document.getElementById('topExamName').textContent = currentExam.nama;
+  document.getElementById('topStudentName').textContent = studentName;
+  document.getElementById('topStudentClass').textContent = studentClass;
+  document.getElementById('studentAvatar').textContent = studentName.charAt(0).toUpperCase();
+  document.getElementById('formFrame').src = currentExam.link;
+  isLocked = true;
+  document.body.classList.add('exam-mode');
+}
+
+// === TIMER ===
+function startTimer() {
+  timerInterval = setInterval(() => {
+    const diff = examEndTime - new Date();
+    if (diff <= 0) { clearInterval(timerInterval); kickUser('Waktu habis'); return; }
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    document.getElementById('timerText').textContent =
+      String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    const t = document.getElementById('timerDisplay');
+    t.className = diff < 300000 ? 'timer danger' : diff < 600000 ? 'timer warning' : 'timer';
+  }, 1000);
+}
+
+// === LOCKS ===
+function setupLocks() {
+  document.addEventListener('contextmenu', e => { e.preventDefault(); reportViolation('Klik Kanan', 'Mencoba klik kanan'); });
+  document.oncontextmenu = e => { e.preventDefault(); return false; };
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key.toUpperCase())) || (e.ctrlKey && ['u','s','p'].includes(e.key.toLowerCase()))) {
+      e.preventDefault(); e.stopPropagation();
+      reportViolation('Shortcut Terlarang', 'Mencoba akses: ' + e.key);
+      return false;
+    }
+  });
+
+  document.addEventListener('copy', e => { e.preventDefault(); reportViolation('Copy', 'Mencoba menyalin teks'); });
+  document.addEventListener('paste', e => { e.preventDefault(); reportViolation('Paste', 'Mencoba menempel teks'); });
+  document.addEventListener('cut', e => { e.preventDefault(); reportViolation('Cut', 'Mencoba memotong teks'); });
+  document.addEventListener('dragstart', e => e.preventDefault());
+  document.addEventListener('selectstart', e => { if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && isLocked) {
+      reportViolation('Tab Switch', 'Berpindah tab atau minimize browser');
+      blockScreen(true);
+    }
+  });
+
+  window.addEventListener('blur', () => {
+    if (isLocked) { reportViolation('Window Blur', 'Meninggalkan halaman ujian'); blockScreen(true); }
+  });
+
+  window.addEventListener('focus', () => { if (isLocked) setTimeout(() => blockScreen(false), 500); });
+
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && isLocked && fsActive) reportViolation('Fullscreen Exit', 'Keluar dari mode fullscreen');
+  });
+
+  window.addEventListener('popstate', () => history.pushState(null, '', location.href));
+  history.pushState(null, '', location.href);
+
+  setInterval(() => {
+    if (window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 160) {
+      reportViolation('DevTools', 'Developer Tools terdeteksi');
+    }
+  }, 2000);
+}
+
+// === VIOLATION ===
+let violationCooldown = false;
+async function reportViolation(type, detail) {
+  if (violationCooldown) return;
+  violationCooldown = true;
+  setTimeout(() => violationCooldown = false, 3000);
+
+  violationCount++;
+  document.getElementById('violationCount').textContent = violationCount;
+
+  await api({
+    action: 'reportViolation', examId: currentExam.id, examName: currentExam.nama,
+    studentName, studentClass, violationCount: 1, userAgent: navigator.userAgent
+  });
+
+  document.getElementById('violType').textContent = type;
+  document.getElementById('violDesc').textContent = detail;
+  document.getElementById('violCurrent').textContent = violationCount;
+  document.getElementById('violMax').textContent = maxViolations;
+  document.getElementById('violTime').textContent = new Date().toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'});
+  document.getElementById('violationOverlay').classList.add('show');
+
+  if (violationCount >= maxViolations) {
+    setTimeout(() => kickUser('Melebihi batas pelanggaran'), 2500);
+  }
+}
+
+function resumeExam() {
+  document.getElementById('violationOverlay').classList.remove('show');
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+}
+
+function kickUser(reason) {
+  isLocked = false;
+  clearInterval(timerInterval);
+  document.getElementById('kickedOverlay').classList.add('show');
+  document.getElementById('formFrame').src = 'about:blank';
+  document.body.classList.remove('exam-mode');
+  if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+}
+
+function blockScreen(show) {
+  document.getElementById('blockScreen').classList.toggle('show', show);
+}
+
+// === ENTER TO SUBMIT ===
+document.getElementById('tokenInput').addEventListener('keydown', e => { if (e.key === 'Enter') verifyToken(); });
+document.getElementById('studentNameInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('tokenInput').focus(); });
+</script>
+</body>
+</html>
