@@ -55,7 +55,15 @@ function setupSpreadsheet() {
   if (!cfgSheet) {
     cfgSheet = ss.insertSheet(CONFIG_SHEET_NAME);
     cfgSheet.getRange(1,1,1,2).setValues([["Key","Value"]]).setBackground("#f59e0b").setFontColor("#fff").setFontWeight("bold");
-    cfgSheet.getRange(2,1,3,2).setValues([["PROCTOR_KEY","2025"],["MAX_VIOLATIONS","5"],["CACHE_DURATION","120"]]);
+    cfgSheet.getRange(2,1,4,2).setValues([["PROCTOR_KEY","2025"],["MAX_VIOLATIONS","5"],["CACHE_DURATION","120"],["APP_VERSION","1"]]);
+  } else {
+    // Migration: tambah APP_VERSION jika belum ada
+    var cfgData = cfgSheet.getDataRange().getValues();
+    var hasVersion = false;
+    for (var i = 1; i < cfgData.length; i++) {
+      if (cfgData[i][0] === "APP_VERSION") { hasVersion = true; break; }
+    }
+    if (!hasVersion) cfgSheet.appendRow(["APP_VERSION", "1"]);
   }
 
   // Sheet Violations
@@ -210,7 +218,7 @@ function doGet(e) {
     var config = getConfig(ss);
     var result = {
       exams: exams,
-      config: { proctorKey: config.PROCTOR_KEY || "2025", maxViolations: parseInt(config.MAX_VIOLATIONS) || 5, pwaEnforce: config.PWA_ENFORCE || "on", cacheDuration: config.CACHE_DURATION || "60", violationReport: config.VIOLATION_REPORT || "on" }
+      config: { proctorKey: config.PROCTOR_KEY || "2025", maxViolations: parseInt(config.MAX_VIOLATIONS) || 5, pwaEnforce: config.PWA_ENFORCE || "on", cacheDuration: config.CACHE_DURATION || "60", violationReport: config.VIOLATION_REPORT || "on", appVersion: config.APP_VERSION || "1" }
     };
 
     cache.put("CBT_EXAM_DATA", JSON.stringify(result), parseInt(config.CACHE_DURATION) || 120);

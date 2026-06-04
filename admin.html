@@ -349,6 +349,16 @@
                             </select>
                             <small class="text-muted">Jika OFF, pelanggaran tetap tercatat lokal di HP siswa tapi tidak dikirim ke server.</small>
                         </div>
+                        <div class="col-md-6 form-group">
+                            <label class="font-weight-bold"><i class="fas fa-code-branch mr-1 text-info"></i> Versi Aplikasi</label>
+                            <div class="input-group">
+                                <input type="number" id="cfgAppVersion" class="form-control text-uppercase font-weight-bold" placeholder="1" min="1" style="letter-spacing:1px;">
+                                <div class="input-group-append">
+                                    <button onclick="bumpAppVersion()" class="btn btn-outline-success" title="Naikkan versi (+1)"><i class="fas fa-arrow-up"></i> Bump</button>
+                                </div>
+                            </div>
+                            <small class="text-muted">Nomor versi app. Naikkan saat ada update kode. Siswa otomatis refresh cache.</small>
+                        </div>
                     </div>
                 </div>
                 <div class="card-footer">
@@ -846,6 +856,7 @@ function renderSettings() {
     $('#cfgCacheDuration').val(cfg.CACHE_DURATION || '120');
     $('#cfgPwaEnforce').val(cfg.PWA_ENFORCE || 'on');
     $('#cfgViolationReport').val(cfg.VIOLATION_REPORT || 'on');
+    $('#cfgAppVersion').val(cfg.APP_VERSION || '1');
 }
 
 // ==================== EXAM CRUD ====================
@@ -1019,7 +1030,8 @@ async function saveConfig() {
         MAX_VIOLATIONS: $('#cfgMaxViolations').val().trim(),
         CACHE_DURATION: $('#cfgCacheDuration').val().trim(),
         PWA_ENFORCE: $('#cfgPwaEnforce').val(),
-        VIOLATION_REPORT: $('#cfgViolationReport').val()
+        VIOLATION_REPORT: $('#cfgViolationReport').val(),
+        APP_VERSION: $('#cfgAppVersion').val().trim()
     };
 
     // Validasi PROCTOR_KEY tidak boleh kosong (Mi7)
@@ -1048,6 +1060,14 @@ async function saveConfig() {
         Swal.fire({ icon: 'success', title: 'Tersimpan!', text: 'Pengaturan berhasil disimpan.', confirmButtonColor: '#4f46e5', timer: 2000, showConfirmButton: false });
         setTimeout(() => refreshAdminData(), 1000);
     } catch (e) { toastr('error', e.message); }
+}
+
+function bumpAppVersion() {
+    const current = parseInt($('#cfgAppVersion').val()) || 1;
+    const next = current + 1;
+    $('#cfgAppVersion').val(next);
+    saveConfig();
+    toastr('success', 'Versi dinaikkan ke ' + next + '. Siswa akan otomatis refresh.');
 }
 
 // ==================== UTILITIES ====================
