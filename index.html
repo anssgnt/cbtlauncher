@@ -23,7 +23,7 @@
     <!-- Favicon Fix 404 -->
     <link rel="icon" type="image/x-icon" href="https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png">
 
-    <!-- Tailwind CSS (Pinned version for production + Cache Busting) -->
+    <!-- Tailwind CSS CDN (play.tailwindcss.com for runtime, acceptable for this use case) -->
     <script src="https://cdn.tailwindcss.com/3.4.1?v=20260605"></script>
 
     <!-- System font stack (zero KB, zero request) -->
@@ -587,7 +587,7 @@
          * APP VERSION — untuk cache busting otomatis
          * Naikkan angka ini setiap ada update biar siswa dapet versi terbaru
          */
-        const APP_VERSION = 3;
+        const APP_VERSION = 8;
         (function checkVersion() {
             const saved = parseInt(localStorage.getItem('app_version') || '0');
             if (saved && saved !== APP_VERSION) {
@@ -603,6 +603,10 @@
                         regs.forEach(r => r.unregister())
                     );
                 }
+                // Reload sekali untuk apply cache baru
+                localStorage.setItem('app_version', String(APP_VERSION));
+                location.reload(true);
+                return;
             }
             localStorage.setItem('app_version', String(APP_VERSION));
         })();
@@ -1551,32 +1555,6 @@
         let lastNotificationId = 0;
         let notificationCheckInterval = null;
         const NOTIFICATION_CHECK_INTERVAL = 5000; // 5 detik
-        const APP_VERSION = '8'; // Increment setiap update
-
-        // Store version untuk detect update
-        function checkForAppUpdate() {
-            const storedVersion = sessionStorage.getItem('app_version');
-            if (!storedVersion) {
-                sessionStorage.setItem('app_version', APP_VERSION);
-                return;
-            }
-            
-            if (storedVersion !== APP_VERSION) {
-                console.log('App update detected:', storedVersion, '→', APP_VERSION);
-                // Notify user dan force reload
-                CustomModal.alert(
-                    '📦 Versi aplikasi terbaru sudah tersedia. Aplikasi akan dimuat ulang dalam 3 detik...',
-                    'Update Aplikasi'
-                );
-                setTimeout(() => {
-                    // Clear all storage untuk fresh start
-                    sessionStorage.clear();
-                    localStorage.clear();
-                    location.reload(true); // Hard refresh
-                }, 3000);
-            }
-            sessionStorage.setItem('app_version', APP_VERSION);
-        }
 
         async function startNotificationPolling() {
             if (notificationCheckInterval) clearInterval(notificationCheckInterval);
@@ -1688,10 +1666,8 @@
 
         // Start polling saat app load
         document.addEventListener('DOMContentLoaded', () => {
-            checkForAppUpdate(); // Check version first
             startNotificationPolling();
-            startPWAConfigPolling(); // Check PWA setting changes
-            // Request notification permission sekali saja
+            startPWAConfigPolling();
             if ('Notification' in window && Notification.permission === 'default') {
                 Notification.requestPermission();
             }
