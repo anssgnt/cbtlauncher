@@ -1561,7 +1561,7 @@
          */
         let lastNotificationId = 0;
         let notificationCheckInterval = null;
-        const NOTIFICATION_CHECK_INTERVAL = 5000; // 5 detik
+        const NOTIFICATION_CHECK_INTERVAL = 3000; // 3 detik — aman karena response <50ms dari Netlify memory
 
         async function startNotificationPolling() {
             if (notificationCheckInterval) clearInterval(notificationCheckInterval);
