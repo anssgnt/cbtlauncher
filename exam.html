@@ -172,6 +172,8 @@ body.exam-mode{overflow:hidden}
 @keyframes toastIn{from{transform:translateX(-50%) translateY(20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
 .sched-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f1f5f9}
 .sched-item:last-child{border-bottom:none}
+.sched-item.clickable{cursor:pointer;transition:background .15s;margin:0 -8px;padding:8px;border-radius:8px}
+.sched-item.clickable:hover{background:linear-gradient(135deg,#fef3c7,#fed7aa);transform:translateX(2px)}
 .sched-time{flex-shrink:0;text-align:center;min-width:40px}
 .sched-time .sched-hour{font-size:12px;font-weight:700;color:#334155;line-height:1.2}
 .sched-time .sched-label{font-size:8px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px}
@@ -213,7 +215,11 @@ body.exam-mode{overflow:hidden}
 
 <div>
   <div class="greeting">Hai, Selamat Datang! 👋</div>
-  <div class="greeting-sub">Masukkan data kamu dan token dari pengawas untuk mulai ujian.</div>
+  <div class="greeting-sub" id="greetingSub">Masukkan data kamu dan token dari pengawas untuk mulai ujian.</div>
+  <div id="savedStudentInfo" style="display:none; margin-top:16px; padding:14px 18px; background:var(--primary-bg); border-radius:14px; border:1px solid #c7d2fe;">
+    <div style="font-weight:800; color:var(--primary-dark); font-size:16px;" id="displayStudentName"></div>
+    <div style="font-size:13px; color:var(--primary); font-weight:600; margin-top:2px;" id="displayStudentClass"></div>
+  </div>
 </div>
 
 <div id="errorMsg" class="error-msg">
@@ -221,23 +227,25 @@ body.exam-mode{overflow:hidden}
   <span id="errorText"></span>
 </div>
 
-<div>
-  <div class="field-label"><span class="material-icons-round" style="font-size:14px">person</span> Nama Lengkap</div>
-  <div class="input-group">
-    <input type="text" id="studentNameInput" placeholder="Masukkan nama kamu">
+<div id="studentFormGroup">
+  <div>
+    <div class="field-label"><span class="material-icons-round" style="font-size:14px">person</span> Nama Lengkap</div>
+    <div class="input-group">
+      <input type="text" id="studentNameInput" placeholder="Masukkan nama kamu">
+    </div>
   </div>
-</div>
 
-<div>
-  <div class="field-label"><span class="material-icons-round" style="font-size:14px">class</span> Kelas</div>
-  <div class="input-group">
-    <select id="studentClassInput">
-      <option value="" disabled selected>Pilih kelas</option>
-      <option value="7A">7A</option><option value="7B">7B</option><option value="7C">7C</option><option value="7D">7D</option>
-      <option value="7E">7E</option><option value="7F">7F</option><option value="7G">7G</option><option value="7H">7H</option>
-      <option value="8A">8A</option><option value="8B">8B</option><option value="8C">8C</option><option value="8D">8D</option>
-      <option value="8E">8E</option><option value="8F">8F</option><option value="8G">8G</option><option value="8H">8H</option>
-    </select>
+  <div>
+    <div class="field-label"><span class="material-icons-round" style="font-size:14px">class</span> Kelas</div>
+    <div class="input-group">
+      <select id="studentClassInput">
+        <option value="" disabled selected>Pilih kelas</option>
+        <option value="7A">7A</option><option value="7B">7B</option><option value="7C">7C</option><option value="7D">7D</option>
+        <option value="7E">7E</option><option value="7F">7F</option><option value="7G">7G</option><option value="7H">7H</option>
+        <option value="8A">8A</option><option value="8B">8B</option><option value="8C">8C</option><option value="8D">8D</option>
+        <option value="8E">8E</option><option value="8F">8F</option><option value="8G">8G</option><option value="8H">8H</option>
+      </select>
+    </div>
   </div>
 </div>
 
@@ -265,6 +273,13 @@ body.exam-mode{overflow:hidden}
   </div>
   <div id="scheduleList"><div style="text-align:center;padding:16px 0;color:#94a3b8;font-size:13px"><span style="display:inline-block;animation:spin 1s linear infinite">↻</span> Memuat jadwal...</div></div>
 </div>
+
+<div style="text-align:center; margin-top:32px; margin-bottom:16px;">
+  <button onclick="clearAppCache()" style="background:none; border:none; color:var(--text-muted); font-size:11px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; transition:color 0.2s;" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--text-muted)'">
+    <span class="material-icons-round" style="font-size:14px;">cleaning_services</span> Bersihkan Cache Aplikasi
+  </button>
+</div>
+
 </div>
 </div>
 
@@ -312,7 +327,7 @@ body.exam-mode{overflow:hidden}
     </button>
   </div>
 </div>
-<iframe class="form-frame" id="formFrame" allow="accelerometer; camera; microphone; geolocation" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+<iframe class="form-frame" id="formFrame" allow="accelerometer; camera; microphone; geolocation" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
 </div>
 
 <!-- VIOLATION OVERLAY -->
@@ -349,7 +364,7 @@ body.exam-mode{overflow:hidden}
   <span class="material-icons-round">block</span>
 </div>
 <h1>Ujian Berakhir</h1>
-<p>Anda telah melebihi batas pelanggaran<br>dan dikeluarkan dari ujian.</p>
+<p id="kickedReason">Anda telah melebihi batas pelanggaran<br>dan dikeluarkan dari ujian.</p>
 <div class="contact">Hubungi pengawas ujian untuk informasi lebih lanjut</div>
 </div>
 
@@ -372,6 +387,34 @@ let violationCount = 0, maxViolations = MAX_VIOLATIONS_DEFAULT;
 let timerInterval = null, examEndTime = null;
 let isLocked = false, fsActive = false;
 let scheduleOffset = 0;
+
+// Reset state on load (handle page refresh during exam)
+document.getElementById('blockScreen').classList.remove('show');
+document.getElementById('violationOverlay').classList.remove('show');
+document.getElementById('examPage').style.display = 'none';
+document.getElementById('fsNotice').classList.remove('show');
+
+// Load saved student data
+const savedName = localStorage.getItem('cbt_studentName');
+const savedClass = localStorage.getItem('cbt_studentClass');
+if (savedName && savedClass) {
+  document.getElementById('studentNameInput').value = savedName;
+  document.getElementById('studentClassInput').value = savedClass;
+  document.getElementById('studentFormGroup').style.display = 'none';
+  document.getElementById('savedStudentInfo').style.display = 'block';
+  document.getElementById('displayStudentName').textContent = savedName;
+  document.getElementById('displayStudentClass').textContent = 'Kelas ' + savedClass;
+  document.getElementById('greetingSub').textContent = 'Masukkan token dari pengawas untuk mulai ujian.';
+}
+
+// === CLEAR CACHE ===
+function clearAppCache() {
+  if (confirm('Apakah kamu yakin ingin membersihkan data yang tersimpan dan me-refresh aplikasi?')) {
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.href = window.location.pathname + '?v=' + new Date().getTime();
+  }
+}
 
 // === API ===
 async function api(payload) {
@@ -448,13 +491,24 @@ function renderSchedule() {
     const statusLabel = isLive ? 'SEDANG BERLANGSUNG' : isDone ? 'SELESAI' : 'AKAN DATANG';
     const startHour = e.start ? e.start.slice(11, 16) : '--:--';
     const endHour = e.end ? e.end.slice(11, 16) : '--:--';
-    return '<div class="sched-item">' +
+    return '<div class="sched-item' + (isLive ? ' clickable' : '') + '"' + (isLive ? ' onclick="fillTokenAndScroll(\'' + e.token + '\')"' : '') + '>' +
       '<div class="sched-time"><div class="sched-hour">' + startHour + '</div><div class="sched-label">mulai</div></div>' +
       '<div class="sched-dot ' + statusClass + '"></div>' +
       '<div class="sched-info"><div class="sched-name">' + e.nama + '</div><div class="sched-meta">' + startHour + ' — ' + endHour + '</div></div>' +
       '<div class="sched-status ' + statusClass + '">' + statusLabel + '</div>' +
       '</div>';
   }).join('');
+}
+
+// === FILL TOKEN FROM SCHEDULE ===
+function fillTokenAndScroll(token) {
+  if (isLocked) return;
+  const input = document.getElementById('tokenInput');
+  input.value = token;
+  input.focus();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  const startBtn = document.getElementById('startBtn');
+  if (startBtn) { startBtn.style.transform = 'scale(0.96)'; setTimeout(() => { startBtn.style.transform = ''; }, 150); }
 }
 
 // === RIPPLE EFFECT ===
@@ -471,7 +525,9 @@ document.querySelectorAll('.btn').forEach(btn => {
 });
 
 // === TOKEN VERIFY ===
+let isVerifying = false;
 async function verifyToken() {
+  if (isVerifying) return;
   const token = document.getElementById('tokenInput').value.trim().toUpperCase();
   studentName = document.getElementById('studentNameInput').value.trim();
   studentClass = document.getElementById('studentClassInput').value;
@@ -480,6 +536,7 @@ async function verifyToken() {
   const btn = document.getElementById('startBtn');
 
   function showErr(msg) {
+    isVerifying = false;
     errText.textContent = msg;
     errEl.style.display = 'flex';
     btn.disabled = false;
@@ -490,6 +547,7 @@ async function verifyToken() {
   if (!studentClass) return showErr('Kelas wajib dipilih');
   if (!token) return showErr('Token wajib diisi');
 
+  isVerifying = true;
   btn.disabled = true;
   btn.innerHTML = '<span class="material-icons-round" style="margin-right:8px;vertical-align:middle">hourglass_empty</span> Memverifikasi...';
   errEl.style.display = 'none';
@@ -505,6 +563,9 @@ async function verifyToken() {
   const end = new Date(currentExam.end.replace(' ', 'T'));
   if (now < start) return showErr('Ujian belum dimulai. Mulai: ' + currentExam.start);
   if (now > end) return showErr('Ujian sudah berakhir');
+
+  localStorage.setItem('cbt_studentName', studentName);
+  localStorage.setItem('cbt_studentClass', studentClass);
 
   document.getElementById('tokenPage').style.display = 'none';
   document.getElementById('maxViolations').textContent = maxViolations;
@@ -585,24 +646,44 @@ function setupLocks() {
     }
   });
 
+  let blurTimeout = null;
   window.addEventListener('blur', () => {
-    if (isLocked) { reportViolation('Window Blur', 'Meninggalkan halaman ujian'); blockScreen(true); }
+    clearTimeout(blurTimeout);
+    blurTimeout = setTimeout(() => {
+      if (!isLocked) return;
+      if (document.activeElement && document.activeElement.tagName === 'IFRAME') return;
+      const frame = document.getElementById('formFrame');
+      if (frame && document.activeElement === frame) return;
+      reportViolation('Window Blur', 'Meninggalkan halaman ujian');
+      blockScreen(true);
+    }, 200);
   });
 
   window.addEventListener('focus', () => { if (isLocked) setTimeout(() => blockScreen(false), 500); });
 
   document.addEventListener('fullscreenchange', () => {
-    if (!document.fullscreenElement && isLocked && fsActive) reportViolation('Fullscreen Exit', 'Keluar dari mode fullscreen');
+    if (document.fullscreenElement) {
+      fsActive = true;
+    } else if (isLocked && fsActive) {
+      reportViolation('Fullscreen Exit', 'Keluar dari mode fullscreen');
+    }
   });
+
+  // Klik topbar = pelanggaran + layar terkunci sementara (disabled: false positive)
+  // document.addEventListener('click', function(e) { ... });
 
   window.addEventListener('popstate', () => history.pushState(null, '', location.href));
   history.pushState(null, '', location.href);
 
-  setInterval(() => {
-    if (window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 160) {
-      reportViolation('DevTools', 'Developer Tools terdeteksi');
+  window.addEventListener('beforeunload', (e) => {
+    if (isLocked) {
+      e.preventDefault();
+      e.returnValue = 'Yakin ingin keluar? Ujian sedang berlangsung.';
+      return e.returnValue;
     }
-  }, 2000);
+  });
+
+  // Removed DevTools detection because it causes false positives when virtual keyboards appear on mobile/tablets.
 }
 
 // === VIOLATION ===
@@ -641,13 +722,24 @@ function kickUser(reason) {
   isLocked = false;
   clearInterval(timerInterval);
   document.getElementById('kickedOverlay').classList.add('show');
+  
+  const kickedReasonEl = document.getElementById('kickedReason');
+  if (kickedReasonEl) {
+    kickedReasonEl.innerHTML = reason === 'Waktu habis' 
+      ? 'Waktu ujian telah habis.' 
+      : 'Anda telah melebihi batas pelanggaran<br>dan dikeluarkan dari ujian.';
+  }
+
   document.getElementById('formFrame').src = 'about:blank';
   document.body.classList.remove('exam-mode');
   if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
 }
 
-function blockScreen(show) {
+function blockScreen(show, autoHide) {
   document.getElementById('blockScreen').classList.toggle('show', show);
+  if (show && autoHide) {
+    setTimeout(function() { blockScreen(false); }, autoHide);
+  }
 }
 
 // === ENTER TO SUBMIT ===
