@@ -18,16 +18,12 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- Favicon Fix 404 -->
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="./icon-192.png">
 
-    <!-- Tailwind CSS CDN (play.tailwindcss.com for runtime, acceptable for this use case) -->
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com/3.4.1?v=20260605"></script>
-
-    <!-- System font stack (zero KB, zero request) -->
-    <link rel="preconnect" href="https://cdn.tailwindcss.com">
 
     <style>
         /* Base Styles & Typography */
@@ -108,6 +104,9 @@
                 Install Aplikasi Sekarang
             </button>
             <p class="text-[11px] text-slate-400 mt-2 font-semibold">Instalasi Otomatis (Android/Windows)</p>
+            <button id="pwaBypassBtn" onclick="bypassAndEnter()" class="hidden w-full py-2.5 bg-slate-100 text-slate-500 text-[11px] font-bold rounded-xl active:scale-95 transition-transform mt-1">
+                Sudah Install? Masuk Langsung →
+            </button>
         </div>
 
         <div id="pwaManualWrapper" class="hidden w-full max-w-sm flex-col items-center bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mt-4 fade-in">
@@ -906,14 +905,22 @@
                     const elEnd = document.getElementById(`countdown-${exam.id}`);
                     const elStart = document.getElementById(`countdown-start-${exam.id}`);
 
-                    if (elEnd && now <= exam.endObj) {
-                        elEnd.innerText = formatCountdown(exam.endObj - now);
-                        if (now >= exam.endObj) fetchData();
+                    // Fix M2: kondisi saling eksklusif — evaluasi terpisah
+                    if (elEnd) {
+                        if (now <= exam.endObj) {
+                            elEnd.innerText = formatCountdown(exam.endObj - now);
+                        } else {
+                            fetchData(); // ujian baru selesai, refresh list
+                        }
                     }
 
-                    if (elStart && now < exam.startObj) {
-                        elStart.innerText = formatCountdown(exam.startObj - now);
-                        if (now >= exam.startObj) fetchData();
+                    if (elStart) {
+                        if (now < exam.startObj) {
+                            elStart.innerText = formatCountdown(exam.startObj - now);
+                        } else if (elStart.innerText !== '') {
+                            elStart.innerText = '';
+                            fetchData(); // ujian baru dimulai, refresh list
+                        }
                     }
 
                     if (kioskExamId === exam.id) {
@@ -1559,13 +1566,14 @@
         async function startNotificationPolling() {
             if (notificationCheckInterval) clearInterval(notificationCheckInterval);
             
-            // Check setiap 5 detik
             notificationCheckInterval = setInterval(async () => {
                 try {
-                    const response = await fetch(URL_API + '?payload=' + encodeURIComponent(JSON.stringify({
-                        action: 'checkNotification',
-                        lastId: lastNotificationId
-                    })));
+                    // Pakai /api/admin endpoint (support action param)
+                    const response = await fetch('/api/admin', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'checkNotification', lastId: lastNotificationId })
+                    });
                     
                     if (!response.ok) return;
                     const result = await response.json();
@@ -1576,28 +1584,22 @@
                         showSystemNotification(notif);
                     }
                 } catch (e) {
-                    console.log('Notification polling error:', e);
+                    // Silent fail - tidak ganggu user
                 }
             }, NOTIFICATION_CHECK_INTERVAL);
         }
 
         function showSystemNotification(notif) {
-            // Browser notification (jika permission granted)
             if ('Notification' in window && Notification.permission === 'granted') {
                 new Notification(notif.title || 'Spensada Exam', {
                     body: notif.message,
-                    icon: 'https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png',
-                    badge: 'https://spensada.me/public/img/konfigurasi/logo/1758281903_cba80d84171bd85558c9.png',
+                    icon: './icon-192.png',
+                    badge: './icon-192.png',
                     tag: 'exam-notif-' + notif.id,
                     requireInteraction: true
                 });
             }
-            
-            // Toast/Modal notification di app
             CustomModal.alert(notif.message, notif.title || '📢 Pemberitahuan Sistem');
-            
-            // Log untuk debugging
-            console.log('Notification received:', notif);
         }
 
         function stopNotificationPolling() {

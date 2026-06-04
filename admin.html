@@ -515,8 +515,10 @@ function switchTab(name) {
 }
 
 // ==================== CLOCK ====================
+let _clockInterval = null;
 function startClock() {
-    setInterval(() => {
+    if (_clockInterval) return; // Guard: jangan jalankan dua kali
+    _clockInterval = setInterval(() => {
         const now = new Date();
         const t = now.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
         $('#statTime').text(t);
@@ -1019,30 +1021,37 @@ async function saveConfig() {
         PWA_ENFORCE: $('#cfgPwaEnforce').val(),
         VIOLATION_REPORT: $('#cfgViolationReport').val()
     };
+
+    // Validasi PROCTOR_KEY tidak boleh kosong (Mi7)
+    if (!config.PROCTOR_KEY) {
+        toastr('warning', 'Kode Proktor tidak boleh kosong!');
+        return;
+    }
+
     try {
+        const oldConfig = adminData.config || {};
         const res = await apiCall({ action: 'updateConfig', config });
         if (res.error) { toastr('error', res.message); return; }
-        
-        // Flush Netlify cache juga
+
+        // Flush Netlify cache
         await fetch('/api/exams?bust=' + Date.now());
-        
-        // Jika PWA setting berubah, broadcast notif ke siswa
-        if (config.PWA_ENFORCE) {
-            const msg = config.PWA_ENFORCE === 'on' 
-                ? '🔔 Pengaturan PWA diaktifkan kembali. Aplikasi dimulai ulang...'
-                : '📱 Anda sekarang bisa akses ujian langsung dari browser tanpa install aplikasi.';
-            await apiCall({ action: 'broadcastNotification', message: msg, type: 'system' });
+
+        // Broadcast hanya jika PWA_ENFORCE benar-benar berubah
+        const oldPwa = oldConfig.PWA_ENFORCE || 'on';
+        if (config.PWA_ENFORCE !== oldPwa) {
+            const msg = config.PWA_ENFORCE === 'on'
+                ? '🔔 Mode ujian diperketat. Install aplikasi diperlukan.'
+                : '📱 Ujian sekarang bisa diakses langsung dari browser.';
+            await apiCall({ action: 'broadcastNotification', message: msg, type: 'system' }).catch(() => {});
         }
-        
-        Swal.fire({ icon: 'success', title: 'Tersimpan!', text: 'Pengaturan berhasil disimpan & cache ter-flush.', confirmButtonColor: '#4f46e5', timer: 2500, showConfirmButton: false });
-        
-        // Refresh admin data untuk lihat perubahan
-        setTimeout(() => refreshAdminData(), 1500);
+
+        Swal.fire({ icon: 'success', title: 'Tersimpan!', text: 'Pengaturan berhasil disimpan.', confirmButtonColor: '#4f46e5', timer: 2000, showConfirmButton: false });
+        setTimeout(() => refreshAdminData(), 1000);
     } catch (e) { toastr('error', e.message); }
 }
 
 // ==================== UTILITIES ====================
-function esc(str) { if (!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function esc(str) { if (!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
 function fmtTime(ts) {
     if (!ts) return '-';
