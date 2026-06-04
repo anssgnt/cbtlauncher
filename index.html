@@ -1326,19 +1326,23 @@
                 fetch(URL_API)
                     .then(r => r.json())
                     .then(data => {
-                        if (data && data.config && data.config.pwaEnforce) {
-                            localStorage.setItem('pwa_enforce', data.config.pwaEnforce);
+                        const pwaEnforceSetting = data && data.config && data.config.pwaEnforce;
+                        if (pwaEnforceSetting) {
+                            localStorage.setItem('pwa_enforce', pwaEnforceSetting);
                         }
-                        if (data && data.config && data.config.pwaEnforce === 'off') {
+                        
+                        // Jika setting OFF, langsung remove gate dan init app
+                        if (pwaEnforceSetting === 'off') {
                             const gate = document.getElementById('pwaInstallGate');
                             if (gate) gate.remove();
                             initApp();
                         } else {
+                            // ON atau undefined → tampilkan gate
                             proceedPWACheck();
                         }
                     })
                     .catch(() => {
-                        // Gagal fetch — fallback ke default (ON)
+                        // Gagal fetch — fallback ke default (ON) - tampilkan gate
                         proceedPWACheck();
                     });
                 return;
@@ -1640,10 +1644,68 @@
             }
         }
 
+        /**
+         * PWA CONFIG POLLING
+         * Periodic check untuk detect jika admin ubah PWA setting
+         */
+        let pwaConfigCheckInterval = null;
+        const PWA_CONFIG_CHECK_INTERVAL = 30000; // 30 detik
+
+        function startPWAConfigPolling() {
+            if (pwaConfigCheckInterval) clearInterval(pwaConfigCheckInterval);
+            
+            pwaConfigCheckInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(URL_API + '?t=' + Date.now()); // Bypass cache
+                    if (!response.ok) return;
+                    const data = await response.json();
+                    
+                    if (data && data.config && data.config.pwaEnforce) {
+                        const currentSetting = localStorage.getItem('pwa_enforce');
+                        const newSetting = data.config.pwaEnforce;
+                        
+                        // Jika setting berubah dari ON ke OFF atau vice versa
+                        if (currentSetting !== newSetting) {
+                            console.log('PWA setting changed:', currentSetting, '→', newSetting);
+                            localStorage.setItem('pwa_enforce', newSetting);
+                            
+                            // Notify user dan reload
+                            if (newSetting === 'off') {
+                                CustomModal.alert(
+                                    'Admin mengubah setting PWA menjadi OFF. Anda sekarang bisa akses langsung dari browser. Halaman akan dimuat ulang.',
+                                    'Pengaturan PWA Diubah'
+                                );
+                            } else {
+                                CustomModal.alert(
+                                    'Admin mengubah setting PWA menjadi ON. Aplikasi dimulai ulang untuk enforce PWA.',
+                                    'Pengaturan PWA Diubah'
+                                );
+                            }
+                            
+                            // Reload setelah 2 detik
+                            setTimeout(() => {
+                                location.reload(true);
+                            }, 2000);
+                        }
+                    }
+                } catch (e) {
+                    console.log('PWA config polling error:', e);
+                }
+            }, PWA_CONFIG_CHECK_INTERVAL);
+        }
+
+        function stopPWAConfigPolling() {
+            if (pwaConfigCheckInterval) {
+                clearInterval(pwaConfigCheckInterval);
+                pwaConfigCheckInterval = null;
+            }
+        }
+
         // Start polling saat app load
         document.addEventListener('DOMContentLoaded', () => {
             checkForAppUpdate(); // Check version first
             startNotificationPolling();
+            startPWAConfigPolling(); // Check PWA setting changes
             // Request notification permission sekali saja
             if ('Notification' in window && Notification.permission === 'default') {
                 Notification.requestPermission();
@@ -1653,6 +1715,7 @@
         // Stop polling saat user keluar
         window.addEventListener('beforeunload', () => {
             stopNotificationPolling();
+            stopPWAConfigPolling();
         });
 
     </script>
