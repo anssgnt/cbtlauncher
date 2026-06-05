@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#6366f1">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <title>Ujian Online - CBT</title>
+<link rel="icon" href="favicon.ico" type="image/x-icon">
 <link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
@@ -275,6 +277,8 @@ body.exam-mode{overflow:hidden}
     </div>
   </div>
 </div>
+
+<div id="upcomingExamBanner" style="display:none; margin-bottom:20px; animation:fadeUp 0.5s ease-out;"></div>
 
 <div>
   <div class="field-label"><span class="material-icons-round" style="font-size:14px">vpn_key</span> Token Ujian</div>
@@ -552,9 +556,121 @@ async function loadExamData() {
       maxViolations = parseInt(data.config?.maxViolations) || MAX_VIOLATIONS_DEFAULT;
     }
     renderSchedule();
+    updateUpcomingBanner();
   } catch(e) {}
 }
 loadExamData();
+
+// === UPCOMING BANNER ===
+let upcomingInterval = null;
+function updateUpcomingBanner() {
+  const banner = document.getElementById('upcomingExamBanner');
+  if (!examData || examData.length === 0) { banner.style.display = 'none'; return; }
+  
+  const todayStr = new Date().toISOString().slice(0,10);
+  const todayExams = examData.filter(e => e.status === 'aktif' && (e.start || '').startsWith(todayStr))
+    .sort((a, b) => (a.start || '').localeCompare(b.start || ''));
+
+  if (todayExams.length === 0) {
+    banner.style.display = 'none';
+    if(upcomingInterval) clearInterval(upcomingInterval);
+    return;
+  }
+
+  let prevLiveCount = -1;
+
+  function renderBanner() {
+    const now = new Date();
+    const liveExams = [];
+    let nextUpcomingTime = null;
+    const upcomingExams = [];
+
+    for (let e of todayExams) {
+      const start = new Date(e.start.replace(' ', 'T'));
+      const end = new Date(e.end.replace(' ', 'T'));
+      if (now >= start && now <= end) { 
+        liveExams.push(e); 
+      } else if (start > now) {
+        if (!nextUpcomingTime) {
+          nextUpcomingTime = start.getTime();
+          upcomingExams.push(e);
+        } else if (start.getTime() === nextUpcomingTime) {
+          upcomingExams.push(e);
+        }
+      }
+    }
+
+    if (liveExams.length === 0 && upcomingExams.length === 0) {
+      banner.style.display = 'none';
+      if(upcomingInterval) clearInterval(upcomingInterval);
+      return;
+    }
+
+    if (prevLiveCount !== -1 && prevLiveCount !== liveExams.length) {
+      renderSchedule(); // Refresh lower schedule dots if an exam just went live
+    }
+    prevLiveCount = liveExams.length;
+
+    banner.style.display = 'block';
+    let html = '';
+
+    for (let e of liveExams) {
+      const endObj = new Date(e.end.replace(' ', 'T'));
+      const diffLive = endObj - now;
+      let liveTimeStr = "Selesai";
+      if (diffLive > 0) {
+        const hL = Math.floor(diffLive / 3600000);
+        const mL = Math.floor((diffLive % 3600000) / 60000);
+        const sL = Math.floor((diffLive % 60000) / 1000);
+        liveTimeStr = (hL>0 ? String(hL).padStart(2,'0')+':' : '') + String(mL).padStart(2,'0') + ':' + String(sL).padStart(2,'0');
+      }
+
+      html += `<div style="background:linear-gradient(135deg, #dcfce7, #bbf7d0); border:1px solid #86efac; border-radius:16px; padding:14px 16px; display:flex; align-items:center; gap:12px; box-shadow:0 4px 12px rgba(34,197,94,0.15); margin-bottom:12px;">
+         <div style="width:44px;height:44px;background:#22c55e;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;box-shadow:0 4px 10px rgba(34,197,94,0.3);">
+           <span class="material-icons-round" style="animation:pulseWarn 2s infinite;">play_arrow</span>
+         </div>
+         <div style="flex:1;">
+           <div style="font-size:11px;font-weight:800;color:#16a34a;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;">Sedang Berlangsung</div>
+           <div style="font-size:15px;font-weight:800;color:#14532d;">${e.nama}</div>
+         </div>
+         <div style="text-align:right;">
+           <div style="font-size:11px;color:#15803d;font-weight:800;background:rgba(255,255,255,0.7);padding:6px 10px;border-radius:10px;display:inline-block;margin-bottom:4px;">Siapkan Token</div>
+           <div style="font-size:10px;font-weight:700;color:#16a34a;letter-spacing:0.5px;">Tutup: <span style="font-variant-numeric:tabular-nums;">${liveTimeStr}</span></div>
+         </div>
+       </div>`;
+    }
+
+    if (liveExams.length === 0 && upcomingExams.length > 0) {
+      const diff = nextUpcomingTime - now.getTime();
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      const timeStr = (h>0 ? String(h).padStart(2,'0')+':' : '') + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+
+      for (let e of upcomingExams) {
+        html += `<div style="background:linear-gradient(135deg, #eef2ff, #e0e7ff); border:1px solid #c7d2fe; border-radius:16px; padding:14px 16px; display:flex; align-items:center; gap:12px; box-shadow:0 4px 12px rgba(99,102,241,0.1); margin-bottom:12px;">
+         <div style="width:44px;height:44px;background:linear-gradient(135deg,#6366f1,#818cf8);border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;box-shadow:0 4px 10px rgba(99,102,241,0.3);">
+           <span class="material-icons-round">hourglass_empty</span>
+         </div>
+         <div style="flex:1;">
+           <div style="font-size:11px;font-weight:800;color:#4f46e5;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;">Akan Datang</div>
+           <div style="font-size:14px;font-weight:800;color:#312e81;">${e.nama}</div>
+         </div>
+         <div style="text-align:right;">
+           <div style="font-size:10px;color:#4f46e5;font-weight:700;margin-bottom:2px;">Dimulai dalam</div>
+           <div style="font-size:18px;font-weight:800;color:#3730a3;font-variant-numeric:tabular-nums;letter-spacing:1px;">${timeStr}</div>
+         </div>
+       </div>`;
+      }
+    }
+
+    banner.innerHTML = html;
+  }
+
+  renderBanner();
+  if(upcomingInterval) clearInterval(upcomingInterval);
+  upcomingInterval = setInterval(renderBanner, 1000);
+}
 
 // === SCHEDULE ===
 function shiftSchedule(direction) {
@@ -608,24 +724,13 @@ function renderSchedule() {
     const statusLabel = isLive ? 'SEDANG BERLANGSUNG' : isDone ? 'SELESAI' : 'AKAN DATANG';
     const startHour = e.start ? e.start.slice(11, 16) : '--:--';
     const endHour = e.end ? e.end.slice(11, 16) : '--:--';
-    return '<div class="sched-item' + (isLive ? ' clickable' : '') + '"' + (isLive ? ' onclick="fillTokenAndScroll(\'' + e.token + '\')"' : '') + '>' +
+    return '<div class="sched-item' + (isLive ? ' live-item' : '') + '">' +
       '<div class="sched-time"><div class="sched-hour">' + startHour + '</div><div class="sched-label">mulai</div></div>' +
       '<div class="sched-dot ' + statusClass + '"></div>' +
       '<div class="sched-info"><div class="sched-name">' + e.nama + '</div><div class="sched-meta">' + startHour + ' — ' + endHour + '</div></div>' +
       '<div class="sched-status ' + statusClass + '">' + statusLabel + '</div>' +
       '</div>';
   }).join('');
-}
-
-// === FILL TOKEN FROM SCHEDULE ===
-function fillTokenAndScroll(token) {
-  if (isLocked) return;
-  const input = document.getElementById('tokenInput');
-  input.value = token;
-  input.focus();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  const startBtn = document.getElementById('startBtn');
-  if (startBtn) { startBtn.style.transform = 'scale(0.96)'; setTimeout(() => { startBtn.style.transform = ''; }, 150); }
 }
 
 // === RIPPLE EFFECT ===
